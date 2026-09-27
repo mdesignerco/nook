@@ -16,6 +16,15 @@ const CHECK_TIMEOUT_SECS: u64 = 10;
 const MIN_AUTO_INSTALL_AGE_SECS: i64 = 24 * 60 * 60;
 const STATE_FILE: &str = "update-state.json";
 
+/// Fork-side update channel. The updater plugin discovers whatever release is
+/// "latest" on the fork, but this manifest is the gate that decides whether
+/// that release is actually offered (approved) or hidden/blocked. Served raw
+/// from the island-only branch so it can be edited without publishing anything.
+const CHANNEL_URL: &str =
+    "https://raw.githubusercontent.com/mdesignerco/bloom/island-only/update-channel.json";
+/// A channel manifest older/larger than this is rejected outright.
+const CHANNEL_TIMEOUT_SECS: u64 = 5;
+
 /// Serializes manifest requests so concurrent callers share a single network hit.
 static CHECK_LOCK: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
 static UPDATE_BUSY: AtomicBool = AtomicBool::new(false);
@@ -38,6 +47,48 @@ struct PersistedUpdateState {
     app_version: String,
     version: String,
     date: String,
+}
+
+/// `update-channel.json` from the fork repo: the version currently approved for
+/// this island-only channel, plus a deny-list that always wins.
+#[derive(Deserialize)]
+struct ChannelManifest {
+    #[serde(default)]
+    schema: u32,
+    #[serde(default)]
+    approved: String,
+    #[serde(default)]
+    blocked: Vec<String>,
+}
+
+/// Decide whether `version` may be offered, per the channel manifest. An
+/// unreachable/invalid manifest is treated as "do not offer anything".
+fn channel_allows(version: &str, manifest: &Option<ChannelManifest>) -> bool {
+    let Some(manifest) = manifest else {
+        return false;
+    };
+    if manifest.schema != 1 || manifest.blocked.iter().any(|v| v == version) {
+        return false;
+    }
+    !manifest.approved.is_empty() && manifest.approved == version
+}
+
+/// Fetch the channel manifest with a short timeout. Runs on a blocking thread
+/// so the async runtime is never stalled by the network call.
+async fn fetch_channel_manifest() -> Option<ChannelManifest> {
+    let url = CHANNEL_URL.to_string();
+    tauri::async_runtime::spawn_blocking(move || {
+        let body = ureq::get(&url)
+            .timeout(Duration::from_secs(CHANNEL_TIMEOUT_SECS))
+            .call()
+            .ok()?
+            .into_string()
+            .ok()?;
+        serde_json::from_str::<ChannelManifest>(&body).ok()
+    })
+    .await
+    .ok()
+    .flatten()
 }
 
 fn now_secs() -> i64 {
@@ -147,6 +198,16 @@ pub async fn check(app: &AppHandle, force: bool) -> Result<UpdateCheckResult, St
         None => UpdateCheckResult::default(),
     };
 
+    // Approve the offer against the fork's channel manifest. A release that
+    // exists but is not approved (or a manifest we cannot reach) is reported
+    // as "no update" so the fork never serves an unvetted build.
+    if result.available {
+        let manifest = fetch_channel_manifest().await;
+        if !channel_allows(result.version.as_deref().unwrap_or(""), &manifest) {
+            return Ok(UpdateCheckResult::default());
+        }
+    }
+
     write_state(
         app,
         &PersistedUpdateState {
@@ -196,6 +257,13 @@ async fn install_inner(app: &AppHandle) -> Result<(), String> {
         .await
         .map_err(|e| e.to_string())?
         .ok_or_else(|| "no update available".to_string())?;
+
+    // Install is gated by the same channel manifest: never download an
+    // unapproved build even if the frontend calls install_update directly.
+    let manifest = fetch_channel_manifest().await;
+    if !channel_allows(&update.version, &manifest) {
+        return Err("the update is not approved in the bloom channel".to_string());
+    }
 
     let _ = app.emit(
         "auto-update-status",
@@ -356,7 +424,19 @@ fn days_from_civil(year: i64, month: i64, day: i64) -> i64 {
 
 #[cfg(test)]
 mod tests {
-    use super::{days_from_civil, parse_rfc3339_utc};
+    use super::{channel_allows, days_from_civil, parse_rfc3339_utc, ChannelManifest};
+
+    fn manifest(approved: &str, blocked: &[&str]) -> Option<ChannelManifest> {
+        serde_json::from_str(&format!(
+            r#"{{ "schema": 1, "approved": "{approved}", "blocked": [{}] }}"#,
+            blocked
+                .iter()
+                .map(|v| format!("\"{v}\""))
+                .collect::<Vec<_>>()
+                .join(",")
+        ))
+        .ok()
+    }
 
     #[test]
     fn parses_tauri_action_pub_date() {
@@ -382,5 +462,37 @@ mod tests {
     fn computes_civil_days() {
         assert_eq!(days_from_civil(1970, 1, 1), 0);
         assert_eq!(days_from_civil(2026, 9, 13), 20_709);
+    }
+
+    #[test]
+    fn channel_offers_only_the_approved_version() {
+        let manifest = manifest("4.0.0", &[]);
+        assert!(channel_allows("4.0.0", &manifest));
+        assert!(!channel_allows("3.9.1", &manifest));
+    }
+
+    #[test]
+    fn channel_blocked_list_wins_over_approval() {
+        let manifest = manifest("4.0.0", &["4.0.0"]);
+        assert!(!channel_allows("4.0.0", &manifest));
+    }
+
+    #[test]
+    fn channel_rejects_unreachable_or_empty_manifest() {
+        assert!(!channel_allows("4.0.0", &None));
+        assert!(!channel_allows("4.0.0", &manifest("", &[])));
+    }
+
+    #[test]
+    fn channel_ignores_badly_formed_manifest() {
+        let manifest: Option<ChannelManifest> = serde_json::from_str("not json").ok();
+        assert!(!channel_allows("4.0.0", &manifest));
+    }
+
+    #[test]
+    fn channel_rejects_wrong_schema() {
+        let manifest: Option<ChannelManifest> =
+            serde_json::from_str(r#"{ "schema": 99, "approved": "4.0.0", "blocked": [] }"#).ok();
+        assert!(!channel_allows("4.0.0", &manifest));
     }
 }

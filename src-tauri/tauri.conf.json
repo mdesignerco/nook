@@ -1,7 +1,7 @@
 {
 	"$schema": "https://schema.tauri.app/config/2",
 	"productName": "bloom",
-	"version": "3.8.7",
+	"version": "4.0.0",
 	"identifier": "com.sehaz.bloom",
 	"build": {
 		"beforeDevCommand": "bun run dev",
@@ -94,9 +94,9 @@
 		"updater": {
 			"active": true,
 			"endpoints": [
-				"https://github.com/SehajveerSingh2005/bloom/releases/latest/download/latest.json"
+				"https://github.com/mdesignerco/bloom/releases/latest/download/latest.json"
 			],
-			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQzQTAzNTlBRUFFODRFMDUKUldRRlR1anFtaldnUThWRExWQ2ZDVmxhNGlFREFPYWZoV1BWbGdQNUxxdHpnbzZPbGh4SWxVMk0K"
+			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEIwQ0YyQ0UzNDNCMTIyMEQKUldRTklyRkQ0eXpQc0pLOEErK25XWTZEd0lxQk9zWmNudVB1YmcwRmNVWFlyQUZYUnQ3bkhNZEcK"
 		}
 	}
 }

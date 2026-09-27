@@ -47,3 +47,19 @@ Guía para agentes que trabajan en esta base de código (Tauri 2 + React + Vite)
   `set_window_opacity` en `src-tauri/src/services.rs`.
 - **Windows/resolución de monitores**: la app es Windows-only (imports Win32 en
   backend). No añadas código de macOS/Linux en rutas críticas.
+
+## Canal de actualizaciones (fork)
+
+- El endpoint y la clave pública de actualización apuntan al **fork**
+  (`mdesignerco/bloom`), no a upstream. La clave privada de firma vive en
+  `C:\Users\jmcgr\.tauri\bloom.key` (gitignored) con su password; en GitHub
+  Actions se inyecta como `TAURI_SIGNING_PRIVATE_KEY` (+ `TAURI_SIGNING_PASSWORD`).
+- **`update-channel.json`** (raíz, servido por `raw.githubusercontent.com` desde
+  `island-only`) es el gate de "qué sí / qué no": solo se ofrece la versión en
+  `approved` (salvo que esté en `blocked`). Si no se puede alcanzar el
+  maniestrable, no se ofrece nada. Edítalo y haz commit para aprobar/vetar una
+  release sin republicar.
+- Para publicar una actualización del fork: `bun run bump <version>` (o
+  `bun run release <version>` desde `main`/`island-only`), push tag `v<version>`
+  → `release.yml` firma y sube `latest.json`. Sin los secrets de firma el
+  workflow de release falla.

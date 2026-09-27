@@ -19,8 +19,8 @@ const versionFiles = [
 ];
 
 const branch = execSync("git rev-parse --abbrev-ref HEAD", { cwd: root }).toString().trim();
-if (branch !== "main") {
-	console.error(`Releases must be cut from main (currently on ${branch}).`);
+if (branch !== "main" && branch !== "island-only") {
+	console.error(`Releases must be cut from main or island-only (currently on ${branch}).`);
 	process.exit(1);
 }
 
