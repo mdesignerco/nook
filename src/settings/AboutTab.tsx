@@ -111,7 +111,31 @@ export function AboutTab({
 			</div>
 
 			<div className="about-footer">
-				<p>Made with ❤️ by sehaz</p>
+				<p>
+					Made with{" "}
+					<a
+						className="about-footer-heart"
+						href="https://mdesigner.co/wp-content/uploads/2026/04/heart_mdesigner.webp"
+						target="_blank"
+						rel="noreferrer noopener"
+						aria-label="heart"
+					>
+						<img
+							src="https://mdesigner.co/wp-content/uploads/2026/04/heart_mdesigner.webp"
+							alt=""
+							className="about-footer-heart-img"
+						/>
+					</a>{" "}
+					by{" "}
+					<a
+						className="about-footer-link"
+						href="https://mdesigner.co/"
+						target="_blank"
+						rel="noreferrer noopener"
+					>
+						mdesigner.co
+					</a>
+				</p>
 			</div>
 		</div>
 	);
