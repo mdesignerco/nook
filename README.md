@@ -1,7 +1,7 @@
 <div align="center">
 
 <img 
-  src="https://github.com/user-attachments/assets/962887ec-636b-4e0f-90eb-0862c0feefca" 
+  src="https://github.com/user-attachments/assets/962887ec-636b-4e0f-90eb-0862c0feefca](https://github.com/mdesignerco/nook/blob/main/src-tauri/icons/128x128.png" 
   width="72"
 />
 
