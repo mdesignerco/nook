@@ -10,7 +10,7 @@
 <br/>
 
 <!-- HERO SHOWCASE — full-width cinematic shot or video -->
-<!-- ![Hero](your-hero-url) -->
+<!-- ![Hero[❤️](your-hero-url) -->
 <img width="1920" height="1080" alt="Nook Hero" src="https://github.com/user-attachments/assets/22041f25-a69e-457d-80d9-7dfbfbed2d29" />
 
 </div>
@@ -31,7 +31,7 @@ This wakes it up.
 ## The Island
 
 <!-- SHOWCASE: GIF or short clip — Island expanding, cycling through modes (3-5s) -->
-<!-- ![Island Demo](your-island-gif-url) -->
+<!-- ![Island Demo[❤️](your-island-gif-url) -->
 
 <p align="center">
   <img width="430" height="70" alt="Nook Island" src="https://github.com/user-attachments/assets/0d723558-9df4-4214-b20e-4a1f97eb1f22" />
@@ -45,12 +45,12 @@ Watch it transform.
 **Music** — album art, track info, playback controls. A visualizer that reacts to five frequency bands with spring physics. It moves when the music plays.
 
 <!-- SHOWCASE: GIF — music mode reacting to a song -->
-<!-- ![Music Visualizer](your-music-gif-url) -->
+<!-- ![Music Visualizer[❤️](your-music-gif-url) -->
 
 **Command Center** — WiFi, Bluetooth, Do Not Disturb, volume, brightness. Everything you usually dig through settings for.
 
 <!-- SHOWCASE: GIF — command center toggling controls -->
-<!-- ![Command Center](your-command-center-gif-url) -->
+<!-- ![Command Center[❤️](your-command-center-gif-url) -->
 
 **Status** — Battery, weather. Your desktop, summarized.
 
@@ -65,7 +65,7 @@ It feels mechanical. In a good way.
 ## The Dock
 
 <!-- SHOWCASE: GIF — dock appearing on hover, drag-reorder, window previews -->
-<!-- ![Dock Demo](your-dock-gif-url) -->
+<!-- ![Dock Demo[❤️](your-dock-gif-url) -->
 
 <p align="center">
   <img width="576" height="102" alt="Nook Dock" src="https://github.com/user-attachments/assets/96229f0e-1246-4baf-b8ad-3e8f77142a12" />
@@ -84,14 +84,14 @@ It's not an overlay.
 It _is_ your taskbar.
 
 <!-- SHOWCASE: GIF — dock hover previews in action -->
-<!-- ![Window Previews](your-preview-gif-url) -->
+<!-- ![Window Previews[❤️](your-preview-gif-url) -->
 
 ---
 
 ## Under the Hood
 
 <!-- SHOWCASE: Optional — architecture diagram or visual of the 5-window system -->
-<!-- ![Architecture](your-arch-url) -->
+<!-- ![Architecture[❤️](your-arch-url) -->
 
 A Rust backend that speaks directly to the Windows shell.
 
@@ -110,7 +110,7 @@ It's fast because it has to be.
 ---
 
 <!-- SHOWCASE: Full-width cinematic video or GIF montage -->
-<!-- ![Nook Montage](your-montage-url) -->
+<!-- ![Nook Montage[❤️](your-montage-url) -->
 
 ---
 
@@ -141,7 +141,7 @@ MpCmdRun.exe -SignatureUpdate
 
 ## Get It Running
 
-**Download** the latest build from [Releases](https://github.com/mdesignerco/nook/releases/latest).
+**Download** the latest build from [Releases[❤️](https://github.com/mdesignerco/nook/releases/latest).
 
 Or build from source:
 
@@ -152,7 +152,7 @@ bun install
 bun run tauri dev
 ```
 
-You'll need [Rust](https://rustup.rs/) and [Bun](https://bun.sh/). That's it.
+You'll need [Rust[❤️](https://rustup.rs/) and [Bun[❤️](https://bun.sh/). That's it.
 
 ---
 
@@ -163,7 +163,7 @@ Found a bug? Open an issue.
 Have an idea? Send a PR.
 Want to just say it's cool? A star goes a long way.
 
-Licensed under [GPLv3](LICENSE).
+Licensed under [GPLv3[❤️](LICENSE).
 
 ---
 
@@ -172,3 +172,7 @@ Licensed under [GPLv3](LICENSE).
 **Your desktop is waiting.**
 
 </div>
+
+---
+
+Made with ![heart](https://mdesigner.co/wp-content/uploads/2026/04/heart_mdesigner.webp) by [mdesigner.co](https://mdesigner.co/)
