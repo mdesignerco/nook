@@ -5,9 +5,11 @@ Guía para agentes que trabajan en esta base de código (Tauri 2 + React + Vite)
 ## Build y verificación
 
 - **Build release correcto (raíz del repo):**
+
   ```
   bun tauri build --no-bundle
   ```
+
   Usa `--no-bundle` para el binario de desarrollo/verificación rápida; emite un
   `.exe` "desnudo" que no instala ni reinicia el equipo.
 
@@ -17,6 +19,7 @@ Guía para agentes que trabajan en esta base de código (Tauri 2 + React + Vite)
   fallará con `ERR_CONNECTION_REFUSED` (ventana en blanco).
 
 - **Verificación en orden** (todo desde la raíz del repo):
+
   ```
   bun run build          # tsc && vite build (frontend)
   cargo clippy --release # backend: no warnings nuevos
@@ -27,12 +30,12 @@ Guía para agentes que trabajan en esta base de código (Tauri 2 + React + Vite)
 
 ## Comandos útiles
 
-| Comando                     | Qué hace                                   |
-| --------------------------- | ------------------------------------------ |
-| `bun run dev`               | Vite dev server                            |
-| `bun run tauri dev`         | App en modo desarrollo                     |
-| `bun run bump`              | Incrementa versión (`scripts/bump-version.mjs`) |
-| `bun run release`           | Release completo (`scripts/release.mjs`)   |
+| Comando             | Qué hace                                        |
+| ------------------- | ----------------------------------------------- |
+| `bun run dev`       | Vite dev server                                 |
+| `bun run tauri dev` | App en modo desarrollo                          |
+| `bun run bump`      | Incrementa versión (`scripts/bump-version.mjs`) |
+| `bun run release`   | Release completo (`scripts/release.mjs`)        |
 
 ## Gotchas específicos
 

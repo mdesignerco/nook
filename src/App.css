@@ -207,6 +207,26 @@ img {
 	position: relative;
 }
 
+.time-center-small .time-flip-container {
+	min-width: 34px;
+	height: 20px;
+}
+
+.time-center-small .time {
+	font-size: 11px;
+}
+
+.time .mode-cycle-hint {
+	margin-left: 3px;
+	vertical-align: middle;
+	opacity: 0.45;
+	transition: opacity 0.15s ease;
+}
+
+.time-flip-container:hover .mode-cycle-hint {
+	opacity: 0.95;
+}
+
 .time-flip-container {
 	min-width: 60px;
 	height: 24px;
@@ -1336,6 +1356,30 @@ img {
 .expanded-music-container {
 	position: relative;
 	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;
+}
+
+/* Info row on top of the media panel (mirrors calendar / command center) */
+.music-top-row {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 36px;
+	flex-shrink: 0;
+	position: relative;
+	z-index: 2;
+}
+
+.expanded-music-container > .cmp,
+.expanded-music-container > .compact-premium-layout {
+	flex: 1;
+	min-height: 0;
+	height: auto;
 }
 
 .calendar-timer-content {

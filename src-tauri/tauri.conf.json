@@ -93,9 +93,7 @@
 	"plugins": {
 		"updater": {
 			"active": true,
-			"endpoints": [
-				"https://github.com/mdesignerco/bloom/releases/latest/download/latest.json"
-			],
+			"endpoints": ["https://github.com/mdesignerco/bloom/releases/latest/download/latest.json"],
 			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEIwQ0YyQ0UzNDNCMTIyMEQKUldRTklyRkQ0eXpQc0pLOEErK25XWTZEd0lxQk9zWmNudVB1YmcwRmNVWFlyQUZYUnQ3bkhNZEcK"
 		}
 	}

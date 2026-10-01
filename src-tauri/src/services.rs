@@ -2893,7 +2893,16 @@ fn animate_island_to_monitor(win: &tauri::WebviewWindow, target: (i32, i32, u32,
         }
         // Phase 1: slide up out of view on the old monitor, fading out.
         let above_old_y = from_pos.y - th as i32;
-        animate_xy(&win2, from_pos.x, from_pos.y, from_pos.x, above_old_y, 1.0, 0.0).await;
+        animate_xy(
+            &win2,
+            from_pos.x,
+            from_pos.y,
+            from_pos.x,
+            above_old_y,
+            1.0,
+            0.0,
+        )
+        .await;
         // A newer animation superseded this one (rapid monitor switch); let the
         // new run take over from the current state instead of snapping stale.
         if ANIMATION_EPOCH.load(Ordering::Relaxed) != epoch {

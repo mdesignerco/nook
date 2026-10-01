@@ -18,19 +18,12 @@ import {
 	HeadphonesIcon
 } from "./icons";
 import { CompactMediaPlayer } from "./CompactMediaPlayer";
+import { ClickableTime } from "./components/ClickableTime";
+import { QuickSettingsPanel } from "./components/QuickSettingsPanel";
 import { useWeather } from "./hooks/useWeather";
 import { useSettingsSync } from "./hooks/useSettingsSync";
 import type { WidgetConfig } from "./components/StatusWidgetConfig";
-import {
-	Cpu,
-	MemoryStick,
-	HardDrive,
-	ArrowUpDown,
-	BellRing,
-	Play,
-	Pause,
-	RotateCcw
-} from "lucide-react";
+import { Cpu, MemoryStick, HardDrive, ArrowUpDown, Play, Pause, RotateCcw } from "lucide-react";
 
 // Pomodoro timer limit.
 const MAX_TIMER_SECONDS = 180 * 60;
@@ -112,47 +105,6 @@ const playTimerChime = () => {
 };
 
 // Simple SVG icons
-function WifiIcon({ connected }: { connected: boolean }) {
-	return (
-		<svg
-			width="18"
-			height="18"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="2.5"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-			opacity={connected ? 1 : 0.4}
-		>
-			<path d="M5 12.55a11 11 0 0 1 14.08 0" />
-			<path d="M1.42 9a16 16 0 0 1 21.16 0" />
-			<path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
-			<line x1="12" y1="20" x2="12.01" y2="20" />
-		</svg>
-	);
-}
-
-function TrayIcon() {
-	return (
-		<svg
-			width="14"
-			height="14"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="2.5"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-		>
-			<rect x="3" y="3" width="6" height="6" rx="1" />
-			<rect x="15" y="3" width="6" height="6" rx="1" />
-			<rect x="15" y="15" width="6" height="6" rx="1" />
-			<rect x="3" y="15" width="6" height="6" rx="1" />
-		</svg>
-	);
-}
-
 function BatteryIcon({
 	charging,
 	level,
@@ -993,6 +945,37 @@ function App() {
 	// Window height is now kept constant to prevent rendering layout lag and sharp corners
 
 	const lastScrollTime = useRef(0);
+
+	type BloomModeType = "music" | "calendar" | "command-center" | "status";
+
+	// The mode to fall back to after calendar/command-center: music if media is
+	// present and playing (music takes priority), otherwise the plain status view.
+	const baseMusicMode = () =>
+		settingsMusicModeEnabled && mediaInfo.has_media && isPlaying ? "music" : "status";
+
+	const cycleMode = (dir: 1 | -1) => {
+		// Music shifts position based on playing state:
+		// Playing: command-center → music → status → calendar (active, near command-center)
+		// Paused:  command-center → status → music → calendar (secondary, after status)
+		const musicBeforeStatus = isPlaying && mediaInfo.has_media && settingsMusicModeEnabled;
+		const modes: BloomModeType[] = musicBeforeStatus
+			? ["command-center", "music", "status", "calendar"]
+			: ["command-center", "status", "music", "calendar"];
+		const availableModes = modes.filter((m) => {
+			if (m === "music" && (!settingsMusicModeEnabled || !mediaInfo.has_media)) return false;
+			if (m === "calendar" && !settingsCalendarEnabled) return false;
+			return true;
+		});
+
+		const currentIndex = availableModes.indexOf(bloomMode);
+		if (currentIndex === -1) return;
+
+		const nextIndex = (currentIndex + dir + availableModes.length) % availableModes.length;
+		const nextMode = availableModes[nextIndex];
+		manualMusicRef.current = nextMode === "music";
+		setBloomMode(nextMode);
+	};
+
 	const handleWheel = (e: React.WheelEvent) => {
 		const target = e.target as HTMLElement;
 		if (target.closest(".calendar-grid") || target.closest(".timer-column")) {
@@ -1008,35 +991,24 @@ function App() {
 		const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
 		if (Math.abs(delta) < 5) return; // Ignore tiny movements
 
-		// Music shifts position based on playing state:
-		// Playing: command-center → music → status → calendar (active, near command-center)
-		// Paused:  command-center → status → music → calendar (secondary, after status)
-		const musicBeforeStatus = isPlaying && mediaInfo.has_media && settingsMusicModeEnabled;
-		const modes: ("command-center" | "status" | "music" | "calendar")[] = musicBeforeStatus
-			? ["command-center", "music", "status", "calendar"]
-			: ["command-center", "status", "music", "calendar"];
-		const availableModes = modes.filter((m) => {
-			if (m === "music" && (!settingsMusicModeEnabled || !mediaInfo.has_media)) return false;
-			if (m === "calendar" && !settingsCalendarEnabled) return false;
-			return true;
-		});
+		lastScrollTime.current = now;
+		cycleMode(delta > 0 ? 1 : -1);
+	};
 
-		const currentIndex = availableModes.indexOf(bloomMode);
-		if (currentIndex === -1) return;
-
-		if (delta > 0) {
-			const nextIndex = (currentIndex + 1) % availableModes.length;
-			const nextMode = availableModes[nextIndex];
-			manualMusicRef.current = nextMode === "music";
-			setBloomMode(nextMode);
-			lastScrollTime.current = now;
-		} else if (delta < 0) {
-			const prevIndex = (currentIndex - 1 + availableModes.length) % availableModes.length;
-			const prevMode = availableModes[prevIndex];
-			manualMusicRef.current = prevMode === "music";
-			setBloomMode(prevMode);
-			lastScrollTime.current = now;
+	// Click on the center time cycles: base → calendar → command-center → base,
+	// returning to music whenever media is present and playing.
+	const cycleTimeClick = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (isTimerFinished) {
+			resetTimer();
+			return;
 		}
+		setBloomMode((prev) => {
+			if (prev === "calendar") return "command-center";
+			if (prev === "command-center") return baseMusicMode();
+			if (!settingsCalendarEnabled) return "command-center";
+			return "calendar";
+		});
 	};
 
 	// Timer state
@@ -1648,23 +1620,6 @@ function App() {
 		invoke("open_bluetooth_settings");
 	}, []);
 
-	const toggleCalendarMode = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		if (isTimerFinished) {
-			resetTimer();
-			return;
-		}
-		if (!settingsCalendarEnabled) return;
-
-		setBloomMode((prev) => {
-			if (prev === "calendar") {
-				// Return to music mode if media is present and playing and music mode is enabled, otherwise status
-				return settingsMusicModeEnabled && mediaInfo.has_media && isPlaying ? "music" : "status";
-			}
-			return "calendar";
-		});
-	};
-
 	// Render a status widget by ID
 	const renderStatusWidget = (id: string) => {
 		switch (id) {
@@ -1772,7 +1727,8 @@ function App() {
 		if (bloomMode === "status") return 36;
 		if (isMusicMode && isHovered) {
 			const hasProgressBar = (mediaInfo.duration_ms ?? 0) > 0;
-			let h = mediaLayout === "compact" ? (hasProgressBar ? 132 : 116) : 120;
+			// +36px for the info row rendered on top of the media panel.
+			let h = mediaLayout === "compact" ? (hasProgressBar ? 168 : 152) : 138;
 			if (mediaLayout === "compact") {
 				if (compactVolumeExpanded) h += 36;
 			}
@@ -1942,6 +1898,19 @@ function App() {
 											exit={{ opacity: 0, scale: 0.98, transition: { duration: 0.1 } }}
 											transition={{ type: "spring", stiffness: 500, damping: 30 }}
 										>
+											{/* Info row on top (same bar as calendar / command center) */}
+											<div className="music-top-row">
+												<ClickableTime
+													time={time}
+													timerSeconds={timerSeconds}
+													isTimerFinished={isTimerFinished}
+													formatTimer={formatTimerTime}
+													onClick={cycleTimeClick}
+													cycleHint
+													showUpdateDot={updateAvailable && showUpdateIndicator}
+												/>
+											</div>
+
 											{mediaLayout === "compact" ? (
 												<CompactMediaPlayer
 													mediaInfo={mediaInfo}
@@ -2276,45 +2245,14 @@ function App() {
 															</div>
 
 															{/* Center - Time (always visible) */}
-															<div className="time-center">
-																<div className="time-flip-container" onClick={toggleCalendarMode}>
-																	<AnimatePresence initial={false}>
-																		{timerSeconds > 0 || isTimerFinished ? (
-																			<motion.span
-																				key="timer"
-																				className={`time compact-timer ${isTimerFinished ? "timer-finished" : ""}`}
-																				initial={{ rotateX: -90, opacity: 0 }}
-																				animate={{ rotateX: 0, opacity: 1 }}
-																				exit={{ rotateX: 90, opacity: 0 }}
-																				transition={{ type: "spring", stiffness: 600, damping: 30 }}
-																			>
-																				{isTimerFinished && (
-																					<BellRing
-																						size={13}
-																						strokeWidth={2.5}
-																						className="timer-bell"
-																					/>
-																				)}
-																				{formatTimerTime(timerSeconds)}
-																			</motion.span>
-																		) : (
-																			<motion.span
-																				key="clock"
-																				className="time"
-																				initial={{ rotateX: -90, opacity: 0 }}
-																				animate={{ rotateX: 0, opacity: 1 }}
-																				exit={{ rotateX: 90, opacity: 0 }}
-																				transition={{ type: "spring", stiffness: 600, damping: 30 }}
-																			>
-																				{time}
-																			</motion.span>
-																		)}
-																	</AnimatePresence>
-																</div>
-																{updateAvailable && showUpdateIndicator && (
-																	<div className="update-dot" />
-																)}
-															</div>
+															<ClickableTime
+																time={time}
+																timerSeconds={timerSeconds}
+																isTimerFinished={isTimerFinished}
+																formatTimer={formatTimerTime}
+																onClick={cycleTimeClick}
+																showUpdateDot={updateAvailable && showUpdateIndicator}
+															/>
 
 															{/* Right: album art (music) or battery (command-center, calendar) */}
 															<div className="side-content right">
@@ -2413,7 +2351,7 @@ function App() {
 									)}
 								</AnimatePresence>
 
-								{/* Command Center Panel */}
+								{/* Command Center / Quick Settings Panel */}
 								<AnimatePresence>
 									{bloomMode === "command-center" && (
 										<motion.div
@@ -2424,211 +2362,30 @@ function App() {
 											exit={{ opacity: 0, filter: "blur(4px)", transition: { duration: 0.1 } }}
 											transition={{ type: "spring", stiffness: 400, damping: 30 }}
 										>
-											{/* Pills Grid */}
-											<div className="cc-pills-grid">
-												{/* Wi-Fi Pill */}
-												<div
-													className={`cc-pill-tile ${wifiEnabled ? "active" : ""}`}
-													onClick={(e) => {
-														e.stopPropagation();
-														toggleWifi();
-													}}
-													onContextMenu={handleWifiRightClick}
-													title="Left-click to toggle, Right-click for Settings"
-												>
-													<div className="cc-pill-icon-wrapper">
-														<WifiIcon connected={wifiEnabled} />
-													</div>
-													<div className="cc-pill-info">
-														<span className="cc-pill-title">Wi-Fi</span>
-														<span className="cc-pill-status">
-															{wifiEnabled ? "Connected" : "Off"}
-														</span>
-													</div>
-												</div>
-
-												{/* Dock Mode Pill */}
-												<div
-													className={`cc-pill-tile ${dockMode === "fixed" ? "active" : ""}`}
-													onClick={toggleDockModeSetting}
-													title="Cycle dock mode: Fixed / Smart / Peek"
-												>
-													<div className="cc-pill-icon-wrapper">
-														<DockIcon />
-													</div>
-													<div className="cc-pill-info">
-														<span className="cc-pill-title">Dock Mode</span>
-														<span className="cc-pill-status">
-															{dockMode === "fixed"
-																? "Fixed"
-																: dockMode === "smart"
-																	? "Smart"
-																	: "Peek"}
-														</span>
-													</div>
-												</div>
-
-												{/* Bluetooth Pill */}
-												<div
-													className={`cc-pill-tile ${bluetoothEnabled ? "active" : ""}`}
-													onClick={(e) => {
-														e.stopPropagation();
-														toggleBluetooth();
-													}}
-													onContextMenu={handleBluetoothRightClick}
-													title="Left-click to toggle, Right-click for Settings"
-												>
-													<div className="cc-pill-icon-wrapper">
-														<BluetoothIcon />
-													</div>
-													<div className="cc-pill-info">
-														<span className="cc-pill-title">Bluetooth</span>
-														<span className="cc-pill-status">
-															{bluetoothEnabled ? "On" : "Off"}
-														</span>
-													</div>
-												</div>
-
-												{/* Notch Mode Pill */}
-												<div
-													className={`cc-pill-tile ${notchMode === "fixed" ? "active" : ""}`}
-													onClick={toggleNotchModeSetting}
-													title="Cycle notch mode: Fixed / Smart / Peek"
-												>
-													<div className="cc-pill-icon-wrapper">
-														<NotchIcon />
-													</div>
-													<div className="cc-pill-info">
-														<span className="cc-pill-title">Notch Mode</span>
-														<span className="cc-pill-status">
-															{notchMode === "fixed"
-																? "Fixed"
-																: notchMode === "smart"
-																	? "Smart"
-																	: "Peek"}
-														</span>
-													</div>
-												</div>
-											</div>
-
-											{/* Circular Actions Row */}
-											<div className="cc-circular-actions-row">
-												<button
-													className={`cc-circular-btn ${dndActive ? "active" : ""}`}
-													onClick={(e) => {
-														e.stopPropagation();
-														setDndActive((prev) => !prev);
-													}}
-													title={`Focus / DND: ${dndActive ? "On" : "Off"}`}
-												>
-													<MoonIcon />
-												</button>
-												<button
-													className={`cc-circular-btn ${batterySaverEnabled ? "active" : ""}`}
-													onClick={(e) => {
-														e.stopPropagation();
-														openBatterySaverSettings();
-													}}
-													title={`Energy Saver: ${batterySaverEnabled ? "On" : "Off"} — Click to open Settings`}
-												>
-													<BatterySaverIcon />
-												</button>
-												<button
-													className="cc-circular-btn"
-													onClick={(e) => {
-														e.stopPropagation();
-														openSystemTray(e);
-													}}
-													title="System Tray"
-												>
-													<TrayIcon />
-												</button>
-												<button
-													className="cc-circular-btn"
-													onClick={(e) => {
-														e.stopPropagation();
-														invoke("open_notification_center");
-													}}
-													title="Notification Center"
-												>
-													<BellIcon />
-												</button>
-												<button
-													className="cc-circular-btn"
-													onClick={(e) => {
-														e.stopPropagation();
-														openSettingsWindow();
-													}}
-													title="Bloom Settings"
-												>
-													<SettingsIcon />
-												</button>
-												<button
-													className="cc-circular-btn"
-													onClick={(e) => {
-														e.stopPropagation();
-														invoke("restart_bloom");
-													}}
-													title="Restart Bloom"
-												>
-													<ReloadIcon />
-												</button>
-											</div>
-
-											{/* Classic Sliders Area */}
-											<div className="cc-classic-sliders-area">
-												{/* Volume Slider */}
-												<div className="cc-classic-slider-row">
-													<div className="cc-classic-slider-label">
-														<VolumeLowIcon style={{ opacity: 0.5 }} />
-														<span>Volume</span>
-													</div>
-													<div className="cc-classic-slider-track">
-														<input
-															type="range"
-															min="0"
-															max="1"
-															step="0.01"
-															value={volume}
-															onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-															onPointerDown={(e) => e.stopPropagation()}
-															onClick={(e) => e.stopPropagation()}
-															className="cc-classic-input"
-														/>
-														<div
-															className="cc-classic-fill"
-															style={{ width: `${volume * 100}%` }}
-														/>
-													</div>
-													<span className="cc-classic-percentage">{Math.round(volume * 100)}%</span>
-												</div>
-
-												{/* Brightness Slider */}
-												<div className="cc-classic-slider-row">
-													<div className="cc-classic-slider-label">
-														<BrightnessLowIcon />
-														<span>Brightness</span>
-													</div>
-													<div className="cc-classic-slider-track">
-														<input
-															type="range"
-															min="0"
-															max="100"
-															step="1"
-															value={currentBrightness}
-															onChange={(e) => handleBrightnessChange(parseInt(e.target.value))}
-															onPointerDown={(e) => e.stopPropagation()}
-															onClick={(e) => e.stopPropagation()}
-															className="cc-classic-input"
-														/>
-														<div
-															className="cc-classic-fill"
-															style={{ width: `${currentBrightness}%` }}
-														/>
-													</div>
-													<span className="cc-classic-percentage">{currentBrightness}%</span>
-												</div>
-											</div>
+											<QuickSettingsPanel
+												wifiEnabled={wifiEnabled}
+												onToggleWifi={toggleWifi}
+												onWifiContextMenu={handleWifiRightClick}
+												dockMode={dockMode}
+												onCycleDockMode={toggleDockModeSetting}
+												bluetoothEnabled={bluetoothEnabled}
+												onToggleBluetooth={toggleBluetooth}
+												onBluetoothContextMenu={handleBluetoothRightClick}
+												notchMode={notchMode}
+												onCycleNotchMode={toggleNotchModeSetting}
+												dndActive={dndActive}
+												onToggleDnd={() => setDndActive((prev) => !prev)}
+												batterySaverEnabled={batterySaverEnabled}
+												onOpenBatterySaver={openBatterySaverSettings}
+												onOpenSystemTray={openSystemTray}
+												onOpenNotificationCenter={() => invoke("open_notification_center")}
+												onOpenSettings={openSettingsWindow}
+												onRestart={() => invoke("restart_bloom")}
+												volume={volume}
+												onVolumeChange={handleVolumeChange}
+												brightness={currentBrightness}
+												onBrightnessChange={handleBrightnessChange}
+											/>
 										</motion.div>
 									)}
 								</AnimatePresence>
@@ -2799,170 +2556,6 @@ function Calendar() {
 				{days}
 			</div>
 		</div>
-	);
-}
-
-function BluetoothIcon() {
-	return (
-		<svg
-			width="18"
-			height="18"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="2.5"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-		>
-			<path d="M6.5 6.5l11 11L12 23V1l5.5 5.5-11 11" />
-		</svg>
-	);
-}
-
-function SettingsIcon() {
-	return (
-		<svg
-			width="14"
-			height="14"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="2.5"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-			style={{ opacity: 0.9 }}
-		>
-			<circle cx="12" cy="12" r="3" />
-			<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-		</svg>
-	);
-}
-
-function BrightnessLowIcon() {
-	return (
-		<svg
-			width="12"
-			height="12"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="2"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-			style={{ opacity: 0.5 }}
-		>
-			<circle cx="12" cy="12" r="5" fill="currentColor" />
-		</svg>
-	);
-}
-
-function MoonIcon() {
-	return (
-		<svg
-			width="18"
-			height="18"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="2.5"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-		>
-			<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-		</svg>
-	);
-}
-
-function DockIcon() {
-	return (
-		<svg
-			width="18"
-			height="18"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="2.5"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-		>
-			<rect x="2" y="14" width="20" height="8" rx="2" />
-			<line x1="6" y1="18" x2="6.01" y2="18" strokeWidth="3.5" strokeLinecap="round" />
-			<line x1="10" y1="18" x2="10.01" y2="18" strokeWidth="3.5" strokeLinecap="round" />
-			<line x1="14" y1="18" x2="14.01" y2="18" strokeWidth="3.5" strokeLinecap="round" />
-			<line x1="18" y1="18" x2="18.01" y2="18" strokeWidth="3.5" strokeLinecap="round" />
-		</svg>
-	);
-}
-
-function NotchIcon() {
-	return (
-		<svg
-			width="18"
-			height="18"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="2.5"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-		>
-			<path d="M4 3h16a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
-			<path d="M9 9v4a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2V9" />
-		</svg>
-	);
-}
-
-function BellIcon() {
-	return (
-		<svg
-			width="14"
-			height="14"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="2.5"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-		>
-			<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9z" />
-			<path d="M13.73 21a2 2 0 0 1-3.46 0" />
-		</svg>
-	);
-}
-
-function ReloadIcon() {
-	return (
-		<svg
-			width="14"
-			height="14"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="2.5"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-		>
-			<path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-		</svg>
-	);
-}
-
-function BatterySaverIcon() {
-	return (
-		<svg
-			width="18"
-			height="18"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="2.5"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-		>
-			<rect x="2" y="7" width="16" height="10" rx="2" />
-			<path d="M22 11v2" />
-			<path d="M6 12h4l2-3v6l-2-3H6" />
-		</svg>
 	);
 }
 
