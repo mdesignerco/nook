@@ -1004,16 +1004,16 @@ const Dock = memo(function Dock() {
 															(allowPathFallback && iconsRef.current[app.path]) ||
 															app.icon;
 
-														const isBloomOrSettings =
+														const isNookOrSettings =
 															app.name.toLowerCase() === "settings" ||
-															app.name.toLowerCase() === "bloom" ||
-															app.path.toLowerCase().includes("bloom.exe");
+															app.name.toLowerCase() === "nook" ||
+															app.path.toLowerCase().includes("nook.exe");
 
 														return icon ? (
 															<img
 																src={icon}
 																alt={app.name}
-																className={isBloomOrSettings ? "bloom-icon-img" : ""}
+																className={isNookOrSettings ? "nook-icon-img" : ""}
 																draggable={false}
 															/>
 														) : (
@@ -1147,15 +1147,15 @@ const Dock = memo(function Dock() {
 													iconsRef.current[cacheKey] ||
 													(allowPathFallback && iconsRef.current[app.path]) ||
 													app.icon;
-												const isBloomOrSettings =
+												const isNookOrSettings =
 													app.name.toLowerCase() === "settings" ||
-													app.name.toLowerCase() === "bloom" ||
-													app.path.toLowerCase().includes("bloom.exe");
+													app.name.toLowerCase() === "nook" ||
+													app.path.toLowerCase().includes("nook.exe");
 												return icon ? (
 													<img
 														src={icon}
 														alt={app.name}
-														className={isBloomOrSettings ? "bloom-icon-img" : ""}
+														className={isNookOrSettings ? "nook-icon-img" : ""}
 														draggable={false}
 													/>
 												) : (

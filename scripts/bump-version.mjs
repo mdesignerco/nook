@@ -23,13 +23,21 @@ function updateCargoToml() {
 	writeFileSync(path, content.replace(/^version = "[^"]*"/m, `version = "${version}"`));
 }
 
+function cargoPackageName() {
+	const content = readFileSync(resolve(root, "src-tauri/Cargo.toml"), "utf8");
+	const match = content.match(/^\[package\][\s\S]*?^name\s*=\s*"([^"]+)"/m);
+	if (!match) throw new Error("Could not read [package] name from src-tauri/Cargo.toml");
+	return match[1];
+}
+
 function updateCargoLock() {
 	const path = resolve(root, "src-tauri/Cargo.lock");
 	const content = readFileSync(path, "utf8");
+	const name = cargoPackageName();
 	writeFileSync(
 		path,
 		content.replace(
-			/(\[\[package\]\]\r?\nname = "bloom"\r?\nversion = ")[^"]*(")/,
+			new RegExp(`(\\[\\[package\\]\\]\\r?\\nname = "${name}"\\r?\\nversion = ")[^"]*(")`),
 			`$1${version}$2`
 		)
 	);

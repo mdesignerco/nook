@@ -415,8 +415,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "bloom"
-version = "4.0.0"
+name = "nook"
+version = "4.1.0"
 dependencies = [
  "base64 0.22.1",
  "image",

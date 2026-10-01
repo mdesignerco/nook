@@ -1399,7 +1399,7 @@ pub fn setup_system_worker(app_handle: AppHandle) -> Sender<SystemCommand> {
                 let mut hwnd = GetForegroundWindow();
 
                 // Find the first meaningful window for overlap detection.
-                // We skip Bloom windows, invisible windows, minimized windows, and 'cloaked' system ghosts.
+                // We skip Nook windows, invisible windows, minimized windows, and 'cloaked' system ghosts.
                 let mut check_count = 0;
                 while !hwnd.is_invalid() && check_count < 15 {
                     let mut process_id = 0u32;
@@ -1412,7 +1412,7 @@ pub fn setup_system_worker(app_handle: AppHandle) -> Sender<SystemCommand> {
                     );
                     let class_str = std::str::from_utf8(&class_name[..len as usize]).unwrap_or("");
 
-                    let is_bloom = process_id == my_process_id || class_str.contains("Bloom");
+                    let is_nook = process_id == my_process_id || class_str.contains("Nook");
                     let is_visible = IsWindowVisible(hwnd).as_bool();
                     let is_iconic = IsIconic(hwnd).as_bool();
 
@@ -1431,7 +1431,7 @@ pub fn setup_system_worker(app_handle: AppHandle) -> Sender<SystemCommand> {
                         && (rect.right - rect.left) > 0
                         && (rect.bottom - rect.top) > 0;
 
-                    if is_bloom || !is_visible || is_iconic || is_cloaked || !has_valid_rect {
+                    if is_nook || !is_visible || is_iconic || is_cloaked || !has_valid_rect {
                         hwnd = windows::Win32::UI::WindowsAndMessaging::GetWindow(
                             hwnd,
                             windows::Win32::UI::WindowsAndMessaging::GW_HWNDNEXT,
@@ -1941,7 +1941,7 @@ static CAPTURE_RECHECK: AtomicBool = AtomicBool::new(true);
 static CAPTURE_LAST_SCAN_MS: AtomicI64 = AtomicI64::new(0);
 
 /// True while a screen-capture UI (Windows Snipping Tool) has a visible window.
-/// Bloom's notch sits exactly where that toolbar lives, so it must get out of
+/// Nook's notch sits exactly where that toolbar lives, so it must get out of
 /// the way even if the capture window isn't recognised as fullscreen.
 unsafe extern "system" fn capture_ui_enum_proc(hwnd: HWND, lparam: LPARAM) -> BOOL {
     use windows::Win32::UI::WindowsAndMessaging::IsIconic;
@@ -2063,7 +2063,7 @@ unsafe extern "system" fn mouse_hook_proc(
             let pt = &*(lparam.0 as *const MSLLHOOKSTRUCT);
             let cursor = pt.pt;
 
-            // While a capture UI (Snipping Tool) is up, Bloom is fully
+            // While a capture UI (Snipping Tool) is up, Nook is fully
             // click-through and skipped entirely so the tool owns the screen.
             if CAPTURE_UI_ACTIVE.load(Ordering::Relaxed) {
                 if MH_LAST_MAIN_IGNORE.load(Ordering::Relaxed) != 1 {
@@ -2113,7 +2113,7 @@ unsafe extern "system" fn mouse_hook_proc(
             let mon_h = cached_size.1 as i32;
 
             let fg_fs = CURRENT_FOREGROUND_FULLSCREEN.load(Ordering::Relaxed);
-            // Island-only overlay mode: when `bloom-overlay-always` is on the
+            // Island-only overlay mode: when `Nook-overlay-always` is on the
             // island stays interactive above fullscreen apps instead of going
             // click-through. The volume/brightness edge OSDs below remain gated
             // by `!fg_fs` on purpose so they never pop up over a fullscreen app.
@@ -2778,7 +2778,7 @@ pub fn reposition_island_and_overlays(app: &AppHandle, animate: bool) {
 }
 
 /// Height of the island window in CSS px. This is the webview height the notch
-/// content is designed for; it is scaled by bloom-scale and the monitor DPI to
+/// content is designed for; it is scaled by Nook-scale and the monitor DPI to
 /// get physical pixels.
 const NOTCH_HEIGHT_CSS_PX: f64 = 420.0;
 
@@ -3115,7 +3115,7 @@ pub unsafe extern "system" fn enum_windows_proc(hwnd: HWND, lparam: LPARAM) -> B
             }
 
             // Filter out system containers and background stuff
-            if title == "Program Manager" || title == "Bloom" || title == "Bloom Dock" {
+            if title == "Program Manager" || title == "Nook" || title == "Nook Dock" {
                 return true.into();
             }
 
@@ -3154,8 +3154,8 @@ pub unsafe extern "system" fn enum_windows_proc(hwnd: HWND, lparam: LPARAM) -> B
                         || window_class == "ExploreWClass"
                         || (window_class == "#32770" && dialog_has_tab_control(hwnd));
 
-                    // Filter out Bloom itself (except the Settings window) and some common background processes
-                    if (lowercase_path.contains("bloom.exe") && title != "Settings")
+                    // Filter out Nook itself (except the Settings window) and some common background processes
+                    if (lowercase_path.contains("nook.exe") && title != "Settings")
                         || lowercase_path.contains("conhost.exe")
                         || (lowercase_path.contains("explorer.exe") && !is_explorer_window)
                         || lowercase_path.contains("shellexperiencehost.exe")
@@ -3377,7 +3377,7 @@ pub fn setup_display_change_monitor(app_handle: AppHandle) {
         use windows::Win32::System::LibraryLoader::GetModuleHandleW;
         use windows::Win32::UI::WindowsAndMessaging::*;
 
-        let class_name = windows::core::PCSTR(c"BloomDisplayMonitor".as_ptr() as *const u8);
+        let class_name = windows::core::PCSTR(c"NookDisplayMonitor".as_ptr() as *const u8);
         let h_inst = GetModuleHandleW(None).unwrap_or_default().into();
 
         let wnd_class = WNDCLASSEXA {
