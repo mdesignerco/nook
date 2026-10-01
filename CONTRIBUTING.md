@@ -1,6 +1,6 @@
-# Contributing to Bloom
+# Contributing to Nook
 
-Thanks for wanting to help. Bloom is a Windows desktop companion built with Tauri — a Rust core and a React/TypeScript UI.
+Thanks for wanting to help. Nook is a Windows desktop companion built with Tauri — a Rust core and a React/TypeScript UI.
 
 ## Before you start
 
@@ -45,4 +45,4 @@ Useful commands:
 
 ## License
 
-Bloom is licensed under GPL-3.0. By contributing, you agree that your contributions are licensed under the same terms.
+Nook is licensed under GPL-3.0. By contributing, you agree that your contributions are licensed under the same terms.

@@ -5,19 +5,19 @@
   width="72"
 />
 
-# Bloom
+# Nook
 
 <br/>
 
 <!-- HERO SHOWCASE — full-width cinematic shot or video -->
 <!-- ![Hero](your-hero-url) -->
-<img width="1920" height="1080" alt="Bloom Hero" src="https://github.com/user-attachments/assets/22041f25-a69e-457d-80d9-7dfbfbed2d29" />
+<img width="1920" height="1080" alt="Nook Hero" src="https://github.com/user-attachments/assets/22041f25-a69e-457d-80d9-7dfbfbed2d29" />
 
 </div>
 
 ---
 
-Bloom makes your Windows desktop feel alive.
+Nook makes your Windows desktop feel alive.
 
 Every transition is a physics simulation.
 Every element responds to touch.
@@ -34,7 +34,7 @@ This wakes it up.
 <!-- ![Island Demo](your-island-gif-url) -->
 
 <p align="center">
-  <img width="430" height="70" alt="Bloom Island" src="https://github.com/user-attachments/assets/0d723558-9df4-4214-b20e-4a1f97eb1f22" />
+  <img width="430" height="70" alt="Nook Island" src="https://github.com/user-attachments/assets/0d723558-9df4-4214-b20e-4a1f97eb1f22" />
 </p>
 
 A notch at the top of your screen that adapts to what you're doing.
@@ -68,12 +68,12 @@ It feels mechanical. In a good way.
 <!-- ![Dock Demo](your-dock-gif-url) -->
 
 <p align="center">
-  <img width="576" height="102" alt="Bloom Dock" src="https://github.com/user-attachments/assets/96229f0e-1246-4baf-b8ad-3e8f77142a12" />
+  <img width="576" height="102" alt="Nook Dock" src="https://github.com/user-attachments/assets/96229f0e-1246-4baf-b8ad-3e8f77142a12" />
 </p>
 
 A taskbar that actually moves.
 
-Bloom replaces your native Windows taskbar.
+Nook replaces your native Windows taskbar.
 It sits at the bottom of your screen, always there when you need it.
 
 Drag to reorder.
@@ -110,13 +110,13 @@ It's fast because it has to be.
 ---
 
 <!-- SHOWCASE: Full-width cinematic video or GIF montage -->
-<!-- ![Bloom Montage](your-montage-url) -->
+<!-- ![Nook Montage](your-montage-url) -->
 
 ---
 
 ## 🛡️ Microsoft Defender
 
-Some users may see a Microsoft Defender warning when installing Bloom.
+Some users may see a Microsoft Defender warning when installing Nook.
 
 The executable was submitted directly to Microsoft for analysis. Microsoft reviewed the file and confirmed that it **does not meet their criteria for malware or potentially unwanted applications**, and **the detection has been removed**.
 
@@ -141,13 +141,13 @@ MpCmdRun.exe -SignatureUpdate
 
 ## Get It Running
 
-**Download** the latest build from [Releases](https://github.com/SehajveerSingh2005/bloom/releases/latest).
+**Download** the latest build from [Releases](https://github.com/mdesignerco/nook/releases/latest).
 
 Or build from source:
 
 ```bash
-git clone https://github.com/SehajveerSingh2005/bloom.git
-cd bloom
+git clone https://github.com/mdesignerco/nook.git
+cd nook
 bun install
 bun run tauri dev
 ```
@@ -158,7 +158,7 @@ You'll need [Rust](https://rustup.rs/) and [Bun](https://bun.sh/). That's it.
 
 ## Contributing
 
-Bloom is open source.
+Nook is open source.
 Found a bug? Open an issue.
 Have an idea? Send a PR.
 Want to just say it's cool? A star goes a long way.
