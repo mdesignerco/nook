@@ -192,7 +192,7 @@ export function QuickSettingsPanel({
 						e.stopPropagation();
 						onOpenSettings();
 					}}
-					title="Bloom Settings"
+					title="Nook Settings"
 				>
 					<SettingsIcon />
 				</button>
@@ -202,7 +202,7 @@ export function QuickSettingsPanel({
 						e.stopPropagation();
 						onRestart();
 					}}
-					title="Restart Bloom"
+					title="Restart Nook"
 				>
 					<ReloadIcon />
 				</button>

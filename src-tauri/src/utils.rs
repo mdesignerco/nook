@@ -68,7 +68,7 @@ pub fn init_taskbar_marker(app: &tauri::AppHandle) {
     }
 }
 
-/// True if a previous Bloom session died without restoring the native taskbar.
+/// True if a previous Nook session died without restoring the native taskbar.
 pub fn taskbar_marker_exists() -> bool {
     TASKBAR_MARKER.get().is_some_and(|p| p.exists())
 }
@@ -662,6 +662,11 @@ pub fn get_now_ms() -> i64 {
 }
 
 /// Load settings.json into the in-memory cache. Call once at startup.
+///
+/// Also performs the one-time migration of the pre-4.1.0 `bloom-*` keys to
+/// `nook-*` (4.1.0 renamed the bundle identifier, which moved the config
+/// directory). Existing keys are never overwritten, and the rewrite is
+/// persisted so it only ever runs once.
 pub fn init_settings_cache(app: &tauri::AppHandle) {
     use crate::state::SETTINGS_CACHE;
     use tauri::Manager;
@@ -677,12 +682,57 @@ pub fn init_settings_cache(app: &tauri::AppHandle) {
                 std::collections::HashMap<String, serde_json::Value>,
             >(&content)
             {
+                let settings = migrate_legacy_setting_keys(app, settings);
                 if let Ok(mut cache) = SETTINGS_CACHE.get().unwrap().lock() {
                     *cache = settings;
                 }
             }
         }
     }
+}
+
+const LEGACY_KEY_PREFIX: &str = "bloom-";
+const CURRENT_KEY_PREFIX: &str = "nook-";
+
+fn migrate_legacy_setting_keys(
+    app: &tauri::AppHandle,
+    settings: std::collections::HashMap<String, serde_json::Value>,
+) -> std::collections::HashMap<String, serde_json::Value> {
+    use tauri::Manager;
+
+    let stale: Vec<String> = settings
+        .keys()
+        .filter(|k| k.starts_with(LEGACY_KEY_PREFIX))
+        .cloned()
+        .collect();
+    if stale.is_empty() {
+        return settings;
+    }
+
+    let mut migrated = settings.clone();
+    for key in stale {
+        let Some(value) = settings.get(&key) else {
+            continue;
+        };
+        let next = format!("{CURRENT_KEY_PREFIX}{}", &key[LEGACY_KEY_PREFIX.len()..]);
+        migrated.entry(next).or_insert_with(|| value.clone());
+        migrated.remove(&key);
+    }
+
+    // Persist so the rename happens exactly once. A write failure only costs a
+    // repeat of this migration on the next launch, never a lost setting.
+    if let Some(path) = app
+        .path()
+        .app_config_dir()
+        .ok()
+        .map(|p| p.join("settings.json"))
+    {
+        if let Ok(content) = serde_json::to_string(&migrated) {
+            let _ = std::fs::write(path, content);
+        }
+    }
+
+    migrated
 }
 
 /// Replace the entire settings cache (used by the file watcher on external changes).
@@ -692,8 +742,8 @@ pub fn replace_settings_cache(new_settings: std::collections::HashMap<String, se
     }
 }
 
-pub fn get_bloom_scale(_app: &tauri::AppHandle) -> f64 {
-    get_setting_str(_app, "bloom-scale")
+pub fn get_nook_scale(_app: &tauri::AppHandle) -> f64 {
+    get_setting_str(_app, "nook-scale")
         .and_then(|s| s.parse::<f64>().ok())
         .unwrap_or(1.0)
 }
@@ -990,8 +1040,8 @@ mod tests {
 
         // Unknown variables stay verbatim
         assert_eq!(
-            expand_env_vars("%BLOOM_NOT_A_REAL_VAR%\\x"),
-            "%BLOOM_NOT_A_REAL_VAR%\\x"
+            expand_env_vars("%Nook_NOT_A_REAL_VAR%\\x"),
+            "%Nook_NOT_A_REAL_VAR%\\x"
         );
 
         // Unclosed percent is left alone
@@ -1018,7 +1068,7 @@ mod tests {
         // Already-qualified paths and nonsense are not resolved
         assert_eq!(resolve_executable_path("C:\\Windows\\notepad.exe"), None);
         assert_eq!(
-            resolve_executable_path("bloom-definitely-not-installed"),
+            resolve_executable_path("nook-definitely-not-installed"),
             None
         );
         assert_eq!(resolve_executable_path(""), None);

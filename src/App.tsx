@@ -378,11 +378,9 @@ function App() {
 	const [time, setTime] = useState("");
 	const [isHovered, setIsHovered] = useState(false);
 	const [isReady, setIsReady] = useState(false);
-	const [scale, setScale] = useState(() =>
-		parseFloat(localStorage.getItem("bloom-scale") || "1.0")
-	);
+	const [scale, setScale] = useState(() => parseFloat(localStorage.getItem("nook-scale") || "1.0"));
 	const [timeFormat24h, setTimeFormat24h] = useState(
-		() => localStorage.getItem("bloom-time-format-24h") === "true"
+		() => localStorage.getItem("nook-time-format-24h") === "true"
 	);
 
 	const [batteryLevel, setBatteryLevel] = useState(100);
@@ -390,7 +388,7 @@ function App() {
 	const [showPowerPulse, setShowPowerPulse] = useState(false);
 	const [showLowBatteryPulse, setShowLowBatteryPulse] = useState(false);
 	const [lowBatteryThreshold, setLowBatteryThreshold] = useState(() =>
-		parseInt(localStorage.getItem("bloom-low-battery-threshold") || "20")
+		parseInt(localStorage.getItem("nook-low-battery-threshold") || "20")
 	);
 	const prevChargingRef = useRef<boolean | null>(null);
 	const powerPulseTimeoutRef = useRef<any>(null);
@@ -406,7 +404,7 @@ function App() {
 	}, []);
 
 	const [notchMode, setNotchMode] = useState(() => {
-		const raw = localStorage.getItem("bloom-notch-mode") || "fixed";
+		const raw = localStorage.getItem("nook-notch-mode") || "fixed";
 		if (raw === "auto-hide") return "smart";
 		return raw;
 	});
@@ -480,7 +478,7 @@ function App() {
 	// Update state
 	const [updateAvailable, setUpdateAvailable] = useState(false);
 	const [showUpdateIndicator, setShowUpdateIndicator] = useState(
-		() => localStorage.getItem("bloom-show-update-indicator") !== "false"
+		() => localStorage.getItem("nook-show-update-indicator") !== "false"
 	);
 	const [showUpdatePulse, setShowUpdatePulse] = useState(false);
 
@@ -523,20 +521,20 @@ function App() {
 	const [startupAnimating, setStartupAnimating] = useState(false);
 
 	const [dockMode, setDockMode] = useState(() => {
-		const raw = localStorage.getItem("bloom-dock-mode") || "fixed";
+		const raw = localStorage.getItem("nook-dock-mode") || "fixed";
 		if (raw === "auto-hide") return "smart";
 		return raw;
 	});
 	const [dndActive, setDndActive] = useState(false);
 	const [dockEnabled, setDockEnabled] = useState(
-		() => localStorage.getItem("bloom-dock-enabled") !== "false"
+		() => localStorage.getItem("nook-dock-enabled") !== "false"
 	);
 	const [isNotchHovered, setIsNotchHovered] = useState(false);
 
 	const [isEdgeHovered, setIsEdgeHovered] = useState(false);
 	const [isOverlapped, setIsOverlapped] = useState(false);
 	const [interactionState, setInteractionState] = useState<"active" | "grace" | "none">("none");
-	const bloomRef = useRef<HTMLDivElement>(null);
+	const nookRef = useRef<HTMLDivElement>(null);
 	const dockEnabledInitial = useRef(true);
 	const dockModeInitial = useRef(true);
 	const notchModeInitial = useRef(true);
@@ -565,8 +563,8 @@ function App() {
 
 	useEffect(() => {
 		const updateRect = () => {
-			if (bloomRef.current && windowLabel === "main") {
-				const rect = bloomRef.current.getBoundingClientRect();
+			if (nookRef.current && windowLabel === "main") {
+				const rect = nookRef.current.getBoundingClientRect();
 				invoke("update_notch_rect", {
 					rect: {
 						x: Math.round(rect.x),
@@ -581,7 +579,7 @@ function App() {
 		updateRect();
 		window.addEventListener("resize", updateRect);
 		const observer = new ResizeObserver(updateRect);
-		if (bloomRef.current) observer.observe(bloomRef.current);
+		if (nookRef.current) observer.observe(nookRef.current);
 
 		return () => {
 			window.removeEventListener("resize", updateRect);
@@ -631,8 +629,8 @@ function App() {
 		// Overlay always emits splash-done, but on a normal relaunch it emits it near-instantly
 		// (after one async getVersion() call) — before this listener would be registered.
 		// By making the same decision here we avoid a race and avoid any unnecessary delay.
-		const firstRun = localStorage.getItem("bloom-first-run") === null;
-		const storedVersion = localStorage.getItem("bloom-app-version");
+		const firstRun = localStorage.getItem("nook-first-run") === null;
+		const storedVersion = localStorage.getItem("nook-app-version");
 
 		const waitForSplash = () => {
 			// Splash is definitely coming — register listener now (2800ms animation gives us plenty of time)
@@ -685,37 +683,37 @@ function App() {
 
 	// Settings state
 	const [settingsWeatherEnabled, setSettingsWeatherEnabled] = useState(
-		() => localStorage.getItem("bloom-weather-enabled") !== "false"
+		() => localStorage.getItem("nook-weather-enabled") !== "false"
 	);
 	const [settingsCalendarEnabled, setSettingsCalendarEnabled] = useState(
-		() => localStorage.getItem("bloom-calendar-enabled") !== "false"
+		() => localStorage.getItem("nook-calendar-enabled") !== "false"
 	);
 	const [settingsTimerSoundEnabled, setSettingsTimerSoundEnabled] = useState(
-		() => localStorage.getItem("bloom-timer-sound-enabled") !== "false"
+		() => localStorage.getItem("nook-timer-sound-enabled") !== "false"
 	);
 	const [settingsMusicModeEnabled, setSettingsMusicModeEnabled] = useState(
-		() => localStorage.getItem("bloom-music-mode-enabled") !== "false"
+		() => localStorage.getItem("nook-music-mode-enabled") !== "false"
 	);
 	const [settingsMusicCompactNotch, setSettingsMusicCompactNotch] = useState(
-		() => localStorage.getItem("bloom-music-compact-notch") !== "false"
+		() => localStorage.getItem("nook-music-compact-notch") !== "false"
 	);
 	const [settingsVisualizerEnabled, setSettingsVisualizerEnabled] = useState(
-		() => localStorage.getItem("bloom-visualizer-enabled") !== "false"
+		() => localStorage.getItem("nook-visualizer-enabled") !== "false"
 	);
 	const [settingsAlbumArtEnabled, setSettingsAlbumArtEnabled] = useState(
-		() => localStorage.getItem("bloom-media-album-art-enabled") !== "false"
+		() => localStorage.getItem("nook-media-album-art-enabled") !== "false"
 	);
 	const [settingsAmbienceEnabled, setSettingsAmbienceEnabled] = useState(
-		() => localStorage.getItem("bloom-media-ambience-enabled") !== "false"
+		() => localStorage.getItem("nook-media-ambience-enabled") !== "false"
 	);
 	const [settingsCompactGlowEnabled, setSettingsCompactGlowEnabled] = useState(
-		() => localStorage.getItem("bloom-media-compact-glow-enabled") !== "false"
+		() => localStorage.getItem("nook-media-compact-glow-enabled") !== "false"
 	);
 	const [settingsCornersEnabled, setSettingsCornersEnabled] = useState(
-		() => localStorage.getItem("bloom-corners-enabled") === "true"
+		() => localStorage.getItem("nook-corners-enabled") === "true"
 	);
 	const [mediaLayout, setMediaLayout] = useState<"classic" | "compact">(
-		() => (localStorage.getItem("bloom-media-layout") as "classic" | "compact") || "classic"
+		() => (localStorage.getItem("nook-media-layout") as "classic" | "compact") || "classic"
 	);
 	const [compactVolumeExpanded, setCompactVolumeExpanded] = useState(false);
 
@@ -741,43 +739,43 @@ function App() {
 					return fallback;
 				};
 
-				setSettingsWeatherEnabled(getVal("bloom-weather-enabled", "true") !== "false");
-				setSettingsCalendarEnabled(getVal("bloom-calendar-enabled", "true") !== "false");
-				setSettingsTimerSoundEnabled(getVal("bloom-timer-sound-enabled", "true") !== "false");
-				setSettingsMusicModeEnabled(getVal("bloom-music-mode-enabled", "true") !== "false");
-				setSettingsMusicCompactNotch(getVal("bloom-music-compact-notch", "true") !== "false");
+				setSettingsWeatherEnabled(getVal("nook-weather-enabled", "true") !== "false");
+				setSettingsCalendarEnabled(getVal("nook-calendar-enabled", "true") !== "false");
+				setSettingsTimerSoundEnabled(getVal("nook-timer-sound-enabled", "true") !== "false");
+				setSettingsMusicModeEnabled(getVal("nook-music-mode-enabled", "true") !== "false");
+				setSettingsMusicCompactNotch(getVal("nook-music-compact-notch", "true") !== "false");
 				const viz =
-					getVal("bloom-media-visualizer-enabled") ?? getVal("bloom-visualizer-enabled", "true");
+					getVal("nook-media-visualizer-enabled") ?? getVal("nook-visualizer-enabled", "true");
 				setSettingsVisualizerEnabled(viz !== "false");
-				setSettingsAlbumArtEnabled(getVal("bloom-media-album-art-enabled", "true") !== "false");
-				setSettingsAmbienceEnabled(getVal("bloom-media-ambience-enabled", "true") !== "false");
+				setSettingsAlbumArtEnabled(getVal("nook-media-album-art-enabled", "true") !== "false");
+				setSettingsAmbienceEnabled(getVal("nook-media-ambience-enabled", "true") !== "false");
 				setSettingsCompactGlowEnabled(
-					getVal("bloom-media-compact-glow-enabled", "true") !== "false"
+					getVal("nook-media-compact-glow-enabled", "true") !== "false"
 				);
-				setSettingsCornersEnabled(getVal("bloom-corners-enabled", "false") === "true");
-				setTimeFormat24h(getVal("bloom-time-format-24h") === "true");
+				setSettingsCornersEnabled(getVal("nook-corners-enabled", "false") === "true");
+				setTimeFormat24h(getVal("nook-time-format-24h") === "true");
 
-				const thresholdStr = getVal("bloom-low-battery-threshold", "20");
+				const thresholdStr = getVal("nook-low-battery-threshold", "20");
 				if (thresholdStr) setLowBatteryThreshold(parseInt(thresholdStr as string));
 
-				const nMode = getVal("bloom-notch-mode", "fixed");
+				const nMode = getVal("nook-notch-mode", "fixed");
 				if (nMode) {
 					const mapped = nMode === "auto-hide" ? "smart" : nMode;
 					setNotchMode(mapped);
 				}
 
 				if (windowLabel === "main") {
-					const firstRun = localStorage.getItem("bloom-first-run") === null;
+					const firstRun = localStorage.getItem("nook-first-run") === null;
 					if (firstRun) {
 						import("@tauri-apps/plugin-autostart").then(({ enable, isEnabled }) => {
 							isEnabled().then((enabled) => {
 								if (!enabled) enable().catch(() => {});
 							});
 						});
-						localStorage.setItem("bloom-first-run", "done");
+						localStorage.setItem("nook-first-run", "done");
 					}
 
-					// Island-only build: the Bloom Dock (taskbar replacement) is
+					// Island-only build: the Nook Dock (taskbar replacement) is
 					// disabled. Only the notch/island appbar is synced and the
 					// native Windows taskbar is never hidden.
 					const syncWindows = async () => {
@@ -810,7 +808,7 @@ function App() {
 						}, 6000);
 					};
 
-					const storedVersion = localStorage.getItem("bloom-app-version");
+					const storedVersion = localStorage.getItem("nook-app-version");
 					if (firstRun || storedVersion === null) {
 						runIslandInitAfterSplash();
 					} else {
@@ -826,10 +824,10 @@ function App() {
 					}
 				}
 
-				const scaleVal = getVal("bloom-scale");
+				const scaleVal = getVal("nook-scale");
 				if (scaleVal !== null) setScale(parseFloat(scaleVal));
 
-				const widgetsVal = getVal("bloom-status-widgets");
+				const widgetsVal = getVal("nook-status-widgets");
 				if (widgetsVal) {
 					try {
 						const parsed = JSON.parse(widgetsVal);
@@ -870,24 +868,24 @@ function App() {
 	// Settings sync — consolidated dispatch for all settings events
 	useSettingsSync(
 		{
-			"bloom-weather-enabled": setSettingsWeatherEnabled,
-			"bloom-calendar-enabled": setSettingsCalendarEnabled,
-			"bloom-timer-sound-enabled": setSettingsTimerSoundEnabled,
-			"bloom-music-mode-enabled": setSettingsMusicModeEnabled,
-			"bloom-music-compact-notch": setSettingsMusicCompactNotch,
-			"bloom-media-visualizer-enabled": setSettingsVisualizerEnabled,
-			"bloom-visualizer-enabled": setSettingsVisualizerEnabled,
-			"bloom-media-album-art-enabled": setSettingsAlbumArtEnabled,
-			"bloom-media-ambience-enabled": setSettingsAmbienceEnabled,
-			"bloom-media-compact-glow-enabled": setSettingsCompactGlowEnabled,
-			"bloom-media-layout": setMediaLayout,
-			"bloom-corners-enabled": setSettingsCornersEnabled,
-			"bloom-scale": setScale,
-			"bloom-low-battery-threshold": setLowBatteryThreshold,
-			"bloom-dock-enabled": setDockEnabled,
-			"bloom-dock-mode": setDockMode,
-			"bloom-notch-mode": setNotchMode,
-			"bloom-status-widgets": (value) => {
+			"nook-weather-enabled": setSettingsWeatherEnabled,
+			"nook-calendar-enabled": setSettingsCalendarEnabled,
+			"nook-timer-sound-enabled": setSettingsTimerSoundEnabled,
+			"nook-music-mode-enabled": setSettingsMusicModeEnabled,
+			"nook-music-compact-notch": setSettingsMusicCompactNotch,
+			"nook-media-visualizer-enabled": setSettingsVisualizerEnabled,
+			"nook-visualizer-enabled": setSettingsVisualizerEnabled,
+			"nook-media-album-art-enabled": setSettingsAlbumArtEnabled,
+			"nook-media-ambience-enabled": setSettingsAmbienceEnabled,
+			"nook-media-compact-glow-enabled": setSettingsCompactGlowEnabled,
+			"nook-media-layout": setMediaLayout,
+			"nook-corners-enabled": setSettingsCornersEnabled,
+			"nook-scale": setScale,
+			"nook-low-battery-threshold": setLowBatteryThreshold,
+			"nook-dock-enabled": setDockEnabled,
+			"nook-dock-mode": setDockMode,
+			"nook-notch-mode": setNotchMode,
+			"nook-status-widgets": (value) => {
 				try {
 					const parsed = JSON.parse(value);
 					if (parsed && Array.isArray(parsed.left) && Array.isArray(parsed.right)) {
@@ -895,8 +893,8 @@ function App() {
 					}
 				} catch {}
 			},
-			"bloom-show-update-indicator": (value) => setShowUpdateIndicator(String(value) === "true"),
-			"bloom-time-format-24h": setTimeFormat24h
+			"nook-show-update-indicator": (value) => setShowUpdateIndicator(String(value) === "true"),
+			"nook-time-format-24h": setTimeFormat24h
 		},
 		[windowLabel]
 	);
@@ -909,7 +907,7 @@ function App() {
 			return;
 		}
 		if (dockEnabled) {
-			invoke("init_dock", { mode: localStorage.getItem("bloom-dock-mode") || "fixed" });
+			invoke("init_dock", { mode: localStorage.getItem("nook-dock-mode") || "fixed" });
 		} else {
 			invoke("toggle_dock", { enable: false });
 		}
@@ -937,8 +935,8 @@ function App() {
 		invoke("change_notch_mode", { mode: notchMode });
 	}, [notchMode, windowLabel]);
 
-	// Bloom mode state: 'music', 'calendar', 'command-center', or 'status'
-	const [bloomMode, setBloomMode] = useState<"music" | "calendar" | "command-center" | "status">(
+	// Nook mode state: 'music', 'calendar', 'command-center', or 'status'
+	const [nookMode, setnookMode] = useState<"music" | "calendar" | "command-center" | "status">(
 		"status"
 	);
 
@@ -946,7 +944,7 @@ function App() {
 
 	const lastScrollTime = useRef(0);
 
-	type BloomModeType = "music" | "calendar" | "command-center" | "status";
+	type nookModeType = "music" | "calendar" | "command-center" | "status";
 
 	// The mode to fall back to after calendar/command-center: music if media is
 	// present and playing (music takes priority), otherwise the plain status view.
@@ -958,7 +956,7 @@ function App() {
 		// Playing: command-center → music → status → calendar (active, near command-center)
 		// Paused:  command-center → status → music → calendar (secondary, after status)
 		const musicBeforeStatus = isPlaying && mediaInfo.has_media && settingsMusicModeEnabled;
-		const modes: BloomModeType[] = musicBeforeStatus
+		const modes: nookModeType[] = musicBeforeStatus
 			? ["command-center", "music", "status", "calendar"]
 			: ["command-center", "status", "music", "calendar"];
 		const availableModes = modes.filter((m) => {
@@ -967,13 +965,13 @@ function App() {
 			return true;
 		});
 
-		const currentIndex = availableModes.indexOf(bloomMode);
+		const currentIndex = availableModes.indexOf(nookMode);
 		if (currentIndex === -1) return;
 
 		const nextIndex = (currentIndex + dir + availableModes.length) % availableModes.length;
 		const nextMode = availableModes[nextIndex];
 		manualMusicRef.current = nextMode === "music";
-		setBloomMode(nextMode);
+		setnookMode(nextMode);
 	};
 
 	const handleWheel = (e: React.WheelEvent) => {
@@ -1003,7 +1001,7 @@ function App() {
 			resetTimer();
 			return;
 		}
-		setBloomMode((prev) => {
+		setnookMode((prev) => {
 			if (prev === "calendar") return "command-center";
 			if (prev === "command-center") return baseMusicMode();
 			if (!settingsCalendarEnabled) return "command-center";
@@ -1018,7 +1016,7 @@ function App() {
 	const [isEditingTimer, setIsEditingTimer] = useState(false);
 	const [timerEditDigits, setTimerEditDigits] = useState("");
 	const [lastDurationSeconds, setLastDurationSeconds] = useState(() => {
-		const stored = parseInt(localStorage.getItem("bloom-timer-last-duration") || "", 10);
+		const stored = parseInt(localStorage.getItem("nook-timer-last-duration") || "", 10);
 		return Number.isFinite(stored) && stored > 0 ? stored : 25 * 60;
 	});
 	const timerInputRef = useRef<HTMLInputElement>(null);
@@ -1039,7 +1037,7 @@ function App() {
 		setIsEditingTimer(false);
 		setTimerSeconds(seconds);
 		setLastDurationSeconds(seconds);
-		localStorage.setItem("bloom-timer-last-duration", String(seconds));
+		localStorage.setItem("nook-timer-last-duration", String(seconds));
 		setIsTimerRunning(true);
 		setIsTimerFinished(false);
 	};
@@ -1086,7 +1084,7 @@ function App() {
 		const base = timerSeconds > 0 ? timerSeconds : lastDurationSeconds;
 		// A tap that changes nothing (e.g. paused timer) must not reset the state.
 		if (!start && total === base) return;
-		localStorage.setItem("bloom-timer-last-duration", String(total));
+		localStorage.setItem("nook-timer-last-duration", String(total));
 		setLastDurationSeconds(total);
 		setTimerSeconds(start ? total : 0);
 		setIsTimerRunning(start);
@@ -1190,13 +1188,13 @@ function App() {
 			settingsMusicModeEnabled &&
 			mediaInfo.has_media &&
 			isPlaying &&
-			bloomMode !== "calendar" &&
+			nookMode !== "calendar" &&
 			(isNewTrackWhilePlaying || justStartedPlaying)
 		) {
 			// Switch if compact notch display is enabled OR we are hovered
 			if (settingsMusicCompactNotch || isHovered) {
 				manualMusicRef.current = false;
-				setBloomMode("music");
+				setnookMode("music");
 			}
 		}
 
@@ -1209,7 +1207,7 @@ function App() {
 		settingsMusicModeEnabled,
 		settingsMusicCompactNotch,
 		isHovered,
-		bloomMode,
+		nookMode,
 		notchMode,
 		triggerEventPeek
 	]);
@@ -1218,53 +1216,53 @@ function App() {
 	// Skip if user manually scrolled to music mode
 	useEffect(() => {
 		let timer: any;
-		if (!isPlaying && bloomMode === "music" && !manualMusicRef.current) {
+		if (!isPlaying && nookMode === "music" && !manualMusicRef.current) {
 			timer = setTimeout(() => {
-				setBloomMode("status");
+				setnookMode("status");
 			}, 5000);
 		}
 		return () => clearTimeout(timer);
-	}, [isPlaying, bloomMode]);
+	}, [isPlaying, nookMode]);
 
-	// Reset bloom mode when calendar setting is disabled
+	// Reset Nook mode when calendar setting is disabled
 	useEffect(() => {
-		if (!settingsCalendarEnabled && bloomMode === "calendar") {
-			setBloomMode("status");
+		if (!settingsCalendarEnabled && nookMode === "calendar") {
+			setnookMode("status");
 		}
-	}, [settingsCalendarEnabled, bloomMode]);
+	}, [settingsCalendarEnabled, nookMode]);
 
-	// Reset bloom mode when music mode setting is disabled
+	// Reset Nook mode when music mode setting is disabled
 	useEffect(() => {
-		if (!settingsMusicModeEnabled && bloomMode === "music") {
-			setBloomMode("status");
+		if (!settingsMusicModeEnabled && nookMode === "music") {
+			setnookMode("status");
 		}
-	}, [settingsMusicModeEnabled, bloomMode]);
+	}, [settingsMusicModeEnabled, nookMode]);
 
-	// Reset bloom mode when compact notch display is disabled while collapsed
+	// Reset Nook mode when compact notch display is disabled while collapsed
 	useEffect(() => {
-		if (!settingsMusicCompactNotch && bloomMode === "music" && !isHovered) {
-			setBloomMode("status");
+		if (!settingsMusicCompactNotch && nookMode === "music" && !isHovered) {
+			setnookMode("status");
 		}
-	}, [settingsMusicCompactNotch, bloomMode, isHovered]);
+	}, [settingsMusicCompactNotch, nookMode, isHovered]);
 
-	// Synchronize bloom mode immediately when music settings are toggled and music is playing
+	// Synchronize Nook mode immediately when music settings are toggled and music is playing
 	useEffect(() => {
 		if (
 			settingsMusicModeEnabled &&
 			settingsMusicCompactNotch &&
 			mediaInfo.has_media &&
 			isPlaying &&
-			bloomMode === "status" &&
+			nookMode === "status" &&
 			!isHovered
 		) {
-			setBloomMode("music");
+			setnookMode("music");
 		}
 	}, [
 		settingsMusicModeEnabled,
 		settingsMusicCompactNotch,
 		mediaInfo.has_media,
 		isPlaying,
-		bloomMode,
+		nookMode,
 		isHovered
 	]);
 
@@ -1587,8 +1585,8 @@ function App() {
 			e.stopPropagation();
 			const nextMode = dockMode === "fixed" ? "smart" : dockMode === "smart" ? "peek" : "fixed";
 			setDockMode(nextMode);
-			localStorage.setItem("bloom-dock-mode", nextMode);
-			invoke("save_setting", { key: "bloom-dock-mode", value: nextMode }).catch(console.error);
+			localStorage.setItem("nook-dock-mode", nextMode);
+			invoke("save_setting", { key: "nook-dock-mode", value: nextMode }).catch(console.error);
 			try {
 				await invoke("change_dock_mode", { mode: nextMode });
 			} catch (err) {
@@ -1603,8 +1601,8 @@ function App() {
 			e.stopPropagation();
 			const nextMode = notchMode === "fixed" ? "smart" : notchMode === "smart" ? "peek" : "fixed";
 			setNotchMode(nextMode);
-			localStorage.setItem("bloom-notch-mode", nextMode);
-			invoke("save_setting", { key: "bloom-notch-mode", value: nextMode }).catch(console.error);
+			localStorage.setItem("nook-notch-mode", nextMode);
+			invoke("save_setting", { key: "nook-notch-mode", value: nextMode }).catch(console.error);
 			try {
 				await invoke("change_notch_mode", { mode: nextMode });
 			} catch (err) {
@@ -1690,13 +1688,13 @@ function App() {
 	};
 
 	// Music mode shows any time we have media info (playing or paused) and music mode setting is enabled
-	const isMusicMode = mediaInfo.has_media && bloomMode === "music" && settingsMusicModeEnabled;
+	const isMusicMode = mediaInfo.has_media && nookMode === "music" && settingsMusicModeEnabled;
 
 	// Calculate width dynamically based on enabled features
 	const getDynamicWidth = () => {
 		if (isCalendarMode) return 480;
-		if (bloomMode === "command-center" && isHovered) return 350;
-		if (bloomMode === "status" && isHovered) {
+		if (nookMode === "command-center" && isHovered) return 350;
+		if (nookMode === "status" && isHovered) {
 			const totalWidgets = statusWidgets.left.length + statusWidgets.right.length;
 			return Math.min(200 + totalWidgets * 50, 380);
 		}
@@ -1722,9 +1720,9 @@ function App() {
 			return isImpacted ? 28.9 : 44.2;
 		}
 		// Sized to the calendar's week-row count plus the timer's fixed content.
-		if (bloomMode === "calendar") return calendarMonthRows >= 6 ? 305 : 273;
-		if (bloomMode === "command-center") return isHovered ? 230 : 36;
-		if (bloomMode === "status") return 36;
+		if (nookMode === "calendar") return calendarMonthRows >= 6 ? 305 : 273;
+		if (nookMode === "command-center") return isHovered ? 230 : 36;
+		if (nookMode === "status") return 36;
 		if (isMusicMode && isHovered) {
 			const hasProgressBar = (mediaInfo.duration_ms ?? 0) > 0;
 			// +36px for the info row rendered on top of the media panel.
@@ -1737,14 +1735,14 @@ function App() {
 		return 36;
 	};
 
-	const isCalendarMode = bloomMode === "calendar";
+	const isCalendarMode = nookMode === "calendar";
 
 	// Close compact media player expansions when notch is unhovered or mode changes
 	useEffect(() => {
 		if (mediaLayout === "compact") {
 			setCompactVolumeExpanded(false);
 		}
-	}, [isHovered, mediaLayout, bloomMode]);
+	}, [isHovered, mediaLayout, nookMode]);
 
 	return (
 		<div className="screen" style={{ overflow: "hidden" }}>
@@ -1770,8 +1768,8 @@ function App() {
 
 			<div style={{ zoom: scale, width: "100%", display: "flex", justifyContent: "center" }}>
 				<motion.div
-					ref={bloomRef}
-					className={`bloom ${isHovered ? "expanded" : ""} ${isImpacted ? "is-impacted" : ""}`}
+					ref={nookRef}
+					className={`nook ${isHovered ? "expanded" : ""} ${isImpacted ? "is-impacted" : ""}`}
 					onMouseEnter={() => setIsNotchHovered(true)}
 					onMouseLeave={() => setIsNotchHovered(false)}
 					onWheel={handleWheel}
@@ -1812,20 +1810,20 @@ function App() {
 					}}
 					onHoverStart={() => {
 						setIsHovered(true);
-						setBloomMode(mediaInfo.has_media && isPlaying ? "music" : "status");
+						setnookMode(mediaInfo.has_media && isPlaying ? "music" : "status");
 					}}
 					onHoverEnd={() => {
 						setIsHovered(false);
 						const targetMode =
 							mediaInfo.has_media && isPlaying && settingsMusicCompactNotch ? "music" : "status";
-						if (bloomMode === "music") {
-							setBloomMode(targetMode);
+						if (nookMode === "music") {
+							setnookMode(targetMode);
 						} else if (
-							bloomMode === "command-center" ||
-							bloomMode === "calendar" ||
-							bloomMode === "status"
+							nookMode === "command-center" ||
+							nookMode === "calendar" ||
+							nookMode === "status"
 						) {
-							setBloomMode(targetMode);
+							setnookMode(targetMode);
 						}
 					}}
 					style={{ originY: 0 }}
@@ -1872,7 +1870,7 @@ function App() {
 					<AnimatePresence mode="wait">
 						{isExpanded && (
 							<motion.div
-								key="bloom-content"
+								key="nook-content"
 								initial={{ opacity: 0 }}
 								animate={{ opacity: 1 }}
 								exit={{ opacity: 0 }}
@@ -1930,7 +1928,7 @@ function App() {
 													onAnimateNext={animateNext}
 													onLayoutChange={(layout) => {
 														setMediaLayout(layout);
-														localStorage.setItem("bloom-media-layout", layout);
+														localStorage.setItem("nook-media-layout", layout);
 														window.dispatchEvent(
 															new CustomEvent("settings-changed", {
 																detail: { key: "media-layout", value: layout }
@@ -1948,7 +1946,7 @@ function App() {
 															onClick={(e) => {
 																e.stopPropagation();
 																setMediaLayout("compact");
-																localStorage.setItem("bloom-media-layout", "compact");
+																localStorage.setItem("nook-media-layout", "compact");
 																window.dispatchEvent(
 																	new CustomEvent("settings-changed", {
 																		detail: { key: "media-layout", value: "compact" }
@@ -2353,7 +2351,7 @@ function App() {
 
 								{/* Command Center / Quick Settings Panel */}
 								<AnimatePresence>
-									{bloomMode === "command-center" && (
+									{nookMode === "command-center" && (
 										<motion.div
 											className="command-center-content-minimal"
 											onClick={(e) => e.stopPropagation()}
@@ -2380,7 +2378,7 @@ function App() {
 												onOpenSystemTray={openSystemTray}
 												onOpenNotificationCenter={() => invoke("open_notification_center")}
 												onOpenSettings={openSettingsWindow}
-												onRestart={() => invoke("restart_bloom")}
+												onRestart={() => invoke("restart_nook")}
 												volume={volume}
 												onVolumeChange={handleVolumeChange}
 												brightness={currentBrightness}

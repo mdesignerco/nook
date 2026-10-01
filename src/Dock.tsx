@@ -65,18 +65,18 @@ const Dock = memo(function Dock() {
 	const iconsRef = useRef<Record<string, string>>({});
 	const [, setIconsTick] = useState(0);
 	const [dockMode, setDockMode] = useState(() => {
-		const raw = localStorage.getItem("bloom-dock-mode") || "fixed";
+		const raw = localStorage.getItem("nook-dock-mode") || "fixed";
 		if (raw === "auto-hide") return "smart";
 		return raw;
 	});
 	const [dockPreviewEnabled, setDockPreviewEnabled] = useState(
-		() => localStorage.getItem("bloom-dock-preview-enabled") !== "false"
+		() => localStorage.getItem("nook-dock-preview-enabled") !== "false"
 	);
 	const [dockIconOnly, setDockIconOnly] = useState(
-		() => localStorage.getItem("bloom-dock-icon-only") === "true"
+		() => localStorage.getItem("nook-dock-icon-only") === "true"
 	);
 	const [dockAdaptive, setDockAdaptive] = useState(
-		() => localStorage.getItem("bloom-dock-adaptive") === "true"
+		() => localStorage.getItem("nook-dock-adaptive") === "true"
 	);
 	const [isMaximized, setIsMaximized] = useState(false);
 	const [previewData, setPreviewData] = useState<{
@@ -109,9 +109,7 @@ const Dock = memo(function Dock() {
 	const dockRef = useRef<HTMLDivElement>(null);
 	const pinnedItemsRef = useRef<AppInfo[]>([]);
 	const handleAppClickRef = useRef<(app: AppInfo) => void>(() => {});
-	const [scale, setScale] = useState(() =>
-		parseFloat(localStorage.getItem("bloom-scale") || "1.0")
-	);
+	const [scale, setScale] = useState(() => parseFloat(localStorage.getItem("nook-scale") || "1.0"));
 	const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
 
 	useEffect(() => {
@@ -233,22 +231,22 @@ const Dock = memo(function Dock() {
 				return fallback;
 			};
 
-			const dMode = getVal("bloom-dock-mode", "fixed");
+			const dMode = getVal("nook-dock-mode", "fixed");
 			if (dMode) {
 				const mapped = dMode === "auto-hide" ? "smart" : dMode;
 				setDockMode(mapped);
 			}
 
-			const preview = getVal("bloom-dock-preview-enabled", "true");
+			const preview = getVal("nook-dock-preview-enabled", "true");
 			setDockPreviewEnabled(preview === "true");
 
-			const iconOnly = getVal("bloom-dock-icon-only", "false");
+			const iconOnly = getVal("nook-dock-icon-only", "false");
 			setDockIconOnly(iconOnly === "true");
 
-			const adaptive = getVal("bloom-dock-adaptive", "false");
+			const adaptive = getVal("nook-dock-adaptive", "false");
 			setDockAdaptive(adaptive === "true");
 
-			const scaleVal = getVal("bloom-scale");
+			const scaleVal = getVal("nook-scale");
 			if (scaleVal !== null) setScale(parseFloat(scaleVal));
 
 			const pinned = await invoke<AppInfo[]>("load_pinned_apps");
@@ -288,11 +286,11 @@ const Dock = memo(function Dock() {
 	}, []);
 
 	useSettingsSync({
-		"bloom-dock-mode": setDockMode,
-		"bloom-dock-preview-enabled": setDockPreviewEnabled,
-		"bloom-dock-icon-only": setDockIconOnly,
-		"bloom-dock-adaptive": setDockAdaptive,
-		"bloom-scale": setScale
+		"nook-dock-mode": setDockMode,
+		"nook-dock-preview-enabled": setDockPreviewEnabled,
+		"nook-dock-icon-only": setDockIconOnly,
+		"nook-dock-adaptive": setDockAdaptive,
+		"nook-scale": setScale
 	});
 
 	useEffect(() => {
@@ -857,12 +855,7 @@ const Dock = memo(function Dock() {
 												handleAppClick(startItem);
 											}}
 										>
-											<img
-												src="/bloom.png"
-												alt="Bloom"
-												className="bloom-icon-img"
-												draggable={false}
-											/>
+											<img src="/nook.png" alt="Nook" className="nook-icon-img" draggable={false} />
 										</motion.div>
 									</motion.div>
 								)}
@@ -1252,10 +1245,10 @@ const Dock = memo(function Dock() {
 							</div>
 							<div
 								className="menu-item has-submenu"
-								onMouseEnter={() => setActiveSubmenu("bloom")}
+								onMouseEnter={() => setActiveSubmenu("Nook")}
 								onMouseLeave={() => setActiveSubmenu(null)}
 							>
-								Bloom Options
+								Nook Options
 								<span className="submenu-arrow">▶</span>
 								<div className="submenu">
 									<div
@@ -1267,8 +1260,8 @@ const Dock = memo(function Dock() {
 									>
 										Open Settings
 									</div>
-									<div className="menu-item" onClick={() => invoke("restart_bloom")}>
-										Restart Bloom
+									<div className="menu-item" onClick={() => invoke("restart_nook")}>
+										Restart Nook
 									</div>
 									<div
 										className="menu-item"
@@ -1280,8 +1273,8 @@ const Dock = memo(function Dock() {
 										Clear Icon Cache
 									</div>
 									<div className="menu-divider" />
-									<div className="menu-item quit" onClick={() => invoke("quit_bloom")}>
-										Quit Bloom
+									<div className="menu-item quit" onClick={() => invoke("quit_nook")}>
+										Quit Nook
 									</div>
 								</div>
 							</div>
@@ -1315,10 +1308,10 @@ const Dock = memo(function Dock() {
 							</div>
 							<div
 								className="menu-item has-submenu"
-								onMouseEnter={() => setActiveSubmenu("bloom")}
+								onMouseEnter={() => setActiveSubmenu("Nook")}
 								onMouseLeave={() => setActiveSubmenu(null)}
 							>
-								Bloom Options
+								Nook Options
 								<span className="submenu-arrow">▶</span>
 								<div className="submenu">
 									<div
@@ -1330,8 +1323,8 @@ const Dock = memo(function Dock() {
 									>
 										Open Settings
 									</div>
-									<div className="menu-item" onClick={() => invoke("restart_bloom")}>
-										Restart Bloom
+									<div className="menu-item" onClick={() => invoke("restart_nook")}>
+										Restart Nook
 									</div>
 									<div
 										className="menu-item"
@@ -1343,8 +1336,8 @@ const Dock = memo(function Dock() {
 										Clear Icon Cache
 									</div>
 									<div className="menu-divider" />
-									<div className="menu-item quit" onClick={() => invoke("quit_bloom")}>
-										Quit Bloom
+									<div className="menu-item quit" onClick={() => invoke("quit_nook")}>
+										Quit Nook
 									</div>
 								</div>
 							</div>

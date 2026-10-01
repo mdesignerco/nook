@@ -15,6 +15,7 @@ import {
 import type { SettingsTab } from "./settings/index";
 import { initTheme } from "./theme";
 import "./Settings.css";
+import "./settings/migrateLegacyKeys";
 
 const appWindow = getCurrentWebviewWindow();
 
@@ -103,8 +104,8 @@ function SettingsApp() {
 							toggleUpdateIndicator={settings.toggleUpdateIndicator}
 							lowBatteryThreshold={settings.lowBatteryThreshold}
 							handleThresholdChange={settings.handleThresholdChange}
-							restartBloom={settings.restartBloom}
-							quitBloom={settings.quitBloom}
+							restartNook={settings.restartNook}
+							quitNook={settings.quitNook}
 						/>
 					)}
 					{activeTab === "appearance" && (

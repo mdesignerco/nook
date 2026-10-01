@@ -66,7 +66,7 @@ body,
 }
 
 .update-splash-text {
-	color: var(--bloom-text, rgba(255, 255, 255, 0.9));
+	color: var(--nook-text, rgba(255, 255, 255, 0.9));
 	font-family:
 		"Inter",
 		-apple-system,
@@ -82,14 +82,14 @@ body,
 .update-progress-bar {
 	width: 200px;
 	height: 4px;
-	background: var(--bloom-border, rgba(255, 255, 255, 0.1));
+	background: var(--nook-border, rgba(255, 255, 255, 0.1));
 	border-radius: 2px;
 	overflow: hidden;
 }
 
 .update-progress-fill {
 	height: 100%;
-	background: var(--bloom-text, rgba(255, 255, 255, 0.9));
+	background: var(--nook-text, rgba(255, 255, 255, 0.9));
 	border-radius: 2px;
 	transition: width 0.3s ease;
 }
@@ -111,9 +111,9 @@ body,
 	align-items: center;
 	justify-content: space-between;
 	padding: 16px 0;
-	background: var(--bloom-bg, rgba(0, 0, 0, 0.8));
+	background: var(--nook-bg, rgba(0, 0, 0, 0.8));
 	border-radius: 0 18px 18px 0;
-	border: 1px solid var(--bloom-border, rgba(255, 255, 255, 0.1));
+	border: 1px solid var(--nook-border, rgba(255, 255, 255, 0.1));
 	border-left: none;
 	width: 42px;
 	height: 196px;
@@ -128,7 +128,7 @@ body,
 	left: 0;
 	width: 13px;
 	height: 13px;
-	background: var(--bloom-bg, rgba(0, 0, 0, 0.8));
+	background: var(--nook-bg, rgba(0, 0, 0, 0.8));
 	pointer-events: none;
 }
 
@@ -140,11 +140,11 @@ body,
 		radial-gradient(
 			circle at 13px 0px,
 			transparent 12px,
-			var(--bloom-border, rgba(255, 255, 255, 0.1)) 12.7px,
-			var(--bloom-border, rgba(255, 255, 255, 0.1)) 13.3px,
+			var(--nook-border, rgba(255, 255, 255, 0.1)) 12.7px,
+			var(--nook-border, rgba(255, 255, 255, 0.1)) 13.3px,
 			transparent 14px
 		),
-		var(--bloom-bg, rgba(0, 0, 0, 0.8));
+		var(--nook-bg, rgba(0, 0, 0, 0.8));
 }
 
 .volume-notch::after {
@@ -155,11 +155,11 @@ body,
 		radial-gradient(
 			circle at 13px 13px,
 			transparent 12px,
-			var(--bloom-border, rgba(255, 255, 255, 0.1)) 12.7px,
-			var(--bloom-border, rgba(255, 255, 255, 0.1)) 13.3px,
+			var(--nook-border, rgba(255, 255, 255, 0.1)) 12.7px,
+			var(--nook-border, rgba(255, 255, 255, 0.1)) 13.3px,
 			transparent 14px
 		),
-		var(--bloom-bg, rgba(0, 0, 0, 0.8));
+		var(--nook-bg, rgba(0, 0, 0, 0.8));
 }
 
 .volume-notch-content-group {
@@ -186,12 +186,12 @@ body,
 	bottom: 0;
 	left: 0;
 	width: 100%;
-	background: var(--bloom-text, white);
+	background: var(--nook-text, white);
 	border-radius: 20px;
 }
 
 .volume-notch-text {
-	color: var(--bloom-text, white);
+	color: var(--nook-text, white);
 	font-size: 10px;
 	font-weight: 700;
 	font-family:
@@ -223,9 +223,9 @@ body,
 	align-items: center;
 	justify-content: space-between;
 	padding: 16px 0;
-	background: var(--bloom-bg, rgba(0, 0, 0, 0.8));
+	background: var(--nook-bg, rgba(0, 0, 0, 0.8));
 	border-radius: 18px 0 0 18px;
-	border: 1px solid var(--bloom-border, rgba(255, 255, 255, 0.1));
+	border: 1px solid var(--nook-border, rgba(255, 255, 255, 0.1));
 	border-right: none;
 	width: 42px;
 	height: 196px;
@@ -240,7 +240,7 @@ body,
 	right: 0;
 	width: 13px;
 	height: 13px;
-	background: var(--bloom-bg, rgba(0, 0, 0, 0.8));
+	background: var(--nook-bg, rgba(0, 0, 0, 0.8));
 	pointer-events: none;
 }
 
@@ -252,11 +252,11 @@ body,
 		radial-gradient(
 			circle at 0px 0px,
 			transparent 12px,
-			var(--bloom-border, rgba(255, 255, 255, 0.1)) 12.7px,
-			var(--bloom-border, rgba(255, 255, 255, 0.1)) 13.3px,
+			var(--nook-border, rgba(255, 255, 255, 0.1)) 12.7px,
+			var(--nook-border, rgba(255, 255, 255, 0.1)) 13.3px,
 			transparent 14px
 		),
-		var(--bloom-bg, rgba(0, 0, 0, 0.8));
+		var(--nook-bg, rgba(0, 0, 0, 0.8));
 }
 
 .brightness-notch::after {
@@ -267,11 +267,11 @@ body,
 		radial-gradient(
 			circle at 0px 13px,
 			transparent 12px,
-			var(--bloom-border, rgba(255, 255, 255, 0.1)) 12.7px,
-			var(--bloom-border, rgba(255, 255, 255, 0.1)) 13.3px,
+			var(--nook-border, rgba(255, 255, 255, 0.1)) 12.7px,
+			var(--nook-border, rgba(255, 255, 255, 0.1)) 13.3px,
 			transparent 14px
 		),
-		var(--bloom-bg, rgba(0, 0, 0, 0.8));
+		var(--nook-bg, rgba(0, 0, 0, 0.8));
 }
 
 .brightness-notch-content-group {
@@ -298,7 +298,7 @@ body,
 	bottom: 0;
 	left: 0;
 	width: 100%;
-	background: var(--bloom-text, white);
+	background: var(--nook-text, white);
 	border-radius: 20px;
 }
 
@@ -308,7 +308,7 @@ body,
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: var(--bloom-text, rgba(255, 255, 255, 0.95));
+	color: var(--nook-text, rgba(255, 255, 255, 0.95));
 	margin-top: 10px;
 }
 

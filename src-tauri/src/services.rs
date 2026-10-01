@@ -59,7 +59,7 @@ fn dock_win_number_enabled() -> bool {
     let Some(app) = KEYBOARD_HOOK_APP_HANDLE.get() else {
         return true;
     };
-    crate::utils::get_setting_str(app, "bloom-dock-win-number-enabled")
+    crate::utils::get_setting_str(app, "nook-dock-win-number-enabled")
         .map(|v| v != "false")
         .unwrap_or(true)
 }
@@ -2799,8 +2799,8 @@ static ANIMATION_EPOCH: AtomicUsize = AtomicUsize::new(0);
 fn place_island(main_win: &tauri::WebviewWindow, monitor: &tauri::Monitor, animate: bool) {
     let scale = monitor.scale_factor();
     let app = main_win.app_handle();
-    let bloom_scale = crate::utils::get_bloom_scale(app);
-    let ph = (NOTCH_HEIGHT_CSS_PX * bloom_scale * scale) as u32;
+    let nook_scale = crate::utils::get_nook_scale(app);
+    let ph = (NOTCH_HEIGHT_CSS_PX * nook_scale * scale) as u32;
     let pos = monitor.position();
     let size = monitor.size();
     let target = (pos.x, pos.y, size.width, ph);
@@ -2940,7 +2940,7 @@ fn register_dock_appbar_inner(window: tauri::WebviewWindow, attempt: i32) {
         let m_pos = monitor.position();
         let hwnd = window.hwnd().unwrap();
         let scale = monitor.scale_factor();
-        let bloom_scale = crate::utils::get_bloom_scale(window.app_handle());
+        let nook_scale = crate::utils::get_nook_scale(window.app_handle());
 
         // ph = full physical window height. outer_size() can return 0 before the
         // window has rendered. Never guess a value — bail and let the retry wrapper handle it.
@@ -2956,7 +2956,7 @@ fn register_dock_appbar_inner(window: tauri::WebviewWindow, attempt: i32) {
             return;
         }
 
-        let pr = ((56.0 * bloom_scale) * scale) as i32;
+        let pr = ((56.0 * nook_scale) * scale) as i32;
 
         unsafe {
             use windows::Win32::Foundation::RECT;
@@ -3289,7 +3289,7 @@ fn reposition_all_windows(app_handle: &AppHandle) {
     // Without this guard, power events (plug/unplug, wake) would re-show
     // a dock that the user had previously disabled.
     let dock_enabled =
-        get_setting_str(app_handle, "bloom-dock-enabled").unwrap_or_else(|| "true".to_string());
+        get_setting_str(app_handle, "nook-dock-enabled").unwrap_or_else(|| "true".to_string());
     if dock_enabled == "true" {
         if let Some(dock_win) = app_handle.get_webview_window("dock") {
             if DOCK_APPBAR_REGISTERED.load(Ordering::Relaxed) {

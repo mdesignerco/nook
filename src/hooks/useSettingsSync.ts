@@ -10,17 +10,17 @@ function convertSettingValue(value: any): any {
 
 /**
  * Centralized settings sync hook. Listens to:
- * - `settings-changed` — emitted by save_setting (bloom keys, native values)
- * - `settings-external-changed` — emitted by file watcher for external edits (bloom keys, string values)
+ * - `settings-changed` — emitted by save_setting (Nook keys, native values)
+ * - `settings-external-changed` — emitted by file watcher for external edits (Nook keys, string values)
  *
- * Both events use the same bloom-prefixed keys (e.g. "bloom-dock-enabled").
+ * Both events use the same nook-prefixed keys (e.g. "nook-dock-enabled").
  * Values may pass through String() conversion in the frontend, producing
  * "true"/"false" strings — the hook auto-converts these to booleans.
  *
  * Uses a ref for handlers so listeners are registered once (not re-registered
  * on every render when a new object literal is passed).
  *
- * @param handlers - Map of bloom-prefixed key → setter
+ * @param handlers - Map of nook-prefixed key → setter
  * @param deps - Optional additional dependency array
  */
 export function useSettingsSync(

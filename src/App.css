@@ -26,16 +26,16 @@ img {
 	/* No pointer-events: none here — the pill itself needs to receive mouse */
 }
 
-.bloom {
+.nook {
 	display: flex;
 	align-items: center;
 	justify-content: flex-start;
 	position: relative;
-	--notch-bg: var(--bloom-bg, rgba(0, 0, 0, 0.8));
+	--notch-bg: var(--nook-bg, rgba(0, 0, 0, 0.8));
 	background: var(--notch-bg);
 	border-radius: 0 0 18px 18px;
 	border: none;
-	color: var(--bloom-text, white);
+	color: var(--nook-text, white);
 	pointer-events: auto;
 	cursor: default;
 	padding: 0px 12px;
@@ -56,8 +56,8 @@ img {
 	transition: background 0.3s ease;
 }
 
-.bloom.expanded {
-	--notch-bg: var(--bloom-bg-expanded, rgba(0, 0, 0, 0.92));
+.nook.expanded {
+	--notch-bg: var(--nook-bg-expanded, rgba(0, 0, 0, 0.92));
 }
 
 .main-row {
@@ -165,8 +165,8 @@ img {
 }
 
 /* Concave top corners ("bridge" to screen edge) */
-.bloom.is-impacted::before,
-.bloom.is-impacted::after {
+.nook.is-impacted::before,
+.nook.is-impacted::after {
 	content: "";
 	position: absolute;
 	top: 0;
@@ -177,7 +177,7 @@ img {
 	transition: background-color 0.3s ease;
 }
 
-.bloom.is-impacted::before {
+.nook.is-impacted::before {
 	left: -13px;
 	-webkit-mask-image: radial-gradient(circle at 0% 100%, transparent 12.5px, black 13px);
 	mask-image: radial-gradient(circle at 0% 100%, transparent 12.5px, black 13px);
@@ -190,7 +190,7 @@ img {
 	);
 }
 
-.bloom.is-impacted::after {
+.nook.is-impacted::after {
 	right: -13px;
 	-webkit-mask-image: radial-gradient(circle at 100% 100%, transparent 12.5px, black 13px);
 	mask-image: radial-gradient(circle at 100% 100%, transparent 12.5px, black 13px);
@@ -242,7 +242,7 @@ img {
 }
 
 .time-flip-container:hover .time {
-	color: var(--bloom-text-muted, rgba(255, 255, 255, 0.8));
+	color: var(--nook-text-muted, rgba(255, 255, 255, 0.8));
 }
 
 .time-flip-container:active {
@@ -254,7 +254,7 @@ img {
 	font-weight: 500;
 	letter-spacing: 0.3px;
 	line-height: 1;
-	color: var(--bloom-text, white);
+	color: var(--nook-text, white);
 	backface-visibility: hidden;
 	position: absolute;
 	transition: color 0.2s ease;
@@ -366,7 +366,7 @@ img {
 	display: flex;
 	align-items: center;
 	gap: 5px;
-	color: var(--bloom-text, rgba(255, 255, 255, 0.9));
+	color: var(--nook-text, rgba(255, 255, 255, 0.9));
 }
 
 .passive-feature .label {
@@ -412,8 +412,8 @@ img {
 .visualizer-horizontal .bar-horizontal {
 	width: 3px;
 	height: 100%;
-	background: var(--bloom-text, white);
-	box-shadow: 0 0 8px var(--bloom-border, rgba(255, 255, 255, 0.3));
+	background: var(--nook-text, white);
+	box-shadow: 0 0 8px var(--nook-border, rgba(255, 255, 255, 0.3));
 	border-radius: 2px;
 	transform-origin: center;
 	will-change: transform;
@@ -676,7 +676,7 @@ img {
 	flex-direction: row;
 	/* Side-by-Side */
 	gap: 16px;
-	color: var(--bloom-text, white);
+	color: var(--nook-text, white);
 	box-sizing: border-box;
 	border-radius: 0 0 28px 28px;
 	overflow: hidden;
@@ -695,7 +695,7 @@ img {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
-	border-left: 1px solid var(--bloom-border, rgba(255, 255, 255, 0.1));
+	border-left: 1px solid var(--nook-border, rgba(255, 255, 255, 0.1));
 	padding-left: 16px;
 }
 
@@ -739,8 +739,8 @@ img {
 }
 
 .calendar-day.today {
-	background: var(--bloom-text, white);
-	color: var(--bloom-bg-expanded, black);
+	background: var(--nook-text, white);
+	color: var(--nook-bg-expanded, black);
 	font-weight: 600;
 }
 
@@ -753,7 +753,7 @@ img {
 	justify-content: center;
 	width: 100%;
 	height: 100%;
-	color: var(--bloom-text, white);
+	color: var(--nook-text, white);
 	transition: color 0.3s ease;
 }
 
@@ -832,7 +832,7 @@ img {
 	font-size: 36px;
 	font-weight: 600;
 	letter-spacing: -0.5px;
-	color: var(--bloom-text, white);
+	color: var(--nook-text, white);
 	backface-visibility: hidden;
 }
 
@@ -931,7 +931,7 @@ img {
 }
 
 .timer-section-new.state-paused {
-	color: var(--bloom-text-muted, rgba(255, 255, 255, 0.55));
+	color: var(--nook-text-muted, rgba(255, 255, 255, 0.55));
 }
 
 .timer-section-new.state-finished {
@@ -967,8 +967,8 @@ img {
 	align-items: center;
 	justify-content: center;
 	gap: 7px;
-	background: var(--bloom-text, white);
-	color: var(--bloom-bg-expanded, black);
+	background: var(--nook-text, white);
+	color: var(--nook-bg-expanded, black);
 	font-family: inherit;
 	font-size: 12px;
 	font-weight: 600;
@@ -997,7 +997,7 @@ img {
 	border: none;
 	border-radius: 7px;
 	background: transparent;
-	color: var(--bloom-text, white);
+	color: var(--nook-text, white);
 	font-size: 10px;
 	font-weight: 600;
 	cursor: pointer;
@@ -1012,11 +1012,11 @@ img {
 }
 
 .timer-preset-segment.active {
-	background: var(--bloom-border, rgba(255, 255, 255, 0.12));
+	background: var(--nook-border, rgba(255, 255, 255, 0.12));
 	opacity: 1;
 }
 
-.bloom.calendar-mode {
+.nook.calendar-mode {
 	padding-top: 4px;
 	border-radius: 0 0 28px 28px !important;
 }
@@ -1127,7 +1127,7 @@ img {
 .premium-title {
 	font-size: 14.5px;
 	font-weight: 600;
-	color: var(--bloom-text, white);
+	color: var(--nook-text, white);
 	white-space: nowrap;
 	letter-spacing: -0.15px;
 	display: inline-block;
@@ -1155,7 +1155,7 @@ img {
 .premium-artist {
 	font-size: 12px;
 	font-weight: 400;
-	color: var(--bloom-text-muted, rgba(255, 255, 255, 0.55));
+	color: var(--nook-text-muted, rgba(255, 255, 255, 0.55));
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -1183,7 +1183,7 @@ img {
 .sleek-btn {
 	background: none;
 	border: none;
-	color: var(--bloom-text, white);
+	color: var(--nook-text, white);
 	cursor: pointer;
 	padding: 8px;
 	display: flex;
@@ -1240,7 +1240,7 @@ img {
 	left: 0;
 	top: 0;
 	height: 100%;
-	background: var(--bloom-text, white);
+	background: var(--nook-text, white);
 	border-radius: 3px;
 	pointer-events: none;
 	transition: width 0.1s ease-out;
@@ -1278,7 +1278,7 @@ img {
 .classic-audio-output-btn {
 	background: none;
 	border: none;
-	color: var(--bloom-text, white);
+	color: var(--nook-text, white);
 	cursor: pointer;
 	padding: 2px;
 	display: flex;
@@ -1406,7 +1406,7 @@ img {
 	flex-direction: column;
 	justify-content: space-between;
 	align-items: center;
-	color: var(--bloom-text, white);
+	color: var(--nook-text, white);
 	border-radius: 0 0 18px 18px;
 	overflow: hidden;
 }
@@ -1426,8 +1426,8 @@ img {
 	gap: 8px;
 	padding: 5px 8px;
 	border-radius: 10px;
-	background: var(--bloom-group-bg, rgba(255, 255, 255, 0.04));
-	border: 1px solid var(--bloom-border, rgba(255, 255, 255, 0.02));
+	background: var(--nook-group-bg, rgba(255, 255, 255, 0.04));
+	border: 1px solid var(--nook-border, rgba(255, 255, 255, 0.02));
 	cursor: pointer;
 	transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 	user-select: none;
@@ -1436,7 +1436,7 @@ img {
 }
 
 .cc-pill-tile:hover {
-	background: var(--bloom-border, rgba(255, 255, 255, 0.08));
+	background: var(--nook-border, rgba(255, 255, 255, 0.08));
 	transform: translateY(-0.5px);
 }
 
@@ -1451,8 +1451,8 @@ img {
 	width: 20px;
 	height: 20px;
 	border-radius: 50%;
-	background: var(--bloom-group-bg, rgba(255, 255, 255, 0.08));
-	color: var(--bloom-text, rgba(255, 255, 255, 0.9));
+	background: var(--nook-group-bg, rgba(255, 255, 255, 0.08));
+	color: var(--nook-text, rgba(255, 255, 255, 0.9));
 	transition: all 0.15s ease;
 }
 
@@ -1470,32 +1470,32 @@ img {
 .cc-pill-title {
 	font-size: 9px;
 	font-weight: 600;
-	color: var(--bloom-text, rgba(255, 255, 255, 0.9));
+	color: var(--nook-text, rgba(255, 255, 255, 0.9));
 }
 
 .cc-pill-status {
 	font-size: 7.5px;
-	color: var(--bloom-text-muted, rgba(255, 255, 255, 0.4));
+	color: var(--nook-text-muted, rgba(255, 255, 255, 0.4));
 	font-weight: 500;
 }
 
 /* Active Monochrome pill states */
 .cc-pill-tile.active {
-	background: var(--bloom-text, rgba(255, 255, 255, 0.95));
-	border-color: var(--bloom-text, rgba(255, 255, 255, 0.95));
+	background: var(--nook-text, rgba(255, 255, 255, 0.95));
+	border-color: var(--nook-text, rgba(255, 255, 255, 0.95));
 }
 
 .cc-pill-tile.active .cc-pill-title {
-	color: var(--bloom-bg-expanded, rgba(0, 0, 0, 0.9));
+	color: var(--nook-bg-expanded, rgba(0, 0, 0, 0.9));
 }
 
 .cc-pill-tile.active .cc-pill-status {
-	color: var(--bloom-bg-expanded, rgba(0, 0, 0, 0.5));
+	color: var(--nook-bg-expanded, rgba(0, 0, 0, 0.5));
 }
 
 .cc-pill-tile.active .cc-pill-icon-wrapper {
-	background: var(--bloom-group-bg, rgba(0, 0, 0, 0.08));
-	color: var(--bloom-bg-expanded, #000);
+	background: var(--nook-group-bg, rgba(0, 0, 0, 0.08));
+	color: var(--nook-bg-expanded, #000);
 }
 
 /* Circular Actions Row */
@@ -1511,9 +1511,9 @@ img {
 	width: 32px;
 	height: 32px;
 	border-radius: 50%;
-	background: var(--bloom-group-bg, rgba(255, 255, 255, 0.04));
-	border: 1px solid var(--bloom-border, rgba(255, 255, 255, 0.02));
-	color: var(--bloom-text-muted, rgba(255, 255, 255, 0.7));
+	background: var(--nook-group-bg, rgba(255, 255, 255, 0.04));
+	border: 1px solid var(--nook-border, rgba(255, 255, 255, 0.02));
+	color: var(--nook-text-muted, rgba(255, 255, 255, 0.7));
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -1522,8 +1522,8 @@ img {
 }
 
 .cc-circular-btn:hover {
-	background: var(--bloom-border, rgba(255, 255, 255, 0.1));
-	color: var(--bloom-text, #fff);
+	background: var(--nook-border, rgba(255, 255, 255, 0.1));
+	color: var(--nook-text, #fff);
 	transform: translateY(-1px);
 }
 
@@ -1532,10 +1532,10 @@ img {
 }
 
 .cc-circular-btn.active {
-	background: var(--bloom-text, #ffffff);
-	border-color: var(--bloom-text, #ffffff);
-	color: var(--bloom-bg-expanded, #000000);
-	box-shadow: 0 2px 8px var(--bloom-border, rgba(255, 255, 255, 0.1));
+	background: var(--nook-text, #ffffff);
+	border-color: var(--nook-text, #ffffff);
+	color: var(--nook-bg-expanded, #000000);
+	box-shadow: 0 2px 8px var(--nook-border, rgba(255, 255, 255, 0.1));
 }
 
 .cc-circular-btn.active:hover {
@@ -1566,7 +1566,7 @@ img {
 	width: 75px;
 	font-size: 9px;
 	font-weight: 600;
-	color: var(--bloom-text-muted, rgba(255, 255, 255, 0.65));
+	color: var(--nook-text-muted, rgba(255, 255, 255, 0.65));
 }
 
 .cc-classic-slider-label svg {
@@ -1579,7 +1579,7 @@ img {
 	flex: 1;
 	height: 6px;
 	border-radius: 3px;
-	background: var(--bloom-group-bg, rgba(255, 255, 255, 0.08));
+	background: var(--nook-group-bg, rgba(255, 255, 255, 0.08));
 	position: relative;
 	display: flex;
 	align-items: center;
@@ -1587,11 +1587,11 @@ img {
 }
 
 .cc-classic-slider-row:hover .cc-classic-slider-track {
-	background: var(--bloom-border, rgba(255, 255, 255, 0.12));
+	background: var(--nook-border, rgba(255, 255, 255, 0.12));
 }
 
 .cc-classic-fill {
-	background: var(--bloom-text, rgba(255, 255, 255, 0.9));
+	background: var(--nook-text, rgba(255, 255, 255, 0.9));
 	border-radius: 3px;
 	height: 100%;
 	position: absolute;
@@ -1604,8 +1604,8 @@ img {
 }
 
 .cc-classic-slider-row:hover .cc-classic-fill {
-	background: var(--bloom-text, #ffffff);
-	box-shadow: 0 0 4px var(--bloom-border, rgba(255, 255, 255, 0.15));
+	background: var(--nook-text, #ffffff);
+	box-shadow: 0 0 4px var(--nook-border, rgba(255, 255, 255, 0.15));
 }
 
 .cc-classic-percentage {
@@ -1613,12 +1613,12 @@ img {
 	text-align: right;
 	font-size: 9px;
 	font-weight: 600;
-	color: var(--bloom-text-muted, rgba(255, 255, 255, 0.55));
+	color: var(--nook-text-muted, rgba(255, 255, 255, 0.55));
 	font-variant-numeric: tabular-nums;
 }
 
 .cc-classic-slider-row:hover .cc-classic-percentage {
-	color: var(--bloom-text, rgba(255, 255, 255, 0.85));
+	color: var(--nook-text, rgba(255, 255, 255, 0.85));
 }
 
 .cc-classic-input {
@@ -1635,22 +1635,22 @@ img {
 
 /* Light Mode overrides for Notch App components */
 .light-mode .power-pulse-content .label {
-	color: var(--bloom-text);
+	color: var(--nook-text);
 }
 
 .light-mode .bottom-row {
-	border-top: 1px solid var(--bloom-border);
+	border-top: 1px solid var(--nook-border);
 }
 
 .light-mode .marquee-content {
-	color: var(--bloom-text);
+	color: var(--nook-text);
 }
 
 .light-mode .music-controls svg,
 .light-mode .notch-status-icons svg,
 .light-mode .weather-notch svg {
-	stroke: var(--bloom-text);
-	color: var(--bloom-text);
+	stroke: var(--nook-text);
+	color: var(--nook-text);
 }
 
 .light-mode .volume-slider-bar,
@@ -1665,7 +1665,7 @@ img {
 }
 
 .light-mode .cc-classic-slider-row svg {
-	color: var(--bloom-text);
+	color: var(--nook-text);
 }
 
 /* ===== Immersive Media Player (iPhone Dynamic Island style) ===== */
@@ -1749,7 +1749,7 @@ img {
 .cmp-title {
 	font-size: 15px;
 	font-weight: 600;
-	color: var(--bloom-text, white);
+	color: var(--nook-text, white);
 	white-space: nowrap;
 	letter-spacing: -0.2px;
 	line-height: 1.2;
@@ -1778,7 +1778,7 @@ img {
 .cmp-artist {
 	font-size: 12px;
 	font-weight: 400;
-	color: var(--bloom-text-muted, rgba(255, 255, 255, 0.5));
+	color: var(--nook-text-muted, rgba(255, 255, 255, 0.5));
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -1794,7 +1794,7 @@ img {
 .cmp-btn {
 	background: none;
 	border: none;
-	color: var(--bloom-text, white);
+	color: var(--nook-text, white);
 	cursor: pointer;
 	padding: 5px;
 	display: flex;
@@ -1850,7 +1850,7 @@ img {
 .cmp-time {
 	font-size: 11px;
 	font-weight: 500;
-	color: var(--bloom-text-muted, rgba(255, 255, 255, 0.5));
+	color: var(--nook-text-muted, rgba(255, 255, 255, 0.5));
 	min-width: 30px;
 	text-align: center;
 	font-variant-numeric: tabular-nums;
@@ -1880,7 +1880,7 @@ img {
 	left: 0;
 	top: 0;
 	height: 100%;
-	background: var(--bloom-text, white);
+	background: var(--nook-text, white);
 	border-radius: 2px;
 	pointer-events: none;
 	transition: width 0.1s linear;
@@ -1943,7 +1943,7 @@ img {
 	left: 0;
 	top: 0;
 	height: 100%;
-	background: var(--bloom-text, white);
+	background: var(--nook-text, white);
 	border-radius: 2px;
 	pointer-events: none;
 	transition: width 0.1s ease-out;
@@ -1987,7 +1987,7 @@ img {
 	border-radius: 6px;
 	cursor: pointer;
 	transition: background 0.15s ease;
-	color: var(--bloom-text-muted, rgba(255, 255, 255, 0.6));
+	color: var(--nook-text-muted, rgba(255, 255, 255, 0.6));
 	font-size: 12px;
 }
 
@@ -1996,7 +1996,7 @@ img {
 }
 
 .cmp-output-item.active {
-	color: var(--bloom-text, white);
+	color: var(--nook-text, white);
 }
 
 .cmp-output-name {

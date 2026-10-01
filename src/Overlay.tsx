@@ -8,6 +8,7 @@ import { getVersion } from "@tauri-apps/api/app";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import "./Overlay.css";
 import { initTheme } from "./theme";
+import "./settings/migrateLegacyKeys";
 
 // ─── Volume Notch ───────────────────────────────────────────────────────────
 
@@ -212,25 +213,23 @@ function OverlayApp() {
 	const [volume, setVolume] = useState(0.5);
 	const [isMuted, setIsMuted] = useState(false);
 	const [volumeOverlayEnabled, setVolumeOverlayEnabled] = useState(
-		() => localStorage.getItem("bloom-volume-overlay-enabled") !== "false"
+		() => localStorage.getItem("nook-volume-overlay-enabled") !== "false"
 	);
 	const [volumeEdgeEnabled, setVolumeEdgeEnabled] = useState(
-		() => localStorage.getItem("bloom-volume-edge-enabled") !== "false"
+		() => localStorage.getItem("nook-volume-edge-enabled") !== "false"
 	);
 
 	// Brightness state
 	const [brightness, setBrightness] = useState(50);
 	const [brightnessOverlayEnabled, setBrightnessOverlayEnabled] = useState(
-		() => localStorage.getItem("bloom-brightness-overlay-enabled") !== "false"
+		() => localStorage.getItem("nook-brightness-overlay-enabled") !== "false"
 	);
 	const [brightnessEdgeEnabled, setBrightnessEdgeEnabled] = useState(
-		() => localStorage.getItem("bloom-brightness-edge-enabled") !== "false"
+		() => localStorage.getItem("nook-brightness-edge-enabled") !== "false"
 	);
 
 	// Shared state
-	const [scale, setScale] = useState(() =>
-		parseFloat(localStorage.getItem("bloom-scale") || "1.0")
-	);
+	const [scale, setScale] = useState(() => parseFloat(localStorage.getItem("nook-scale") || "1.0"));
 	const timeoutRef = useRef<any>(null);
 	const hideWindowTimeoutRef = useRef<any>(null);
 	const splashActiveRef = useRef(false);
@@ -246,14 +245,14 @@ function OverlayApp() {
 	useEffect(() => {
 		invoke("load_settings")
 			.then((settings: any) => {
-				if (settings && settings["bloom-scale"] !== undefined) {
-					setScale(parseFloat(settings["bloom-scale"]));
+				if (settings && settings["nook-scale"] !== undefined) {
+					setScale(parseFloat(settings["nook-scale"]));
 				}
-				if (settings && settings["bloom-brightness-overlay-enabled"] !== undefined) {
-					setBrightnessOverlayEnabled(settings["bloom-brightness-overlay-enabled"] === "true");
+				if (settings && settings["nook-brightness-overlay-enabled"] !== undefined) {
+					setBrightnessOverlayEnabled(settings["nook-brightness-overlay-enabled"] === "true");
 				}
-				if (settings && settings["bloom-volume-overlay-enabled"] !== undefined) {
-					setVolumeOverlayEnabled(settings["bloom-volume-overlay-enabled"] === "true");
+				if (settings && settings["nook-volume-overlay-enabled"] !== undefined) {
+					setVolumeOverlayEnabled(settings["nook-volume-overlay-enabled"] === "true");
 				}
 			})
 			.catch(console.error);
@@ -261,14 +260,14 @@ function OverlayApp() {
 
 	// ── Splash Detection ──
 	useEffect(() => {
-		const firstRun = localStorage.getItem("bloom-first-run") === null;
-		const storedVersion = localStorage.getItem("bloom-app-version");
+		const firstRun = localStorage.getItem("nook-first-run") === null;
+		const storedVersion = localStorage.getItem("nook-app-version");
 
 		const showSplash = (version?: string) => {
 			splashActiveRef.current = true;
 			setMode("splash");
 			invoke("set_splash_fullscreen", { fullscreen: true });
-			if (version) localStorage.setItem("bloom-app-version", version);
+			if (version) localStorage.setItem("nook-app-version", version);
 			setTimeout(() => emit("splash-done"), 2800);
 		};
 
@@ -277,7 +276,7 @@ function OverlayApp() {
 			showSplash();
 			// Still try to store the version in the background
 			getVersion()
-				.then((v) => localStorage.setItem("bloom-app-version", v))
+				.then((v) => localStorage.setItem("nook-app-version", v))
 				.catch(() => {});
 			return;
 		}
@@ -292,13 +291,13 @@ function OverlayApp() {
 				}
 			})
 			.catch(() => {
-				// Version check failed — let bloom start
+				// Version check failed — let Nook start
 				emit("splash-done");
 			});
 	}, []);
 
 	const onSplashComplete = useCallback(() => {
-		localStorage.setItem("bloom-first-run", "done");
+		localStorage.setItem("nook-first-run", "done");
 		setTimeout(() => {
 			splashActiveRef.current = false;
 			setMode("idle");
@@ -388,11 +387,11 @@ function OverlayApp() {
 	]);
 
 	useSettingsSync({
-		"bloom-volume-overlay-enabled": setVolumeOverlayEnabled,
-		"bloom-volume-edge-enabled": setVolumeEdgeEnabled,
-		"bloom-brightness-overlay-enabled": setBrightnessOverlayEnabled,
-		"bloom-brightness-edge-enabled": setBrightnessEdgeEnabled,
-		"bloom-scale": setScale
+		"nook-volume-overlay-enabled": setVolumeOverlayEnabled,
+		"nook-volume-edge-enabled": setVolumeEdgeEnabled,
+		"nook-brightness-overlay-enabled": setBrightnessOverlayEnabled,
+		"nook-brightness-edge-enabled": setBrightnessEdgeEnabled,
+		"nook-scale": setScale
 	});
 
 	// Side effects: reset overlay mode to idle when overlay is disabled
@@ -488,7 +487,7 @@ function OverlayApp() {
 						transition={{ duration: 0.3 }}
 					>
 						<motion.img
-							src="/bloom.png"
+							src="/nook.png"
 							className="splash-logo"
 							draggable={false}
 							initial={{ scale: 0, opacity: 0, rotate: 0 }}
@@ -518,7 +517,7 @@ function OverlayApp() {
 						exit={{ opacity: 0 }}
 						transition={{ duration: 0.3 }}
 					>
-						<img src="/bloom.png" className="update-splash-logo" alt="Bloom" />
+						<img src="/nook.png" className="update-splash-logo" alt="Nook" />
 						<p className="update-splash-text">
 							{updateStatus === "checking" && "Checking for updates..."}
 							{updateStatus === "downloading" && `Downloading update... ${updateProgress}%`}

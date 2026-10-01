@@ -130,8 +130,8 @@ fn main() {
             set_menu_open,
             focus_window,
             close_window,
-            quit_bloom,
-            restart_bloom,
+            quit_nook,
+            restart_nook,
             get_volume,
             get_brightness,
             set_volume,
@@ -182,7 +182,7 @@ fn main() {
 
             let window = app.get_webview_window("main").unwrap();
 
-            // Island-only build: the Bloom Dock window no longer exists. Only the
+            // Island-only build: the Nook Dock window no longer exists. Only the
             // main (notch/island) window rect is tracked.
             let win_clone = window.clone();
             let update_main_rect = move || {
@@ -261,12 +261,12 @@ fn main() {
             {
                 let app_h = app.handle().clone();
                 OVERLAY_ALWAYS_ON.store(
-                    crate::utils::get_setting_str(&app_h, "bloom-overlay-always")
+                    crate::utils::get_setting_str(&app_h, "nook-overlay-always")
                         .is_some_and(|v| v == "true"),
                     Ordering::Relaxed,
                 );
                 FOLLOW_ACTIVE_MONITOR.store(
-                    crate::utils::get_setting_str(&app_h, "bloom-follow-active-monitor")
+                    crate::utils::get_setting_str(&app_h, "nook-follow-active-monitor")
                         .is_none_or(|v| v != "false"),
                     Ordering::Relaxed,
                 );

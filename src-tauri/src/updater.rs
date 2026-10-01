@@ -21,7 +21,7 @@ const STATE_FILE: &str = "update-state.json";
 /// that release is actually offered (approved) or hidden/blocked. Served raw
 /// from the island-only branch so it can be edited without publishing anything.
 const CHANNEL_URL: &str =
-    "https://raw.githubusercontent.com/mdesignerco/bloom/island-only/update-channel.json";
+    "https://raw.githubusercontent.com/mdesignerco/nook/island-only/update-channel.json";
 /// A channel manifest older/larger than this is rejected outright.
 const CHANNEL_TIMEOUT_SECS: u64 = 5;
 
@@ -262,7 +262,7 @@ async fn install_inner(app: &AppHandle) -> Result<(), String> {
     // unapproved build even if the frontend calls install_update directly.
     let manifest = fetch_channel_manifest().await;
     if !channel_allows(&update.version, &manifest) {
-        return Err("the update is not approved in the bloom channel".to_string());
+        return Err("the update is not approved in the nook channel".to_string());
     }
 
     let _ = app.emit(
@@ -311,7 +311,7 @@ async fn install_inner(app: &AppHandle) -> Result<(), String> {
 /// auto-installs only when the user enabled it and the release has aged.
 pub async fn run_startup_check(app: AppHandle) {
     let auto_update =
-        crate::utils::get_setting_str(&app, "bloom-auto-update").as_deref() == Some("true");
+        crate::utils::get_setting_str(&app, "nook-auto-update").as_deref() == Some("true");
 
     if auto_update {
         let _ = app.emit(

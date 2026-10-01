@@ -116,17 +116,17 @@ export async function applyTheme(
 	const root = document.documentElement;
 
 	if (opacity === undefined || opacity === null) {
-		const cachedOpacity = localStorage.getItem("bloom-theme-opacity");
+		const cachedOpacity = localStorage.getItem("nook-theme-opacity");
 		opacity = cachedOpacity !== null ? parseFloat(cachedOpacity) : 0.8;
 	}
 
 	if (saturation === undefined || saturation === null) {
-		const cachedSaturation = localStorage.getItem("bloom-theme-saturation");
+		const cachedSaturation = localStorage.getItem("nook-theme-saturation");
 		saturation = cachedSaturation !== null ? parseFloat(cachedSaturation) : 0.5;
 	}
 
 	if (brightness === undefined || brightness === null) {
-		const cachedBrightness = localStorage.getItem("bloom-theme-brightness");
+		const cachedBrightness = localStorage.getItem("nook-theme-brightness");
 		brightness = cachedBrightness !== null ? parseFloat(cachedBrightness) : 0.15;
 	}
 
@@ -134,14 +134,14 @@ export async function applyTheme(
 	const opExpanded = Math.min(1.0, opacity + 0.12);
 
 	if (mode === "light") {
-		root.style.setProperty("--bloom-bg", `rgba(255, 255, 255, ${op})`);
-		root.style.setProperty("--bloom-bg-expanded", `rgba(245, 245, 247, ${opExpanded})`);
-		root.style.setProperty("--bloom-text", "#1c1c1e");
-		root.style.setProperty("--bloom-text-muted", "rgba(28, 28, 30, 0.65)");
-		root.style.setProperty("--bloom-border", "rgba(0, 0, 0, 0.12)");
-		root.style.setProperty("--bloom-group-bg", "rgba(0, 0, 0, 0.04)");
-		root.style.setProperty("--bloom-accent", "#007aff");
-		root.style.setProperty("--bloom-scrollbar-thumb", "rgba(0, 0, 0, 0.15)");
+		root.style.setProperty("--nook-bg", `rgba(255, 255, 255, ${op})`);
+		root.style.setProperty("--nook-bg-expanded", `rgba(245, 245, 247, ${opExpanded})`);
+		root.style.setProperty("--nook-text", "#1c1c1e");
+		root.style.setProperty("--nook-text-muted", "rgba(28, 28, 30, 0.65)");
+		root.style.setProperty("--nook-border", "rgba(0, 0, 0, 0.12)");
+		root.style.setProperty("--nook-group-bg", "rgba(0, 0, 0, 0.04)");
+		root.style.setProperty("--nook-accent", "#007aff");
+		root.style.setProperty("--nook-scrollbar-thumb", "rgba(0, 0, 0, 0.15)");
 		root.classList.add("light-mode");
 		root.classList.remove("dark-mode");
 		root.classList.add("theme-light");
@@ -153,24 +153,24 @@ export async function applyTheme(
 		const finalBgColor = hslToHex(hsl.h, hsl.s, hsl.l);
 		const isLight = brightness > 0.55;
 
-		root.style.setProperty("--bloom-bg", hexToRgba(finalBgColor, op));
-		root.style.setProperty("--bloom-bg-expanded", hexToRgba(finalBgColor, opExpanded));
-		root.style.setProperty("--bloom-text", isLight ? "#1c1c1e" : "#ffffff");
+		root.style.setProperty("--nook-bg", hexToRgba(finalBgColor, op));
+		root.style.setProperty("--nook-bg-expanded", hexToRgba(finalBgColor, opExpanded));
+		root.style.setProperty("--nook-text", isLight ? "#1c1c1e" : "#ffffff");
 		root.style.setProperty(
-			"--bloom-text-muted",
+			"--nook-text-muted",
 			isLight ? "rgba(28, 28, 30, 0.65)" : "rgba(255, 255, 255, 0.65)"
 		);
 		root.style.setProperty(
-			"--bloom-border",
+			"--nook-border",
 			isLight ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.12)"
 		);
 		root.style.setProperty(
-			"--bloom-group-bg",
+			"--nook-group-bg",
 			isLight ? "rgba(0, 0, 0, 0.04)" : "rgba(255, 255, 255, 0.04)"
 		);
-		root.style.setProperty("--bloom-accent", customColor);
+		root.style.setProperty("--nook-accent", customColor);
 		root.style.setProperty(
-			"--bloom-scrollbar-thumb",
+			"--nook-scrollbar-thumb",
 			isLight ? "rgba(0, 0, 0, 0.15)" : "rgba(255, 255, 255, 0.15)"
 		);
 		root.classList.add("theme-custom");
@@ -191,24 +191,24 @@ export async function applyTheme(
 			const finalBgColor = hslToHex(hsl.h, hsl.s, hsl.l);
 			const isLight = brightness > 0.55;
 
-			root.style.setProperty("--bloom-bg", hexToRgba(finalBgColor, op));
-			root.style.setProperty("--bloom-bg-expanded", hexToRgba(finalBgColor, opExpanded));
-			root.style.setProperty("--bloom-text", isLight ? "#1c1c1e" : "#ffffff");
+			root.style.setProperty("--nook-bg", hexToRgba(finalBgColor, op));
+			root.style.setProperty("--nook-bg-expanded", hexToRgba(finalBgColor, opExpanded));
+			root.style.setProperty("--nook-text", isLight ? "#1c1c1e" : "#ffffff");
 			root.style.setProperty(
-				"--bloom-text-muted",
+				"--nook-text-muted",
 				isLight ? "rgba(28, 28, 30, 0.65)" : "rgba(255, 255, 255, 0.65)"
 			);
 			root.style.setProperty(
-				"--bloom-border",
+				"--nook-border",
 				isLight ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.12)"
 			);
 			root.style.setProperty(
-				"--bloom-group-bg",
+				"--nook-group-bg",
 				isLight ? "rgba(0, 0, 0, 0.04)" : "rgba(255, 255, 255, 0.04)"
 			);
-			root.style.setProperty("--bloom-accent", accentHex);
+			root.style.setProperty("--nook-accent", accentHex);
 			root.style.setProperty(
-				"--bloom-scrollbar-thumb",
+				"--nook-scrollbar-thumb",
 				isLight ? "rgba(0, 0, 0, 0.15)" : "rgba(255, 255, 255, 0.15)"
 			);
 			root.classList.add("theme-adaptive");
@@ -226,14 +226,14 @@ export async function applyTheme(
 		}
 	} else {
 		// default/dark
-		root.style.setProperty("--bloom-bg", `rgba(0, 0, 0, ${op})`);
-		root.style.setProperty("--bloom-bg-expanded", `rgba(0, 0, 0, ${opExpanded})`);
-		root.style.setProperty("--bloom-text", "#ffffff");
-		root.style.setProperty("--bloom-text-muted", "rgba(255, 255, 255, 0.6)");
-		root.style.setProperty("--bloom-border", "rgba(255, 255, 255, 0.1)");
-		root.style.setProperty("--bloom-group-bg", "rgba(255, 255, 255, 0.04)");
-		root.style.setProperty("--bloom-accent", "#007aff");
-		root.style.setProperty("--bloom-scrollbar-thumb", "rgba(255, 255, 255, 0.1)");
+		root.style.setProperty("--nook-bg", `rgba(0, 0, 0, ${op})`);
+		root.style.setProperty("--nook-bg-expanded", `rgba(0, 0, 0, ${opExpanded})`);
+		root.style.setProperty("--nook-text", "#ffffff");
+		root.style.setProperty("--nook-text-muted", "rgba(255, 255, 255, 0.6)");
+		root.style.setProperty("--nook-border", "rgba(255, 255, 255, 0.1)");
+		root.style.setProperty("--nook-group-bg", "rgba(255, 255, 255, 0.04)");
+		root.style.setProperty("--nook-accent", "#007aff");
+		root.style.setProperty("--nook-scrollbar-thumb", "rgba(255, 255, 255, 0.1)");
 		root.classList.add("dark-mode");
 		root.classList.remove("light-mode");
 		root.classList.add("theme-dark");
@@ -242,13 +242,13 @@ export async function applyTheme(
 }
 
 export function initTheme() {
-	const syncMode = localStorage.getItem("bloom-theme-mode") || "dark";
-	const syncColor = localStorage.getItem("bloom-theme-color") || "#007aff";
-	const syncOpacityVal = localStorage.getItem("bloom-theme-opacity");
+	const syncMode = localStorage.getItem("nook-theme-mode") || "dark";
+	const syncColor = localStorage.getItem("nook-theme-color") || "#007aff";
+	const syncOpacityVal = localStorage.getItem("nook-theme-opacity");
 	const syncOpacity = syncOpacityVal !== null ? parseFloat(syncOpacityVal) : 0.8;
-	const syncSaturationVal = localStorage.getItem("bloom-theme-saturation");
+	const syncSaturationVal = localStorage.getItem("nook-theme-saturation");
 	const syncSaturation = syncSaturationVal !== null ? parseFloat(syncSaturationVal) : 0.5;
-	const syncBrightnessVal = localStorage.getItem("bloom-theme-brightness");
+	const syncBrightnessVal = localStorage.getItem("nook-theme-brightness");
 	const syncBrightness = syncBrightnessVal !== null ? parseFloat(syncBrightnessVal) : 0.15;
 
 	// Fast synchronous draw using cached localStorage
@@ -257,18 +257,16 @@ export function initTheme() {
 	// Sync settings.json in background to avoid flickers
 	invoke<Record<string, any>>("load_settings")
 		.then((settings) => {
-			const mode = settings["bloom-theme-mode"] ? String(settings["bloom-theme-mode"]) : syncMode;
-			const color = settings["bloom-theme-color"]
-				? String(settings["bloom-theme-color"])
-				: syncColor;
-			const opacityVal = settings["bloom-theme-opacity"]
-				? parseFloat(String(settings["bloom-theme-opacity"]))
+			const mode = settings["nook-theme-mode"] ? String(settings["nook-theme-mode"]) : syncMode;
+			const color = settings["nook-theme-color"] ? String(settings["nook-theme-color"]) : syncColor;
+			const opacityVal = settings["nook-theme-opacity"]
+				? parseFloat(String(settings["nook-theme-opacity"]))
 				: syncOpacity;
-			const saturationVal = settings["bloom-theme-saturation"]
-				? parseFloat(String(settings["bloom-theme-saturation"]))
+			const saturationVal = settings["nook-theme-saturation"]
+				? parseFloat(String(settings["nook-theme-saturation"]))
 				: syncSaturation;
-			const brightnessVal = settings["bloom-theme-brightness"]
-				? parseFloat(String(settings["bloom-theme-brightness"]))
+			const brightnessVal = settings["nook-theme-brightness"]
+				? parseFloat(String(settings["nook-theme-brightness"]))
 				: syncBrightness;
 
 			if (
@@ -278,11 +276,11 @@ export function initTheme() {
 				saturationVal !== syncSaturation ||
 				brightnessVal !== syncBrightness
 			) {
-				localStorage.setItem("bloom-theme-mode", mode);
-				localStorage.setItem("bloom-theme-color", color);
-				localStorage.setItem("bloom-theme-opacity", String(opacityVal));
-				localStorage.setItem("bloom-theme-saturation", String(saturationVal));
-				localStorage.setItem("bloom-theme-brightness", String(brightnessVal));
+				localStorage.setItem("nook-theme-mode", mode);
+				localStorage.setItem("nook-theme-color", color);
+				localStorage.setItem("nook-theme-opacity", String(opacityVal));
+				localStorage.setItem("nook-theme-saturation", String(saturationVal));
+				localStorage.setItem("nook-theme-brightness", String(brightnessVal));
 				applyTheme(mode, color, opacityVal, saturationVal, brightnessVal);
 			}
 		})
@@ -290,38 +288,38 @@ export function initTheme() {
 
 	// Helper: read all theme values from localStorage and apply
 	const applyThemeFromStorage = () => {
-		const mode = localStorage.getItem("bloom-theme-mode") || "dark";
-		const color = localStorage.getItem("bloom-theme-color") || "#007aff";
-		const opacity = parseFloat(localStorage.getItem("bloom-theme-opacity") || "0.80");
-		const saturation = parseFloat(localStorage.getItem("bloom-theme-saturation") || "0.50");
-		const brightness = parseFloat(localStorage.getItem("bloom-theme-brightness") || "0.15");
+		const mode = localStorage.getItem("nook-theme-mode") || "dark";
+		const color = localStorage.getItem("nook-theme-color") || "#007aff";
+		const opacity = parseFloat(localStorage.getItem("nook-theme-opacity") || "0.80");
+		const saturation = parseFloat(localStorage.getItem("nook-theme-saturation") || "0.50");
+		const brightness = parseFloat(localStorage.getItem("nook-theme-brightness") || "0.15");
 		applyTheme(mode, color, opacity, saturation, brightness);
 	};
 
-	const bloomThemeKeys = [
-		"bloom-theme-mode",
-		"bloom-theme-color",
-		"bloom-theme-opacity",
-		"bloom-theme-saturation",
-		"bloom-theme-brightness"
+	const nookThemeKeys = [
+		"nook-theme-mode",
+		"nook-theme-color",
+		"nook-theme-opacity",
+		"nook-theme-saturation",
+		"nook-theme-brightness"
 	];
 
 	// Listen to setting changes broadcasted from settings window
 	// (localStorage sync is handled by saveAndLocal in Settings.tsx; we just apply the theme)
 	const settingsPromise = listen<{ key: string; value: any }>("settings-changed", (event) => {
 		const { key } = event.payload;
-		if (bloomThemeKeys.includes(key)) {
+		if (nookThemeKeys.includes(key)) {
 			applyThemeFromStorage();
 		}
 	});
 
 	// Listen to system accent color updates in case of adaptive theme
 	const accentPromise = listen<string>("system-accent-changed", (event) => {
-		const currentMode = localStorage.getItem("bloom-theme-mode") || "dark";
+		const currentMode = localStorage.getItem("nook-theme-mode") || "dark";
 		if (currentMode === "adaptive") {
-			const opacity = parseFloat(localStorage.getItem("bloom-theme-opacity") || "0.80");
-			const saturation = parseFloat(localStorage.getItem("bloom-theme-saturation") || "0.50");
-			const brightness = parseFloat(localStorage.getItem("bloom-theme-brightness") || "0.15");
+			const opacity = parseFloat(localStorage.getItem("nook-theme-opacity") || "0.80");
+			const saturation = parseFloat(localStorage.getItem("nook-theme-saturation") || "0.50");
+			const brightness = parseFloat(localStorage.getItem("nook-theme-brightness") || "0.15");
 			applyTheme("adaptive", event.payload, opacity, saturation, brightness);
 		}
 	});
@@ -332,7 +330,7 @@ export function initTheme() {
 		"settings-external-changed",
 		(event) => {
 			const { key } = event.payload;
-			if (bloomThemeKeys.includes(key)) {
+			if (nookThemeKeys.includes(key)) {
 				applyThemeFromStorage();
 			}
 		}

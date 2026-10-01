@@ -35,7 +35,7 @@ export function AboutTab({
 			case "available":
 				return `Update Available (v${updateVersion})`;
 			case "uptodate":
-				return "Bloom is up to date";
+				return "Nook is up to date";
 			case "downloading":
 				return "Downloading Update...";
 			case "installing":
@@ -67,8 +67,8 @@ export function AboutTab({
 	return (
 		<div className="about-tab-container">
 			<div className="about-header">
-				<img src="/bloom.png" className="about-logo" alt="Bloom Logo" />
-				<h1 className="about-title">Bloom</h1>
+				<img src="/nook.png" className="about-logo" alt="Nook Logo" />
+				<h1 className="about-title">Nook</h1>
 				<p className="about-version">Version {appVersion}</p>
 			</div>
 

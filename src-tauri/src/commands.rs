@@ -67,7 +67,7 @@ pub fn set_ignore_cursor_events(window: Window, ignore: bool) {
 
 #[tauri::command]
 pub async fn init_dock(app: AppHandle, mode: String) {
-    // Island-only build: the Bloom Dock (taskbar replacement) is intentionally
+    // Island-only build: the Nook Dock (taskbar replacement) is intentionally
     // disabled. The dock window is never shown and the native Windows taskbar is
     // never hidden, regardless of any saved setting.
     let _ = mode;
@@ -327,7 +327,7 @@ pub async fn open_app(app: AppHandle, app_name: String) {
         return;
     }
 
-    if app_name == "bloom-settings" {
+    if app_name == "nook-settings" {
         open_settings_window(app);
         return;
     }
@@ -602,7 +602,7 @@ pub async fn focus_window(hwnd: isize) {
             let _ = ShowWindow(hwnd, SW_RESTORE);
             let _ = SetForegroundWindow(hwnd);
         } else {
-            // Minimize if: window is foreground, OR same process as foreground (not Bloom), OR recently focused
+            // Minimize if: window is foreground, OR same process as foreground (not Nook), OR recently focused
             let fg = GetForegroundWindow();
             let mut should_minimize = false;
 
@@ -1452,7 +1452,7 @@ pub async fn load_pinned_apps(app: AppHandle) -> Vec<AppInfo> {
         },
         AppInfo {
             name: "Settings".into(),
-            path: "bloom-settings".into(),
+            path: "nook-settings".into(),
             icon: None,
             is_running: false,
             hwnd: None,
@@ -2113,7 +2113,7 @@ pub fn set_volume(volume: f32) {
     }
 }
 
-/// Restore the native taskbar, unregister Bloom's appbars, and exit gracefully.
+/// Restore the native taskbar, unregister Nook's appbars, and exit gracefully.
 /// Shared by the tray menu, the in-app Quit button, and the window CloseRequested
 /// handlers so that any shutdown path (including Task Manager's WM_CLOSE) behaves
 /// identically.
@@ -2139,12 +2139,12 @@ pub fn restore_taskbar_and_exit(handle: &AppHandle) {
 }
 
 #[tauri::command]
-pub async fn quit_bloom(handle: AppHandle) {
+pub async fn quit_nook(handle: AppHandle) {
     restore_taskbar_and_exit(&handle);
 }
 
 #[tauri::command]
-pub async fn restart_bloom(handle: AppHandle) {
+pub async fn restart_nook(handle: AppHandle) {
     if let Some(w) = handle.get_webview_window("main") {
         unregister_appbar_native(w.hwnd().unwrap());
     }
@@ -2179,7 +2179,7 @@ pub async fn close_window(hwnd: isize) {
 fn re_register_appbars(app: &AppHandle, settings: &HashMap<String, serde_json::Value>) {
     if let Some(main_win) = app.get_webview_window("main") {
         let notch_fixed = settings
-            .get("bloom-notch-mode")
+            .get("nook-notch-mode")
             .map(|v| v.as_str() == Some("fixed"))
             .unwrap_or(true);
         if notch_fixed {
@@ -2210,13 +2210,13 @@ pub fn save_setting(app: AppHandle, key: String, value: serde_json::Value) -> Re
 
     crate::utils::replace_settings_cache(settings.clone());
 
-    // Broadcast so all windows sync — emit the key as-is (bloom-prefixed)
+    // Broadcast so all windows sync — emit the key as-is (nook-prefixed)
     let _ = app.emit(
         "settings-changed",
         serde_json::json!({ "key": &key, "value": &settings[&key] }),
     );
 
-    if key == "bloom-scale" {
+    if key == "nook-scale" {
         re_register_appbars(&app, &settings);
     }
     Ok(())
@@ -2759,7 +2759,7 @@ pub fn import_settings(app: AppHandle, settings: String) -> Result<(), String> {
         );
     }
 
-    if imported.contains_key("bloom-scale") {
+    if imported.contains_key("nook-scale") {
         re_register_appbars(&app, &imported);
     }
 

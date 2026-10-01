@@ -1,102 +1,100 @@
 {
-  "$schema": "https://schema.tauri.app/config/2",
+	"$schema": "https://schema.tauri.app/config/2",
 	"productName": "Nook",
 	"version": "4.1.0",
 	"identifier": "com.mdesignerco.nook",
-  "build": {
-    "beforeDevCommand": "bun run dev",
-    "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "bun run build",
-    "frontendDist": "../dist"
-  },
-  "app": {
-    "windows": [
-      {
+	"build": {
+		"beforeDevCommand": "bun run dev",
+		"devUrl": "http://localhost:1420",
+		"beforeBuildCommand": "bun run build",
+		"frontendDist": "../dist"
+	},
+	"app": {
+		"windows": [
+			{
 				"label": "main",
 				"title": "Nook",
-        "width": 1920,
-        "height": 420,
-        "x": 0,
-        "y": 0,
-        "decorations": false,
-        "transparent": true,
-        "resizable": false,
-        "maximizable": false,
-        "minimizable": false,
-        "closable": false,
-        "alwaysOnTop": true,
-        "visibleOnAllWorkspaces": true,
-        "focus": false,
-        "skipTaskbar": true,
-        "shadow": false,
-        "visible": false,
-        "dragDropEnabled": false
-      },
-      {
-        "label": "settings",
-        "title": "Settings",
-        "url": "settings.html",
-        "width": 620,
-        "height": 480,
-        "decorations": false,
-        "transparent": true,
-        "resizable": true,
-        "maximizable": false,
-        "minimizable": false,
-        "closable": false,
-        "alwaysOnTop": false,
-        "visibleOnAllWorkspaces": false,
-        "focus": true,
-        "skipTaskbar": false,
-        "shadow": true,
-        "visible": false,
-        "center": true
-      },
-      {
-        "label": "overlay",
-        "title": "Overlay",
-        "url": "overlay.html",
-        "width": 1920,
-        "height": 1080,
-        "x": 0,
-        "y": 0,
-        "decorations": false,
-        "transparent": true,
-        "resizable": false,
-        "maximizable": false,
-        "minimizable": false,
-        "closable": false,
-        "alwaysOnTop": true,
-        "visibleOnAllWorkspaces": true,
-        "focus": false,
-        "skipTaskbar": true,
-        "shadow": false,
-        "visible": false
-      }
-    ],
-    "security": {
-      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://ipapi.co https://ip-api.com"
-    }
-  },
-  "bundle": {
-    "active": true,
-    "createUpdaterArtifacts": true,
-    "targets": "all",
-    "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
-    ]
-  },
-  "plugins": {
-    "updater": {
-      "active": true,
-      "endpoints": [
-        "https://github.com/mdesignerco/bloom/releases/latest/download/latest.json"
-      ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEIwQ0YyQ0UzNDNCMTIyMEQKUldRTklyRkQ0eXpQc0pLOEErK25XWTZEd0lxQk9zWmNudVB1YmcwRmNVWFlyQUZYUnQ3bkhNZEcK"
-    }
-  }
+				"width": 1920,
+				"height": 420,
+				"x": 0,
+				"y": 0,
+				"decorations": false,
+				"transparent": true,
+				"resizable": false,
+				"maximizable": false,
+				"minimizable": false,
+				"closable": false,
+				"alwaysOnTop": true,
+				"visibleOnAllWorkspaces": true,
+				"focus": false,
+				"skipTaskbar": true,
+				"shadow": false,
+				"visible": false,
+				"dragDropEnabled": false
+			},
+			{
+				"label": "settings",
+				"title": "Settings",
+				"url": "settings.html",
+				"width": 620,
+				"height": 480,
+				"decorations": false,
+				"transparent": true,
+				"resizable": true,
+				"maximizable": false,
+				"minimizable": false,
+				"closable": false,
+				"alwaysOnTop": false,
+				"visibleOnAllWorkspaces": false,
+				"focus": true,
+				"skipTaskbar": false,
+				"shadow": true,
+				"visible": false,
+				"center": true
+			},
+			{
+				"label": "overlay",
+				"title": "Overlay",
+				"url": "overlay.html",
+				"width": 1920,
+				"height": 1080,
+				"x": 0,
+				"y": 0,
+				"decorations": false,
+				"transparent": true,
+				"resizable": false,
+				"maximizable": false,
+				"minimizable": false,
+				"closable": false,
+				"alwaysOnTop": true,
+				"visibleOnAllWorkspaces": true,
+				"focus": false,
+				"skipTaskbar": true,
+				"shadow": false,
+				"visible": false
+			}
+		],
+		"security": {
+			"csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://ipapi.co https://ip-api.com"
+		}
+	},
+	"bundle": {
+		"active": true,
+		"createUpdaterArtifacts": true,
+		"targets": "all",
+		"icon": [
+			"icons/32x32.png",
+			"icons/128x128.png",
+			"icons/128x128@2x.png",
+			"icons/icon.icns",
+			"icons/icon.ico"
+		]
+	},
+	"plugins": {
+		"updater": {
+			"active": true,
+			"endpoints": ["https://github.com/mdesignerco/nook/releases/latest/download/latest.json"],
+			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEIwQ0YyQ0UzNDNCMTIyMEQKUldRTklyRkQ0eXpQc0pLOEErK25XWTZEd0lxQk9zWmNudVB1YmcwRmNVWFlyQUZYUnQ3bkhNZEcK"
+		}
+	}
 }

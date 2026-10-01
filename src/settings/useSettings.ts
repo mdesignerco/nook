@@ -22,33 +22,33 @@ export function useSettings() {
 	const [weatherEnabled, setWeatherEnabled] = useState(true);
 	const [calendarEnabled, setCalendarEnabled] = useState(true);
 	const [timerSoundEnabled, setTimerSoundEnabled] = useState(
-		() => localStorage.getItem("bloom-timer-sound-enabled") !== "false"
+		() => localStorage.getItem("nook-timer-sound-enabled") !== "false"
 	);
 	const [musicModeEnabled, setMusicModeEnabled] = useState(true);
 	const [musicCompactNotch, setMusicCompactNotch] = useState(true);
 	const [volumeOverlayEnabled, setVolumeOverlayEnabled] = useState(true);
 	const [volumeEdgeEnabled, setVolumeEdgeEnabled] = useState(
-		() => localStorage.getItem("bloom-volume-edge-enabled") !== "false"
+		() => localStorage.getItem("nook-volume-edge-enabled") !== "false"
 	);
 	const [brightnessOverlayEnabled, setBrightnessOverlayEnabled] = useState(
-		() => localStorage.getItem("bloom-brightness-overlay-enabled") !== "false"
+		() => localStorage.getItem("nook-brightness-overlay-enabled") !== "false"
 	);
 	const [brightnessEdgeEnabled, setBrightnessEdgeEnabled] = useState(
-		() => localStorage.getItem("bloom-brightness-edge-enabled") !== "false"
+		() => localStorage.getItem("nook-brightness-edge-enabled") !== "false"
 	);
 	const [mediaAmbienceEnabled, setMediaAmbienceEnabled] = useState(true);
 	const [mediaCompactGlowEnabled, setMediaCompactGlowEnabled] = useState(true);
 	const [mediaLayout, setMediaLayout] = useState<"classic" | "compact">(
-		() => (localStorage.getItem("bloom-media-layout") as "classic" | "compact") || "classic"
+		() => (localStorage.getItem("nook-media-layout") as "classic" | "compact") || "classic"
 	);
 	const [cornersEnabled, setCornersEnabled] = useState(
-		() => localStorage.getItem("bloom-corners-enabled") === "true"
+		() => localStorage.getItem("nook-corners-enabled") === "true"
 	);
 	const [showUpdateIndicator, setShowUpdateIndicator] = useState(
-		() => localStorage.getItem("bloom-show-update-indicator") !== "false"
+		() => localStorage.getItem("nook-show-update-indicator") !== "false"
 	);
 	const [timeFormat24h, setTimeFormat24h] = useState(
-		() => localStorage.getItem("bloom-time-format-24h") === "true"
+		() => localStorage.getItem("nook-time-format-24h") === "true"
 	);
 	const [tempUnitFahrenheit, setTempUnitFahrenheit] = useState(false);
 	const [cityName, setCityName] = useState("");
@@ -63,24 +63,24 @@ export function useSettings() {
 	const [dockEnabled, setDockEnabled] = useState(true);
 	const [dockPreviewEnabled, setDockPreviewEnabled] = useState(true);
 	const [dockIconOnly, setDockIconOnly] = useState(
-		() => localStorage.getItem("bloom-dock-icon-only") === "true"
+		() => localStorage.getItem("nook-dock-icon-only") === "true"
 	);
 	const [dockAdaptive, setDockAdaptive] = useState(
-		() => localStorage.getItem("bloom-dock-adaptive") === "true"
+		() => localStorage.getItem("nook-dock-adaptive") === "true"
 	);
 	const [dockWinNumberEnabled, setDockWinNumberEnabled] = useState(
-		() => localStorage.getItem("bloom-dock-win-number-enabled") !== "false"
+		() => localStorage.getItem("nook-dock-win-number-enabled") !== "false"
 	);
 	const [dockMode, setDockMode] = useState(() => {
-		const raw = localStorage.getItem("bloom-dock-mode") || "smart";
+		const raw = localStorage.getItem("nook-dock-mode") || "smart";
 		return raw === "auto-hide" ? "smart" : raw;
 	});
 	const [notchMode, setNotchMode] = useState("fixed");
 	const [overlayAlways, setOverlayAlways] = useState(
-		() => localStorage.getItem("bloom-overlay-always") === "true"
+		() => localStorage.getItem("nook-overlay-always") === "true"
 	);
 	const [followActiveMonitor, setFollowActiveMonitor] = useState(
-		() => localStorage.getItem("bloom-follow-active-monitor") !== "false"
+		() => localStorage.getItem("nook-follow-active-monitor") !== "false"
 	);
 	const [lowBatteryThreshold, setLowBatteryThreshold] = useState(20);
 	const [updateStatus, setUpdateStatus] = useState<
@@ -89,27 +89,25 @@ export function useSettings() {
 	const [updateVersion, setUpdateVersion] = useState("");
 	const [appVersion, setAppVersion] = useState("");
 	const [autoUpdate, setAutoUpdate] = useState(
-		() => localStorage.getItem("bloom-auto-update") === "true"
+		() => localStorage.getItem("nook-auto-update") === "true"
 	);
-	const [scale, setScale] = useState(() =>
-		parseFloat(localStorage.getItem("bloom-scale") || "1.0")
-	);
+	const [scale, setScale] = useState(() => parseFloat(localStorage.getItem("nook-scale") || "1.0"));
 	const [themeMode, setThemeMode] = useState(
-		() => localStorage.getItem("bloom-theme-mode") || "dark"
+		() => localStorage.getItem("nook-theme-mode") || "dark"
 	);
 	const [themeColor, setThemeColor] = useState(
-		() => localStorage.getItem("bloom-theme-color") || "#007aff"
+		() => localStorage.getItem("nook-theme-color") || "#007aff"
 	);
 	const [themeOpacity, setThemeOpacity] = useState(() => {
-		const val = localStorage.getItem("bloom-theme-opacity");
+		const val = localStorage.getItem("nook-theme-opacity");
 		return val !== null ? parseFloat(val) : 0.8;
 	});
 	const [themeSaturation, setThemeSaturation] = useState(() => {
-		const val = localStorage.getItem("bloom-theme-saturation");
+		const val = localStorage.getItem("nook-theme-saturation");
 		return val !== null ? parseFloat(val) : 0.5;
 	});
 	const [themeBrightness, setThemeBrightness] = useState(() => {
-		const val = localStorage.getItem("bloom-theme-brightness");
+		const val = localStorage.getItem("nook-theme-brightness");
 		return val !== null ? parseFloat(val) : 0.15;
 	});
 	const [exportStatus, setExportStatus] = useState<"idle" | "exporting" | "success" | "error">(
@@ -137,46 +135,46 @@ export function useSettings() {
 				if (val !== null) setter(transform(val));
 			};
 
-			apply(getVal("bloom-weather-enabled"), setWeatherEnabled, readBool);
-			apply(getVal("bloom-calendar-enabled"), setCalendarEnabled, readBool);
-			apply(getVal("bloom-timer-sound-enabled"), setTimerSoundEnabled, readBool);
-			apply(getVal("bloom-music-mode-enabled"), setMusicModeEnabled, readBool);
-			apply(getVal("bloom-music-compact-notch"), setMusicCompactNotch, readBool);
-			apply(getVal("bloom-volume-overlay-enabled"), setVolumeOverlayEnabled, readBool);
-			apply(getVal("bloom-brightness-overlay-enabled"), setBrightnessOverlayEnabled, readBool);
-			apply(getVal("bloom-media-ambience-enabled"), setMediaAmbienceEnabled, readBool);
-			apply(getVal("bloom-media-compact-glow-enabled"), setMediaCompactGlowEnabled, readBool);
-			apply(getVal("bloom-corners-enabled"), setCornersEnabled, readBool);
-			apply(getVal("bloom-time-format-24h"), setTimeFormat24h, readBool);
-			apply(getVal("bloom-show-update-indicator"), setShowUpdateIndicator, readBool);
-			apply(getVal("bloom-auto-update"), setAutoUpdate, readBool);
-			apply(getVal("bloom-volume-edge-enabled"), setVolumeEdgeEnabled, readBool);
-			apply(getVal("bloom-brightness-edge-enabled"), setBrightnessEdgeEnabled, readBool);
-			apply(getVal("bloom-dock-enabled"), setDockEnabled, readBool);
-			apply(getVal("bloom-dock-preview-enabled"), setDockPreviewEnabled, readBool);
-			apply(getVal("bloom-dock-icon-only"), setDockIconOnly, readBool);
-			apply(getVal("bloom-dock-adaptive"), setDockAdaptive, readBool);
-			apply(getVal("bloom-dock-win-number-enabled"), setDockWinNumberEnabled, readBool);
+			apply(getVal("nook-weather-enabled"), setWeatherEnabled, readBool);
+			apply(getVal("nook-calendar-enabled"), setCalendarEnabled, readBool);
+			apply(getVal("nook-timer-sound-enabled"), setTimerSoundEnabled, readBool);
+			apply(getVal("nook-music-mode-enabled"), setMusicModeEnabled, readBool);
+			apply(getVal("nook-music-compact-notch"), setMusicCompactNotch, readBool);
+			apply(getVal("nook-volume-overlay-enabled"), setVolumeOverlayEnabled, readBool);
+			apply(getVal("nook-brightness-overlay-enabled"), setBrightnessOverlayEnabled, readBool);
+			apply(getVal("nook-media-ambience-enabled"), setMediaAmbienceEnabled, readBool);
+			apply(getVal("nook-media-compact-glow-enabled"), setMediaCompactGlowEnabled, readBool);
+			apply(getVal("nook-corners-enabled"), setCornersEnabled, readBool);
+			apply(getVal("nook-time-format-24h"), setTimeFormat24h, readBool);
+			apply(getVal("nook-show-update-indicator"), setShowUpdateIndicator, readBool);
+			apply(getVal("nook-auto-update"), setAutoUpdate, readBool);
+			apply(getVal("nook-volume-edge-enabled"), setVolumeEdgeEnabled, readBool);
+			apply(getVal("nook-brightness-edge-enabled"), setBrightnessEdgeEnabled, readBool);
+			apply(getVal("nook-dock-enabled"), setDockEnabled, readBool);
+			apply(getVal("nook-dock-preview-enabled"), setDockPreviewEnabled, readBool);
+			apply(getVal("nook-dock-icon-only"), setDockIconOnly, readBool);
+			apply(getVal("nook-dock-adaptive"), setDockAdaptive, readBool);
+			apply(getVal("nook-dock-win-number-enabled"), setDockWinNumberEnabled, readBool);
 
-			apply(getVal("bloom-temp-unit"), setTempUnitFahrenheit, (v) => v === "fahrenheit");
-			apply(getVal("bloom-scale"), setScale, parseFloat);
-			apply(getVal("bloom-low-battery-threshold"), setLowBatteryThreshold, parseInt);
+			apply(getVal("nook-temp-unit"), setTempUnitFahrenheit, (v) => v === "fahrenheit");
+			apply(getVal("nook-scale"), setScale, parseFloat);
+			apply(getVal("nook-low-battery-threshold"), setLowBatteryThreshold, parseInt);
 
-			apply(getVal("bloom-notch-mode"), setNotchMode, (v) => (v === "auto-hide" ? "smart" : v));
-			apply(getVal("bloom-overlay-always"), setOverlayAlways, readBool);
-			apply(getVal("bloom-follow-active-monitor"), setFollowActiveMonitor, readBool);
-			apply(getVal("bloom-dock-mode"), setDockMode, (v) => (v === "auto-hide" ? "smart" : v));
+			apply(getVal("nook-notch-mode"), setNotchMode, (v) => (v === "auto-hide" ? "smart" : v));
+			apply(getVal("nook-overlay-always"), setOverlayAlways, readBool);
+			apply(getVal("nook-follow-active-monitor"), setFollowActiveMonitor, readBool);
+			apply(getVal("nook-dock-mode"), setDockMode, (v) => (v === "auto-hide" ? "smart" : v));
 
-			const savedCity = getVal("bloom-weather-city");
+			const savedCity = getVal("nook-weather-city");
 			if (savedCity) setCityName(savedCity);
 
-			apply(getVal("bloom-theme-mode"), setThemeMode, (v) => v);
-			apply(getVal("bloom-theme-color"), setThemeColor, (v) => v);
-			apply(getVal("bloom-theme-opacity"), setThemeOpacity, parseFloat);
-			apply(getVal("bloom-theme-saturation"), setThemeSaturation, parseFloat);
-			apply(getVal("bloom-theme-brightness"), setThemeBrightness, parseFloat);
+			apply(getVal("nook-theme-mode"), setThemeMode, (v) => v);
+			apply(getVal("nook-theme-color"), setThemeColor, (v) => v);
+			apply(getVal("nook-theme-opacity"), setThemeOpacity, parseFloat);
+			apply(getVal("nook-theme-saturation"), setThemeSaturation, parseFloat);
+			apply(getVal("nook-theme-brightness"), setThemeBrightness, parseFloat);
 
-			const widgetsVal = getVal("bloom-status-widgets");
+			const widgetsVal = getVal("nook-status-widgets");
 			if (widgetsVal) {
 				try {
 					const parsed = JSON.parse(widgetsVal);
@@ -207,46 +205,46 @@ export function useSettings() {
 
 	// ── Sync settings from other windows ──
 	useSettingsSync({
-		"bloom-dock-mode": setDockMode,
-		"bloom-notch-mode": setNotchMode,
-		"bloom-overlay-always": setOverlayAlways,
-		"bloom-follow-active-monitor": setFollowActiveMonitor,
-		"bloom-dock-enabled": setDockEnabled,
-		"bloom-dock-icon-only": setDockIconOnly,
-		"bloom-dock-preview-enabled": setDockPreviewEnabled,
-		"bloom-dock-adaptive": setDockAdaptive,
-		"bloom-dock-win-number-enabled": setDockWinNumberEnabled,
-		"bloom-weather-enabled": setWeatherEnabled,
-		"bloom-calendar-enabled": setCalendarEnabled,
-		"bloom-timer-sound-enabled": setTimerSoundEnabled,
-		"bloom-music-mode-enabled": setMusicModeEnabled,
-		"bloom-music-compact-notch": setMusicCompactNotch,
-		"bloom-media-ambience-enabled": setMediaAmbienceEnabled,
-		"bloom-media-compact-glow-enabled": setMediaCompactGlowEnabled,
-		"bloom-media-layout": setMediaLayout,
-		"bloom-corners-enabled": setCornersEnabled,
-		"bloom-show-update-indicator": setShowUpdateIndicator,
-		"bloom-time-format-24h": setTimeFormat24h,
-		"bloom-low-battery-threshold": setLowBatteryThreshold,
-		"bloom-scale": setScale,
-		"bloom-temp-unit": (v) => setTempUnitFahrenheit(v === "fahrenheit"),
-		"bloom-auto-update": setAutoUpdate,
-		"bloom-volume-overlay-enabled": setVolumeOverlayEnabled,
-		"bloom-volume-edge-enabled": setVolumeEdgeEnabled,
-		"bloom-brightness-overlay-enabled": setBrightnessOverlayEnabled,
-		"bloom-brightness-edge-enabled": setBrightnessEdgeEnabled,
-		"bloom-theme-mode": setThemeMode,
-		"bloom-theme-color": setThemeColor,
-		"bloom-theme-opacity": setThemeOpacity,
-		"bloom-theme-saturation": setThemeSaturation,
-		"bloom-theme-brightness": setThemeBrightness,
-		"bloom-weather-city": (v) => setCityName(v || "")
+		"nook-dock-mode": setDockMode,
+		"nook-notch-mode": setNotchMode,
+		"nook-overlay-always": setOverlayAlways,
+		"nook-follow-active-monitor": setFollowActiveMonitor,
+		"nook-dock-enabled": setDockEnabled,
+		"nook-dock-icon-only": setDockIconOnly,
+		"nook-dock-preview-enabled": setDockPreviewEnabled,
+		"nook-dock-adaptive": setDockAdaptive,
+		"nook-dock-win-number-enabled": setDockWinNumberEnabled,
+		"nook-weather-enabled": setWeatherEnabled,
+		"nook-calendar-enabled": setCalendarEnabled,
+		"nook-timer-sound-enabled": setTimerSoundEnabled,
+		"nook-music-mode-enabled": setMusicModeEnabled,
+		"nook-music-compact-notch": setMusicCompactNotch,
+		"nook-media-ambience-enabled": setMediaAmbienceEnabled,
+		"nook-media-compact-glow-enabled": setMediaCompactGlowEnabled,
+		"nook-media-layout": setMediaLayout,
+		"nook-corners-enabled": setCornersEnabled,
+		"nook-show-update-indicator": setShowUpdateIndicator,
+		"nook-time-format-24h": setTimeFormat24h,
+		"nook-low-battery-threshold": setLowBatteryThreshold,
+		"nook-scale": setScale,
+		"nook-temp-unit": (v) => setTempUnitFahrenheit(v === "fahrenheit"),
+		"nook-auto-update": setAutoUpdate,
+		"nook-volume-overlay-enabled": setVolumeOverlayEnabled,
+		"nook-volume-edge-enabled": setVolumeEdgeEnabled,
+		"nook-brightness-overlay-enabled": setBrightnessOverlayEnabled,
+		"nook-brightness-edge-enabled": setBrightnessEdgeEnabled,
+		"nook-theme-mode": setThemeMode,
+		"nook-theme-color": setThemeColor,
+		"nook-theme-opacity": setThemeOpacity,
+		"nook-theme-saturation": setThemeSaturation,
+		"nook-theme-brightness": setThemeBrightness,
+		"nook-weather-city": (v) => setCityName(v || "")
 	});
 
 	// ── Listen for system accent changes (adaptive theme) ──
 	useEffect(() => {
 		const unlisten = listen<string>("system-accent-changed", (event) => {
-			const mode = localStorage.getItem("bloom-theme-mode") || "dark";
+			const mode = localStorage.getItem("nook-theme-mode") || "dark";
 			if (mode === "adaptive") {
 				try {
 					const hsl = hexToHsl(event.payload);
@@ -368,187 +366,187 @@ export function useSettings() {
 	const toggleWeather = () => {
 		const next = !weatherEnabled;
 		setWeatherEnabled(next);
-		saveSetting("bloom-weather-enabled", String(next));
+		saveSetting("nook-weather-enabled", String(next));
 	};
 
 	const toggleCalendar = () => {
 		const next = !calendarEnabled;
 		setCalendarEnabled(next);
-		saveSetting("bloom-calendar-enabled", String(next));
+		saveSetting("nook-calendar-enabled", String(next));
 	};
 
 	const toggleTimerSound = () => {
 		const next = !timerSoundEnabled;
 		setTimerSoundEnabled(next);
-		saveSetting("bloom-timer-sound-enabled", String(next));
+		saveSetting("nook-timer-sound-enabled", String(next));
 	};
 
 	const toggleMusicMode = () => {
 		const next = !musicModeEnabled;
 		setMusicModeEnabled(next);
-		saveSetting("bloom-music-mode-enabled", String(next));
+		saveSetting("nook-music-mode-enabled", String(next));
 	};
 
 	const toggleMusicCompactNotch = () => {
 		const next = !musicCompactNotch;
 		setMusicCompactNotch(next);
-		saveSetting("bloom-music-compact-notch", String(next));
+		saveSetting("nook-music-compact-notch", String(next));
 	};
 
 	const toggleMediaLayout = (layout: "classic" | "compact") => {
 		setMediaLayout(layout);
-		saveSetting("bloom-media-layout", layout);
+		saveSetting("nook-media-layout", layout);
 	};
 
 	const toggleVolumeOverlay = () => {
 		const next = !volumeOverlayEnabled;
 		setVolumeOverlayEnabled(next);
-		saveSetting("bloom-volume-overlay-enabled", String(next));
+		saveSetting("nook-volume-overlay-enabled", String(next));
 	};
 
 	const toggleVolumeEdge = () => {
 		const next = !volumeEdgeEnabled;
 		setVolumeEdgeEnabled(next);
-		saveSetting("bloom-volume-edge-enabled", String(next));
+		saveSetting("nook-volume-edge-enabled", String(next));
 	};
 
 	const toggleBrightnessOverlay = () => {
 		const next = !brightnessOverlayEnabled;
 		setBrightnessOverlayEnabled(next);
-		saveSetting("bloom-brightness-overlay-enabled", String(next));
+		saveSetting("nook-brightness-overlay-enabled", String(next));
 	};
 
 	const toggleBrightnessEdge = () => {
 		const next = !brightnessEdgeEnabled;
 		setBrightnessEdgeEnabled(next);
-		saveSetting("bloom-brightness-edge-enabled", String(next));
+		saveSetting("nook-brightness-edge-enabled", String(next));
 	};
 
 	const toggleAmbience = () => {
 		const next = !mediaAmbienceEnabled;
 		setMediaAmbienceEnabled(next);
-		saveSetting("bloom-media-ambience-enabled", String(next));
+		saveSetting("nook-media-ambience-enabled", String(next));
 	};
 
 	const toggleCompactGlow = () => {
 		const next = !mediaCompactGlowEnabled;
 		setMediaCompactGlowEnabled(next);
-		saveSetting("bloom-media-compact-glow-enabled", String(next));
+		saveSetting("nook-media-compact-glow-enabled", String(next));
 	};
 
 	const toggleCorners = () => {
 		const next = !cornersEnabled;
 		setCornersEnabled(next);
-		saveSetting("bloom-corners-enabled", String(next));
+		saveSetting("nook-corners-enabled", String(next));
 	};
 
 	const toggleUpdateIndicator = () => {
 		const next = !showUpdateIndicator;
 		setShowUpdateIndicator(next);
-		saveSetting("bloom-show-update-indicator", String(next));
+		saveSetting("nook-show-update-indicator", String(next));
 	};
 
 	const toggleTimeFormat24h = () => {
 		const next = !timeFormat24h;
 		setTimeFormat24h(next);
-		saveSetting("bloom-time-format-24h", String(next));
+		saveSetting("nook-time-format-24h", String(next));
 	};
 
 	const toggleTempUnit = () => {
 		const next = !tempUnitFahrenheit;
 		setTempUnitFahrenheit(next);
-		saveSetting("bloom-temp-unit", next ? "fahrenheit" : "celsius");
+		saveSetting("nook-temp-unit", next ? "fahrenheit" : "celsius");
 	};
 
 	const toggleDock = () => {
 		const next = !dockEnabled;
 		setDockEnabled(next);
-		saveSetting("bloom-dock-enabled", String(next));
+		saveSetting("nook-dock-enabled", String(next));
 	};
 
 	const toggleDockPreview = () => {
 		const next = !dockPreviewEnabled;
 		setDockPreviewEnabled(next);
-		saveSetting("bloom-dock-preview-enabled", String(next));
+		saveSetting("nook-dock-preview-enabled", String(next));
 	};
 
 	const toggleDockIconOnly = () => {
 		const next = !dockIconOnly;
 		setDockIconOnly(next);
-		saveSetting("bloom-dock-icon-only", String(next));
+		saveSetting("nook-dock-icon-only", String(next));
 	};
 
 	const toggleDockAdaptive = () => {
 		const next = !dockAdaptive;
 		setDockAdaptive(next);
-		saveSetting("bloom-dock-adaptive", String(next));
+		saveSetting("nook-dock-adaptive", String(next));
 	};
 
 	const toggleDockWinNumber = () => {
 		const next = !dockWinNumberEnabled;
 		setDockWinNumberEnabled(next);
-		saveSetting("bloom-dock-win-number-enabled", String(next));
+		saveSetting("nook-dock-win-number-enabled", String(next));
 	};
 
 	const toggleAutoUpdate = () => {
 		const next = !autoUpdate;
 		setAutoUpdate(next);
-		saveSetting("bloom-auto-update", String(next));
+		saveSetting("nook-auto-update", String(next));
 	};
 
 	// ── Value setters ──
 	const setDockModeValue = (newMode: string) => {
 		setDockMode(newMode);
-		saveSetting("bloom-dock-mode", newMode);
+		saveSetting("nook-dock-mode", newMode);
 	};
 
 	const setNotchModeValue = (newMode: string) => {
 		setNotchMode(newMode);
-		saveSetting("bloom-notch-mode", newMode);
+		saveSetting("nook-notch-mode", newMode);
 	};
 
 	const toggleOverlayAlways = () => {
 		const next = !overlayAlways;
 		setOverlayAlways(next);
-		saveSetting("bloom-overlay-always", String(next));
+		saveSetting("nook-overlay-always", String(next));
 		invoke("set_feature_toggles", { overlayAlways: next }).catch(console.error);
 	};
 
 	const toggleFollowActiveMonitor = () => {
 		const next = !followActiveMonitor;
 		setFollowActiveMonitor(next);
-		saveSetting("bloom-follow-active-monitor", String(next));
+		saveSetting("nook-follow-active-monitor", String(next));
 		invoke("set_feature_toggles", { followActiveMonitor: next }).catch(console.error);
 	};
 
 	const handleThresholdChange = (val: number) => {
 		setLowBatteryThreshold(val);
-		saveSetting("bloom-low-battery-threshold", val.toString());
+		saveSetting("nook-low-battery-threshold", val.toString());
 	};
 
 	const handleScaleChange = (val: number) => {
 		setScale(val);
-		saveSetting("bloom-scale", val.toString());
+		saveSetting("nook-scale", val.toString());
 	};
 
 	const handleWidgetsChange = (config: WidgetConfig) => {
 		setStatusWidgets(config);
-		saveSetting("bloom-status-widgets", JSON.stringify(config));
+		saveSetting("nook-status-widgets", JSON.stringify(config));
 	};
 
 	// ── Theme handlers ──
 	const handleThemeModeChange = async (mode: string) => {
 		setThemeMode(mode);
-		saveSetting("bloom-theme-mode", mode);
+		saveSetting("nook-theme-mode", mode);
 
 		if (mode === "adaptive") {
 			try {
 				const accentHex = await invoke<string>("get_system_accent_color");
 				const hsl = hexToHsl(accentHex);
 				setThemeSaturation(hsl.s / 100);
-				saveSetting("bloom-theme-saturation", String(hsl.s / 100));
+				saveSetting("nook-theme-saturation", String(hsl.s / 100));
 				setThemeBrightness(hsl.l / 100);
-				saveSetting("bloom-theme-brightness", String(hsl.l / 100));
+				saveSetting("nook-theme-brightness", String(hsl.l / 100));
 			} catch (e) {
 				console.error("Failed to parse adaptive accent HSL:", e);
 			}
@@ -557,14 +555,14 @@ export function useSettings() {
 
 	const handleThemeColorChange = (color: string) => {
 		setThemeColor(color);
-		saveSetting("bloom-theme-color", color);
+		saveSetting("nook-theme-color", color);
 
 		try {
 			const hsl = hexToHsl(color);
 			setThemeSaturation(hsl.s / 100);
-			saveSetting("bloom-theme-saturation", String(hsl.s / 100));
+			saveSetting("nook-theme-saturation", String(hsl.s / 100));
 			setThemeBrightness(hsl.l / 100);
-			saveSetting("bloom-theme-brightness", String(hsl.l / 100));
+			saveSetting("nook-theme-brightness", String(hsl.l / 100));
 		} catch (e) {
 			console.error("Failed to parse custom color HSL:", e);
 		}
@@ -572,17 +570,17 @@ export function useSettings() {
 
 	const handleOpacityChange = (value: number) => {
 		setThemeOpacity(value);
-		saveSetting("bloom-theme-opacity", String(value));
+		saveSetting("nook-theme-opacity", String(value));
 	};
 
 	const handleSaturationChange = (value: number) => {
 		setThemeSaturation(value);
-		saveSetting("bloom-theme-saturation", String(value));
+		saveSetting("nook-theme-saturation", String(value));
 	};
 
 	const handleBrightnessChange = (value: number) => {
 		setThemeBrightness(value);
-		saveSetting("bloom-theme-brightness", String(value));
+		saveSetting("nook-theme-brightness", String(value));
 	};
 
 	// ── City search ──
@@ -595,18 +593,18 @@ export function useSettings() {
 		setCityName(city.name);
 		setShowCityDropdown(false);
 		setCitySearchResults([]);
-		localStorage.setItem("bloom-weather-city", city.name);
-		localStorage.setItem("bloom-weather-lat", city.latitude.toString());
-		localStorage.setItem("bloom-weather-lon", city.longitude.toString());
+		localStorage.setItem("nook-weather-city", city.name);
+		localStorage.setItem("nook-weather-lat", city.latitude.toString());
+		localStorage.setItem("nook-weather-lon", city.longitude.toString());
 		await invoke("save_setting", {
-			key: "bloom-weather-lat",
+			key: "nook-weather-lat",
 			value: city.latitude.toString()
 		}).catch(() => {});
 		await invoke("save_setting", {
-			key: "bloom-weather-lon",
+			key: "nook-weather-lon",
 			value: city.longitude.toString()
 		}).catch(() => {});
-		await invoke("save_setting", { key: "bloom-weather-city", value: city.name }).catch(() => {});
+		await invoke("save_setting", { key: "nook-weather-city", value: city.name }).catch(() => {});
 		emit("weather-refresh", { lat: city.latitude, lon: city.longitude });
 	};
 
@@ -614,12 +612,12 @@ export function useSettings() {
 		setCityName("");
 		setShowCityDropdown(false);
 		setCitySearchResults([]);
-		localStorage.removeItem("bloom-weather-city");
-		localStorage.removeItem("bloom-weather-lat");
-		localStorage.removeItem("bloom-weather-lon");
-		await invoke("save_setting", { key: "bloom-weather-lat", value: null }).catch(() => {});
-		await invoke("save_setting", { key: "bloom-weather-lon", value: null }).catch(() => {});
-		await invoke("save_setting", { key: "bloom-weather-city", value: null }).catch(() => {});
+		localStorage.removeItem("nook-weather-city");
+		localStorage.removeItem("nook-weather-lat");
+		localStorage.removeItem("nook-weather-lon");
+		await invoke("save_setting", { key: "nook-weather-lat", value: null }).catch(() => {});
+		await invoke("save_setting", { key: "nook-weather-lon", value: null }).catch(() => {});
+		await invoke("save_setting", { key: "nook-weather-city", value: null }).catch(() => {});
 		emit("weather-refresh", true);
 	};
 
@@ -630,8 +628,8 @@ export function useSettings() {
 			const { save: saveDialog } = await import("@tauri-apps/plugin-dialog");
 			const settingsJson = await invoke<string>("export_settings");
 			const filePath = await saveDialog({
-				title: "Export Bloom Settings",
-				defaultPath: "bloom-settings.json",
+				title: "Export Nook Settings",
+				defaultPath: "nook-settings.json",
 				filters: [{ name: "JSON", extensions: ["json"] }]
 			});
 			if (filePath) {
@@ -653,7 +651,7 @@ export function useSettings() {
 		try {
 			const { open: openDialog } = await import("@tauri-apps/plugin-dialog");
 			const filePath = await openDialog({
-				title: "Import Bloom Settings",
+				title: "Import Nook Settings",
 				filters: [{ name: "JSON", extensions: ["json"] }],
 				multiple: false
 			});
@@ -781,7 +779,7 @@ export function useSettings() {
 		handleImportSettings,
 
 		// Utilities
-		restartBloom: () => invoke("restart_bloom"),
-		quitBloom: () => invoke("quit_bloom")
+		restartNook: () => invoke("restart_nook"),
+		quitNook: () => invoke("quit_nook")
 	};
 }
