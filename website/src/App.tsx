@@ -16,39 +16,12 @@ import BrowserApp from "./components/apps/BrowserApp";
 
 import nookBackground from "./assets/nook-background.webp";
 import nookTrackCover from "./assets/move-in-silence-cover.png";
+import { loadSettings, type NookSettings, type UpdateSetting } from "./lib/settings";
 
 const wallpapersList = [nookBackground];
 
-interface NookSettings {
-	wallpaper: number;
-	dockMode: "fixed" | "auto-hide";
-	notchMode: "fixed" | "auto-hide";
-	accentColor: string;
-	isDockEnabled: boolean;
-}
-
-const defaultSettings: NookSettings = {
-	wallpaper: 0,
-	dockMode: "fixed",
-	notchMode: "fixed",
-	accentColor: "#e8c5e5",
-	isDockEnabled: true
-};
-
 export default function App() {
-	const [settings, setSettings] = useState<NookSettings>(() => {
-		// Pre-4.2 demos stored the same blob under "bloom-settings"; migrate once.
-		const saved =
-			localStorage.getItem("nook-settings") ?? localStorage.getItem("bloom-settings");
-		if (saved) {
-			try {
-				return { ...defaultSettings, ...(JSON.parse(saved) as Partial<NookSettings>) };
-			} catch {
-				return defaultSettings;
-			}
-		}
-		return defaultSettings;
-	});
+	const [settings, setSettings] = useState<NookSettings>(loadSettings);
 
 	const [openApps, setOpenApps] = useState<string[]>(["about", "music", "terminal"]);
 	const [minimizedApps, setMinimizedApps] = useState<string[]>([]);
@@ -84,7 +57,7 @@ export default function App() {
 				about: clamp(prev.about.x, prev.about.y, 500, 460),
 				music: clamp(prev.music.x, prev.music.y, 800, 520),
 				terminal: clamp(prev.terminal.x, prev.terminal.y, 500, 320),
-				settings: clamp(prev.settings.x, prev.settings.y, 520, 480),
+				settings: clamp(prev.settings.x, prev.settings.y, 520, 620),
 				changelog: clamp(prev.changelog.x, prev.changelog.y, 480, 560),
 				performance: clamp(prev.performance.x, prev.performance.y, 420, 440),
 				features: clamp(prev.features.x, prev.features.y, 580, 480),
@@ -106,7 +79,7 @@ export default function App() {
 
 	const [visualizerData, setVisualizerData] = useState<number[]>([0.15, 0.15, 0.15, 0.15, 0.15]);
 
-	const updateSetting = useCallback((key: string, value: any) => {
+	const updateSetting = useCallback<UpdateSetting>((key, value) => {
 		setSettings((prev) => ({ ...prev, [key]: value }));
 	}, []);
 
@@ -252,7 +225,7 @@ export default function App() {
 								onMinimize={() => handleMinimizeApp("settings")}
 								onFocus={() => setFocusedApp("settings")}
 								width={520}
-								height={480}
+								height={620}
 								defaultPosition={positions.settings}
 								viewport={viewport}
 							>

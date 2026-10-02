@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import type { CSSProperties } from "react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
+import { ArrowUpDown, Cpu, HardDrive, MemoryStick } from "lucide-react";
 import {
 	PlayIcon,
 	PauseIcon,
@@ -11,15 +12,12 @@ import {
 	MusicNoteIcon,
 	HeadphonesIcon
 } from "../icons";
+import { useSimulatedSystem, formatBytes } from "../lib/simulatedSystem";
+import { useSimulatedWeather } from "../lib/simulatedWeather";
+import type { NookSettings, UpdateSetting } from "../lib/settings";
 
 interface NotchProps {
-	settings: {
-		wallpaper: number;
-		dockMode: "fixed" | "auto-hide";
-		notchMode: "fixed" | "auto-hide";
-		accentColor: string;
-		isDockEnabled: boolean;
-	};
+	settings: NookSettings;
 	playback: {
 		isPlaying: boolean;
 		trackTitle: string;
@@ -34,7 +32,7 @@ interface NotchProps {
 	setPlaybackState: (state: Partial<NotchProps["playback"]>) => void;
 	visualizerData: number[];
 	onOpenApp: (appId: string) => void;
-	updateSetting?: (key: string, value: string | number | boolean) => void;
+	updateSetting?: UpdateSetting;
 }
 
 const MARQUEE_SPEED = 30;
@@ -227,23 +225,6 @@ function BatteryIcon({
 				</div>
 			)}
 		</div>
-	);
-}
-
-function ThermometerIcon() {
-	return (
-		<svg
-			width="12"
-			height="12"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="2.2"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-		>
-			<path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z" />
-		</svg>
 	);
 }
 
@@ -513,11 +494,18 @@ export default function Notch({
 	const trackCount = playback.tracksCount || 3;
 
 	const isAnyInteraction = isHovered || isNotchHovered || isEdgeHovered;
-	const isAutoHide = settings.notchMode === "auto-hide";
-	const isHidden = !startupAnimating && isAutoHide && interactionState === "none" && !eventPeek;
+	// The real app tracks the monitor holding focus; a browser page has only one
+	// display, so Smart behaves like Fixed here and Peek is the mode that hides.
+	const isPeekMode = settings.notchMode === "peek";
+	const isHidden = !startupAnimating && isPeekMode && interactionState === "none" && !eventPeek;
 
-	const isCalendarMode = nookMode === "calendar";
-	const isMusicMode = hasMedia && nookMode === "music";
+	const isCalendarMode = nookMode === "calendar" && settings.calendarEnabled;
+	const isMusicMode = hasMedia && settings.musicModeEnabled && nookMode === "music";
+	// Compact mode only collapses the island while music is actually running.
+	const isMusicCompact = isMusicMode && isPlaying && settings.musicCompactNotch;
+
+	const system = useSimulatedSystem();
+	const weather = useSimulatedWeather(settings.cityName, settings.tempUnitFahrenheit);
 
 	const triggerEventPeek = useCallback((duration = 3000) => {
 		setEventPeek(true);
@@ -594,12 +582,13 @@ export default function Notch({
 		const isNewTrackWhilePlaying = title !== lastTrackRef.current && isPlaying;
 		const justStartedPlaying = isPlaying && !lastPlayingRef.current;
 
-		if (isAutoHide && (isNewTrackWhilePlaying || justStartedPlaying)) {
+		if (isPeekMode && (isNewTrackWhilePlaying || justStartedPlaying)) {
 			triggerEventPeek(3000);
 		}
 
 		if (
 			hasMedia &&
+			settings.musicModeEnabled &&
 			isPlaying &&
 			nookMode !== "calendar" &&
 			(isNewTrackWhilePlaying || justStartedPlaying)
@@ -610,7 +599,16 @@ export default function Notch({
 
 		lastTrackRef.current = title;
 		lastPlayingRef.current = isPlaying;
-	}, [hasMedia, isPlaying, title, isHovered, nookMode, isAutoHide, triggerEventPeek]);
+	}, [
+		hasMedia,
+		isPlaying,
+		title,
+		isHovered,
+		nookMode,
+		isPeekMode,
+		settings.musicModeEnabled,
+		triggerEventPeek
+	]);
 
 	useEffect(() => {
 		let timer: number | undefined;
@@ -654,6 +652,34 @@ export default function Notch({
 		return () => window.clearInterval(id);
 	}, [isTimerRunning]);
 
+	// Play a short two-tone chime when the timer lands, if the setting allows it.
+	useEffect(() => {
+		if (!isTimerFinished || !settings.timerSoundEnabled) return;
+		let ctx: AudioContext | null = null;
+		try {
+			ctx = new AudioContext();
+			const now = ctx.currentTime;
+			[880, 1174.66].forEach((freq, i) => {
+				const osc = ctx!.createOscillator();
+				const gain = ctx!.createGain();
+				osc.type = "sine";
+				osc.frequency.value = freq;
+				gain.gain.setValueAtTime(0.0001, now + i * 0.18);
+				gain.gain.exponentialRampToValueAtTime(0.18, now + i * 0.18 + 0.02);
+				gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.18 + 0.32);
+				osc.connect(gain).connect(ctx!.destination);
+				osc.start(now + i * 0.18);
+				osc.stop(now + i * 0.18 + 0.35);
+			});
+		} catch {
+			// Autoplay policy or no WebAudio — the visual "timer finished" state
+			// is enough feedback.
+		}
+		return () => {
+			ctx?.close().catch(() => {});
+		};
+	}, [isTimerFinished, settings.timerSoundEnabled]);
+
 	const formatTimerTime = (totalSeconds: number) => {
 		const mins = Math.floor(Math.abs(totalSeconds) / 60);
 		const secs = Math.abs(totalSeconds) % 60;
@@ -682,9 +708,10 @@ export default function Notch({
 			resetTimer();
 			return;
 		}
+		if (!settings.calendarEnabled) return;
 		setNookMode((prev) => {
 			if (prev === "calendar") {
-				return hasMedia && isPlaying ? "music" : "status";
+				return hasMedia && isPlaying && settings.musicModeEnabled ? "music" : "status";
 			}
 			return "calendar";
 		});
@@ -735,18 +762,27 @@ export default function Notch({
 		}
 	};
 
+	const NOTCH_MODES: NookSettings["notchMode"][] = ["fixed", "smart", "peek"];
+	const NOTCH_MODE_LABELS: Record<NookSettings["notchMode"], string> = {
+		fixed: "Fixed",
+		smart: "Smart",
+		peek: "Peek"
+	};
+
 	const toggleNotchModeSetting = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		if (updateSetting) {
-			updateSetting("notchMode", settings.notchMode === "fixed" ? "auto-hide" : "fixed");
-		}
+		if (!updateSetting) return;
+		const idx = NOTCH_MODES.indexOf(settings.notchMode);
+		updateSetting("notchMode", NOTCH_MODES[(idx + 1) % NOTCH_MODES.length]);
 	};
 
 	const getDynamicWidth = () => {
 		if (isCalendarMode) return 480;
 		if (nookMode === "command-center" && isHovered) return 350;
-		if (nookMode === "status" && isHovered) return Math.min(200 + 2 * 50, 380);
-		if (isMusicMode && isHovered) return 340;
+		// Each placed widget chip claims horizontal room beside the clock.
+		const widgetSlots = settings.statusWidgets.left.length + settings.statusWidgets.right.length;
+		if (nookMode === "status" && isHovered) return Math.min(200 + widgetSlots * 50, 480);
+		if (isMusicMode && isHovered) return settings.mediaLayout === "compact" ? 300 : 340;
 
 		let w = 140;
 		if (isMusicMode) {
@@ -768,42 +804,97 @@ export default function Notch({
 		return 36;
 	};
 
-	const batteryLevel = 85;
-	const isCharging = true;
+	const WeatherIcon = weather.icon;
 
-	const renderWeather = () => (
-		<motion.div
-			className="passive-features-group"
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			exit={{ opacity: 0 }}
-			transition={{ duration: 0.2 }}
-		>
-			<div className="passive-feature" title="Clear — New Delhi">
-				<ThermometerIcon />
-				<span className="label">24°C</span>
-			</div>
-		</motion.div>
-	);
+	/** One status widget chip. `id` matches the ids in lib/statusWidgets. */
+	const renderWidget = (id: string) => {
+		switch (id) {
+			case "weather":
+				if (!settings.weatherEnabled) return null;
+				return (
+					<div className="passive-feature" title={`${weather.condition} — ${settings.cityName}`}>
+						<WeatherIcon size={14} strokeWidth={2} />
+						<span className="label">
+							{weather.temperature}°{weather.unit}
+						</span>
+					</div>
+				);
+			case "battery":
+				return (
+					<div
+						className="passive-feature"
+						title={system.isCharging ? "Charging" : "On battery"}
+					>
+						<BatteryIcon charging={system.isCharging} level={system.batteryLevel} />
+						<span className="label">{system.batteryLevel}%</span>
+					</div>
+				);
+			case "cpu":
+				return (
+					<div className="passive-feature" title="Processor load">
+						<Cpu size={14} strokeWidth={2} />
+						<span className="label">{system.cpuUsage}%</span>
+					</div>
+				);
+			case "ram":
+				return (
+					<div className="passive-feature" title="Memory in use">
+						<MemoryStick size={14} strokeWidth={2} />
+						<span className="label">{system.ramUsage}%</span>
+					</div>
+				);
+			case "disk":
+				return (
+					<div className="passive-feature" title="Free disk space">
+						<HardDrive size={14} strokeWidth={2} />
+						<span className="label">{system.diskSpaceGB}GB</span>
+					</div>
+				);
+			case "net":
+				return (
+					<div
+						className="passive-feature"
+						title={
+							system.netDownSpeed > 0
+								? `Down ${formatBytes(system.netDownSpeed)}/s · Up ${formatBytes(system.netUpSpeed)}/s`
+								: "Network idle"
+						}
+					>
+						<ArrowUpDown size={14} strokeWidth={2} />
+						<span className="label">
+							{system.netDownSpeed > 0 ? `↓${formatBytes(system.netDownSpeed)}` : "—"}
+						</span>
+					</div>
+				);
+			default:
+				return null;
+		}
+	};
 
-	const renderBattery = () => (
-		<motion.div
-			className="passive-features-group"
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			exit={{ opacity: 0 }}
-			transition={{ duration: 0.2 }}
-		>
-			<div className="passive-feature">
-				<BatteryIcon charging={isCharging} level={batteryLevel} />
-				<span className="label">{batteryLevel}%</span>
-			</div>
-		</motion.div>
-	);
+	const renderWidgetZone = (ids: string[]) => {
+		// "weather" renders nothing when the weather widget is disabled.
+		const visible = ids.filter(
+			(id) => id !== "weather" || settings.weatherEnabled
+		);
+		if (visible.length === 0) return null;
+		return (
+			<motion.div
+				className="passive-features-group"
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				exit={{ opacity: 0 }}
+				transition={{ duration: 0.2 }}
+			>
+				{visible.map((id) => (
+					<div key={id}>{renderWidget(id)}</div>
+				))}
+			</motion.div>
+		);
+	};
 
 	return (
 		<div className="absolute top-0 left-0 right-0 h-12 flex justify-center items-start z-[100] pointer-events-none">
-			{isAutoHide && (
+			{isPeekMode && (
 				<div
 					className="absolute inset-x-0 top-0 h-3 z-[95] pointer-events-auto"
 					onMouseEnter={() => setIsEdgeHovered(true)}
@@ -812,7 +903,7 @@ export default function Notch({
 			)}
 
 			<motion.div
-				className={`nook ${isHovered ? "expanded" : ""} ${isImpacted ? "is-impacted" : ""} ${isCalendarMode ? "calendar-mode" : ""}`}
+				className={`nook ${isHovered ? "expanded" : ""} ${isImpacted ? "is-impacted" : ""} ${isCalendarMode ? "calendar-mode" : ""} ${settings.mediaLayout === "compact" ? "media-compact" : ""} ${isMusicCompact ? "music-compact" : ""}`}
 				onMouseEnter={() => setIsNotchHovered(true)}
 				onMouseLeave={() => setIsNotchHovered(false)}
 				onWheel={handleWheel}
@@ -1140,9 +1231,9 @@ export default function Notch({
 																<Visualizer isPlaying={isPlaying} frames={visualizerData} />
 															</motion.div>
 														</AnimatePresence>
-													) : isHovered ? (
-														renderWeather()
-													) : null}
+												) : isHovered ? (
+													renderWidgetZone(settings.statusWidgets.left)
+												) : null}
 												</div>
 
 												<div className="time-center">
@@ -1179,13 +1270,13 @@ export default function Notch({
 													{isMusicMode ? (
 														<motion.div
 															key="album-art"
-															className="album-art-glow-wrapper"
+															className={`album-art-glow-wrapper${settings.mediaAmbienceEnabled ? " glow-ambient" : ""}${settings.mediaLayout === "compact" && settings.mediaCompactGlowEnabled ? " glow-compact" : ""}`}
 															initial={{ opacity: 0, scale: 0.8 }}
 															animate={{ opacity: 1, scale: 1 }}
 															exit={{ opacity: 0, y: -20, scale: 0.8, filter: "blur(8px)" }}
 															transition={{ duration: 0.12 }}
 														>
-															{albumArtUrl && (
+															{albumArtUrl && settings.mediaAmbienceEnabled && (
 																<img src={albumArtUrl} alt="" className="album-art-glow-bg" />
 															)}
 															<button
@@ -1242,9 +1333,9 @@ export default function Notch({
 																</div>
 															</button>
 														</motion.div>
-													) : isHovered ? (
-														renderBattery()
-													) : null}
+												) : isHovered ? (
+													renderWidgetZone(settings.statusWidgets.right)
+												) : null}
 												</div>
 											</motion.div>
 										</div>
@@ -1316,9 +1407,9 @@ export default function Notch({
 											</div>
 
 											<div
-												className={`cc-pill-tile ${settings.notchMode === "fixed" ? "active" : ""}`}
+												className={`cc-pill-tile ${settings.notchMode !== "peek" ? "active" : ""}`}
 												onClick={toggleNotchModeSetting}
-												title="Cycle notch mode: Fixed / Auto Hide"
+												title="Cycle notch mode: Fixed / Smart / Peek"
 											>
 												<div className="cc-pill-icon-wrapper">
 													<NotchIcon />
@@ -1326,7 +1417,7 @@ export default function Notch({
 												<div className="cc-pill-info">
 													<span className="cc-pill-title">Notch Mode</span>
 													<span className="cc-pill-status">
-														{settings.notchMode === "fixed" ? "Fixed" : "Auto Hide"}
+														{NOTCH_MODE_LABELS[settings.notchMode]}
 													</span>
 												</div>
 											</div>

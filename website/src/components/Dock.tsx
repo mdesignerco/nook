@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, memo } from "react";
 import { motion, AnimatePresence, Reorder } from "framer-motion";
 import { Music, Settings, Terminal, ScrollText, Activity, Sparkles, Globe } from "lucide-react";
+import type { NookSettings } from "../lib/settings";
 
 interface DockItem {
 	id: string;
@@ -9,13 +10,7 @@ interface DockItem {
 }
 
 interface DockProps {
-	settings: {
-		wallpaper: number;
-		dockMode: "fixed" | "auto-hide";
-		notchMode: "fixed" | "auto-hide";
-		accentColor: string;
-		isDockEnabled: boolean;
-	};
+	settings: NookSettings;
 	openApps: string[];
 	minimizedApps: string[];
 	onOpenApp: (appId: string) => void;
