@@ -61,7 +61,7 @@ const Dock = memo(function Dock({
 }: DockProps) {
 	const [dockItems, setDockItems] = useState<DockItem[]>([
 		{ id: "about", name: "About Nook", accent: "#e8c5e5" },
-		{ id: "music", name: "moooosic", accent: "#ff2d55" },
+			{ id: "music", name: "nooosik", accent: "#ff2d55" },
 		{ id: "settings", name: "Settings", accent: "#8e8e93" },
 		{ id: "terminal", name: "some crappy hacker window", accent: "#34c759" },
 		{ id: "changelog", name: "what did we break", accent: "#5e9eff" },

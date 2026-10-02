@@ -14,12 +14,10 @@ import PerformanceApp from "./components/apps/PerformanceApp";
 import FeaturesApp from "./components/apps/FeaturesApp";
 import BrowserApp from "./components/apps/BrowserApp";
 
-import wallpaperImg from "./assets/wallpaper.jpg";
-import wallpaper2 from "./assets/wallpaper-2.jpg";
-import wallpaper3 from "./assets/wallpaper-3.jpg";
-import wallpaper4 from "./assets/wallpaper-4.jpg";
+import nookBackground from "./assets/nook-background.webp";
+import nookTrackCover from "./assets/move-in-silence-cover.png";
 
-const wallpapersList = [wallpaperImg, wallpaper2, wallpaper3, wallpaper4];
+const wallpapersList = [nookBackground];
 
 interface NookSettings {
 	wallpaper: number;
@@ -30,7 +28,7 @@ interface NookSettings {
 }
 
 const defaultSettings: NookSettings = {
-	wallpaper: 2,
+	wallpaper: 0,
 	dockMode: "fixed",
 	notchMode: "fixed",
 	accentColor: "#e8c5e5",
@@ -97,12 +95,11 @@ export default function App() {
 
 	const [playback, setPlayback] = useState({
 		isPlaying: false,
-		trackTitle: "Golden Hour",
-		trackArtist: "Aesthetic Lo-Fi",
-		trackCover:
-			"https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=300&auto=format&fit=crop&q=60",
+		trackTitle: "Move in Silence",
+		trackArtist: "mdesigner",
+		trackCover: nookTrackCover,
 		currentTime: 0,
-		duration: 180,
+		duration: 51.946,
 		volume: 0.5,
 		trackIndex: 0
 	});
@@ -226,7 +223,7 @@ export default function App() {
 
 							<Window
 								id="music"
-								title="moooosic"
+        title="nooosik"
 								isOpen={openApps.includes("music")}
 								isFocused={focusedApp === "music"}
 								isMinimized={minimizedApps.includes("music")}

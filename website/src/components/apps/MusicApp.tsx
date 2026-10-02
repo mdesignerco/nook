@@ -26,7 +26,9 @@ import {
 import { PauseIcon, PlayIcon, SkipBackIcon, SkipForwardIcon } from "../../icons";
 import { loadYouTubeApi } from "../../lib/youtube";
 import type { YouTubePlayer } from "../../lib/youtube";
-import albumArt from "../../assets/keychain-laalu.jpg";
+import { LocalAudioPlayer, localTrackKey } from "../../lib/localAudioPlayer";
+import albumArt from "../../assets/move-in-silence-cover.png";
+import trackAudio from "../../assets/move-in-silence.mp3";
 
 interface PlaybackState {
 	isPlaying: boolean;
@@ -47,10 +49,13 @@ interface MusicAppProps {
 }
 
 interface AlbumTrack {
+	id: string;
 	title: string;
 	artists: string;
 	durationMs: number;
-	videoId: string;
+	artwork?: string;
+	src?: string;
+	videoId?: string;
 }
 
 interface TrackEntry {
@@ -64,64 +69,30 @@ const APPLE_RED = "#fa2d48";
 const IDLE_LEVELS = [0.15, 0.15, 0.15, 0.15, 0.15];
 
 const ALBUM = {
-	title: "Keychain Laalu",
-	artist: "Arpit Bala",
-	genre: "Indian Pop",
-	year: 2025,
+	title: "Move in Silence",
+	artist: "mdesigner",
+	genre: "Colombian Trap",
+	year: 2026,
 	artwork: albumArt,
-	playlistUrl: "https://www.youtube.com/playlist?list=OLAK5uy_kyYXVI95Zk22k5CywnOtE19TS3hP4RTJg",
 	tracks: [
 		{
-			title: "Pyari Amaanat",
-			artists: "Arpit Bala, A.O.D. & Angad Virk",
-			durationMs: 188571,
-			videoId: "pn7-ZM81hQM"
-		},
-		{
-			title: "Chuppi",
-			artists: "Arpit Bala, sufr, Adil, A.O.D. & Angad Virk",
-			durationMs: 253441,
-			videoId: "UJukT1qKH3s"
-		},
-		{
-			title: "Champakali",
-			artists: "Arpit Bala, Natiq, toorjo dey & Angad Virk",
-			durationMs: 135273,
-			videoId: "hI0F69b7BYk"
-		},
-		{
-			title: "Taaron Se",
-			artists: "Arpit Bala, A.O.D., Angad Virk & Karan Kanchan",
-			durationMs: 267142,
-			videoId: "WrczwHORF60"
-		},
-		{
-			title: "Daraaz Mein",
-			artists: "Arpit Bala, A.O.D. & Angad Virk",
-			durationMs: 219375,
-			videoId: "qXNcrFshDNE"
-		},
-		{
-			title: "Kaise Manaye",
-			artists: "Arpit Bala, Adil, Karan Kanchan & A.O.D.",
-			durationMs: 206893,
-			videoId: "GFAE0q_5Aig"
-		},
-		{
-			title: "Best Friend",
-			artists: "Arpit Bala, pho, Adil & NEVERSOBER",
-			durationMs: 221500,
-			videoId: "dfWBmrc3ZQQ"
-		},
-		{
-			title: "Rakhlo Tum Chupaake",
-			artists: "Arpit Bala & Adil",
-			durationMs: 205800,
-			videoId: "slN2QlYr_-c"
-		},
-		{ title: "RTC Bonus", artists: "Arpit Bala & Adil", durationMs: 109947, videoId: "pW959vzEFM0" }
+			id: "move-in-silence",
+			title: "Move in Silence",
+			artists: "mdesigner",
+			durationMs: 51946,
+			artwork: albumArt,
+			src: trackAudio
+		}
 	] as AlbumTrack[]
 };
+
+function trackSourceKey(track: AlbumTrack): string {
+	return track.src ? localTrackKey(track.id) : (track.videoId ?? track.id);
+}
+
+function trackArtwork(track: AlbumTrack): string {
+	return track.artwork ?? ALBUM.artwork;
+}
 
 const TRACK_ENTRIES: TrackEntry[] = ALBUM.tracks.map((track, index) => ({ track, index }));
 
@@ -227,7 +198,7 @@ function TrackList({
 				const seconds = knownDurations[index] ?? track.durationMs / 1000;
 				return (
 					<div
-						key={track.videoId}
+						key={track.id}
 						onClick={() => onSelect(index)}
 						className="group grid cursor-pointer grid-cols-[30px_minmax(0,1fr)_auto_30px] items-center gap-3.5 rounded-md px-3.5 py-[9px] transition-colors hover:bg-white/[0.05]"
 					>
@@ -246,7 +217,7 @@ function TrackList({
 
 						<div className="flex min-w-0 items-center gap-3">
 							{showArtwork && (
-								<img src={ALBUM.artwork} alt="" className="h-9 w-9 shrink-0 rounded object-cover" />
+								<img src={trackArtwork(track)} alt="" className="h-9 w-9 shrink-0 rounded object-cover" />
 							)}
 							<div className="min-w-0">
 								<div
@@ -290,14 +261,16 @@ function TrackList({
 									>
 										<PlayIcon size={10} /> Play
 									</button>
-									<a
-										href={`https://www.youtube.com/watch?v=${track.videoId}`}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="flex w-full items-center gap-2.5 px-3.5 py-2 text-[12.5px] text-white/85 hover:bg-white/[0.07]"
-									>
-										<ExternalLink size={13} /> Open on YouTube
-									</a>
+									{track.videoId && (
+										<a
+											href={`https://www.youtube.com/watch?v=${track.videoId}`}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="flex w-full items-center gap-2.5 px-3.5 py-2 text-[12.5px] text-white/85 hover:bg-white/[0.07]"
+										>
+											<ExternalLink size={13} /> Open on YouTube
+										</a>
+									)}
 								</div>
 							)}
 						</div>
@@ -316,7 +289,7 @@ export default function MusicApp({ playback, setPlaybackState, setVisualizerData
 	const errorCountRef = useRef(0);
 	const volumeRef = useRef(playback.volume);
 
-	const [playerReady, setPlayerReady] = useState(false);
+	const [ytPlayerReady, setYtPlayerReady] = useState(false);
 	const [view, setView] = useState<View>("home");
 	const [query, setQuery] = useState("");
 	const [shuffle, setShuffle] = useState(false);
@@ -388,13 +361,59 @@ export default function MusicApp({ playback, setPlaybackState, setVisualizerData
 		advanceRef.current = advance;
 	}, [advance]);
 
+	const usesLocalSource = Boolean(track.src);
+	const resolveLocalSource = useCallback(
+		(key: string) => ALBUM.tracks.find((item) => trackSourceKey(item) === key)?.src,
+		[]
+	);
+	const playerReady = usesLocalSource || ytPlayerReady;
+
 	useEffect(() => {
 		let disposed = false;
+
+		const teardown = () => {
+			playerReadyRef.current = false;
+			try {
+				playerRef.current?.destroy();
+			} catch {
+				/* ignore */
+			}
+			playerRef.current = null;
+		};
+
+		if (usesLocalSource) {
+			const player = new LocalAudioPlayer(resolveLocalSource, {
+				onStateChange: (state) => {
+					if (state === "playing") {
+						errorCountRef.current = 0;
+						if (!playingRef.current) setPlaybackState({ isPlaying: true });
+					} else if (state === "paused") {
+						if (playingRef.current) setPlaybackState({ isPlaying: false });
+					} else {
+						advanceRef.current(false);
+					}
+				},
+				onBlocked: () => {
+					setPlaybackState({ isPlaying: false });
+				},
+				onError: () => {
+					errorCountRef.current += 1;
+					setPlaybackState({ isPlaying: false });
+				}
+			});
+			playerRef.current = player;
+			player.setVolume(Math.round(volumeRef.current * 100));
+			player.cueVideoById({ videoId: trackSourceKey(ALBUM.tracks[currentIndexRef.current]) });
+			playerReadyRef.current = true;
+			loadedIndexRef.current = currentIndexRef.current;
+
+			return teardown;
+		}
 
 		loadYouTubeApi().then((YT) => {
 			if (disposed || !playerHostRef.current || playerRef.current) return;
 			playerRef.current = new YT.Player(playerHostRef.current, {
-				videoId: ALBUM.tracks[0].videoId,
+				videoId: trackSourceKey(ALBUM.tracks[0]),
 				playerVars: {
 					controls: 0,
 					disablekb: 1,
@@ -408,16 +427,16 @@ export default function MusicApp({ playback, setPlaybackState, setVisualizerData
 				events: {
 					onReady: (event) => {
 						playerReadyRef.current = true;
-						setPlayerReady(true);
+						setYtPlayerReady(true);
 						try {
 							event.target.setVolume(Math.round(volumeRef.current * 100));
 							const startIndex = currentIndexRef.current;
 							if (startIndex !== 0) {
 								loadedIndexRef.current = startIndex;
 								if (playingRef.current) {
-									event.target.loadVideoById({ videoId: ALBUM.tracks[startIndex].videoId });
+									event.target.loadVideoById({ videoId: trackSourceKey(ALBUM.tracks[startIndex]) });
 								} else {
-									event.target.cueVideoById({ videoId: ALBUM.tracks[startIndex].videoId });
+									event.target.cueVideoById({ videoId: trackSourceKey(ALBUM.tracks[startIndex]) });
 								}
 							} else if (playingRef.current) {
 								event.target.playVideo();
@@ -450,25 +469,19 @@ export default function MusicApp({ playback, setPlaybackState, setVisualizerData
 
 		return () => {
 			disposed = true;
-			playerReadyRef.current = false;
-			try {
-				playerRef.current?.destroy();
-			} catch {
-				/* ignore */
-			}
-			playerRef.current = null;
+			teardown();
 		};
-	}, [setPlaybackState]);
+	}, [setPlaybackState, usesLocalSource, resolveLocalSource]);
 
 	useEffect(() => {
 		if (!playerReady || loadedIndexRef.current === currentTrackIndex) return;
 		loadedIndexRef.current = currentTrackIndex;
-		const videoId = track.videoId;
+		const sourceKey = trackSourceKey(track);
 		callPlayer((player) => {
-			if (playingRef.current) player.loadVideoById({ videoId });
-			else player.cueVideoById({ videoId });
+			if (playingRef.current) player.loadVideoById({ videoId: sourceKey });
+			else player.cueVideoById({ videoId: sourceKey });
 		});
-	}, [currentTrackIndex, playerReady, track.videoId, callPlayer]);
+	}, [currentTrackIndex, playerReady, track, callPlayer]);
 
 	useEffect(() => {
 		if (!playerReady) return;
@@ -535,8 +548,8 @@ export default function MusicApp({ playback, setPlaybackState, setVisualizerData
 	useEffect(() => {
 		setPlaybackState({
 			trackTitle: track.title,
-			trackArtist: ALBUM.artist,
-			trackCover: ALBUM.artwork,
+			trackArtist: track.artists,
+			trackCover: trackArtwork(track),
 			trackIndex: currentTrackIndex,
 			tracksCount: ALBUM.tracks.length
 		});
@@ -568,7 +581,7 @@ export default function MusicApp({ playback, setPlaybackState, setVisualizerData
 			return;
 		}
 		loadedIndexRef.current = index;
-		callPlayer((player) => player.loadVideoById({ videoId: ALBUM.tracks[index].videoId }));
+		callPlayer((player) => player.loadVideoById({ videoId: trackSourceKey(ALBUM.tracks[index]) }));
 		setPlaybackState({ trackIndex: index, isPlaying: true, currentTime: 0, duration: 0 });
 	};
 
@@ -726,69 +739,58 @@ export default function MusicApp({ playback, setPlaybackState, setVisualizerData
 						className="pointer-events-none absolute -left-10 -top-24 h-64 w-64 rounded-full opacity-[0.18] blur-[110px]"
 						style={{ backgroundColor: APPLE_RED }}
 					/>
-					<div className="relative">
-						<a
-							href={ALBUM.playlistUrl}
-							target="_blank"
-							rel="noopener noreferrer"
-							title="Open playlist on YouTube"
-							className="absolute right-0 top-0 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/60 transition hover:bg-white/[0.09] hover:text-white"
-						>
-							<Ellipsis size={16} />
-						</a>
-						<div className="flex items-end gap-6">
-							<img
-								src={ALBUM.artwork}
-								alt={`${ALBUM.title} cover`}
-								className="h-[156px] w-[156px] shrink-0 rounded-lg object-cover shadow-[0_22px_54px_-14px_rgba(0,0,0,0.9)]"
-							/>
-							<div className="min-w-0 pb-0.5">
-								<h1 className="truncate text-[30px] font-bold leading-tight tracking-tight">
-									{ALBUM.title}
-								</h1>
+					<div className="flex items-end gap-6">
+						<img
+							src={ALBUM.artwork}
+							alt={`${ALBUM.title} cover`}
+							className="h-[156px] w-[156px] shrink-0 rounded-lg object-cover shadow-[0_22px_54px_-14px_rgba(0,0,0,0.9)]"
+						/>
+						<div className="min-w-0 pb-0.5">
+							<h1 className="truncate text-[30px] font-bold leading-tight tracking-tight">
+								{ALBUM.title}
+							</h1>
+							<button
+								onClick={() => {
+									setQuery(ALBUM.artist);
+									setView("search");
+								}}
+								className="mt-0.5 block text-[18px] font-medium transition hover:underline"
+								style={{ color: APPLE_RED }}
+							>
+								{ALBUM.artist}
+							</button>
+							<p className="mt-0.5 text-[11.5px] text-white/40">
+								{ALBUM.genre} · {ALBUM.year}
+							</p>
+							<div className="mt-4 flex items-center gap-3">
 								<button
-									onClick={() => {
-										setQuery(ALBUM.artist);
-										setView("search");
-									}}
-									className="mt-0.5 block text-[18px] font-medium transition hover:underline"
-									style={{ color: APPLE_RED }}
+									onClick={shufflePlay}
+									title="Shuffle"
+									aria-label="Shuffle"
+									className="flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.08] text-white/75 transition hover:bg-white/[0.14] hover:text-white active:scale-95"
 								>
-									{ALBUM.artist}
+									<Shuffle size={15} />
 								</button>
-								<p className="mt-0.5 text-[11.5px] text-white/40">
-									{ALBUM.genre} · {ALBUM.year}
-								</p>
-								<div className="mt-4 flex items-center gap-3">
-									<button
-										onClick={shufflePlay}
-										title="Shuffle"
-										aria-label="Shuffle"
-										className="flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.08] text-white/75 transition hover:bg-white/[0.14] hover:text-white active:scale-95"
-									>
-										<Shuffle size={15} />
-									</button>
-									<button
-										onClick={togglePlay}
-										className="flex items-center gap-2 rounded-full bg-white px-6 py-2.5 text-[13.5px] font-semibold text-black transition hover:bg-white/90 active:scale-[0.97]"
-									>
-										{playback.isPlaying ? <PauseIcon size={12} /> : <PlayIcon size={13} />}
-										{playback.isPlaying ? "Pause" : "Play"}
-									</button>
-									<button
-										onClick={() => setLibraryAdded((prev) => !prev)}
-										aria-pressed={libraryAdded}
-										aria-label={libraryAdded ? "Remove from library" : "Add to library"}
-										title={libraryAdded ? "Added to library" : "Add to library"}
-										className={`flex h-9 w-9 items-center justify-center rounded-full border transition active:scale-95 ${
-											libraryAdded
-												? "border-transparent bg-white/90 text-black"
-												: "border-white/10 bg-white/[0.04] text-white/70 hover:bg-white/[0.09] hover:text-white"
-										}`}
-									>
-										{libraryAdded ? <Check size={15} /> : <Plus size={15} />}
-									</button>
-								</div>
+								<button
+									onClick={togglePlay}
+									className="flex items-center gap-2 rounded-full bg-white px-6 py-2.5 text-[13.5px] font-semibold text-black transition hover:bg-white/90 active:scale-[0.97]"
+								>
+									{playback.isPlaying ? <PauseIcon size={12} /> : <PlayIcon size={13} />}
+									{playback.isPlaying ? "Pause" : "Play"}
+								</button>
+								<button
+									onClick={() => setLibraryAdded((prev) => !prev)}
+									aria-pressed={libraryAdded}
+									aria-label={libraryAdded ? "Remove from library" : "Add to library"}
+									title={libraryAdded ? "Added to library" : "Add to library"}
+									className={`flex h-9 w-9 items-center justify-center rounded-full border transition active:scale-95 ${
+										libraryAdded
+											? "border-transparent bg-white/90 text-black"
+											: "border-white/10 bg-white/[0.04] text-white/70 hover:bg-white/[0.09] hover:text-white"
+									}`}
+								>
+									{libraryAdded ? <Check size={15} /> : <Plus size={15} />}
+								</button>
 							</div>
 						</div>
 					</div>
@@ -891,26 +893,15 @@ export default function MusicApp({ playback, setPlaybackState, setVisualizerData
 						active={view === "songs"}
 						onClick={() => setView("songs")}
 					/>
-					<a
-						href={ALBUM.playlistUrl}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="flex items-center gap-2.5 rounded-md px-2.5 py-[7.5px] text-[13.5px] text-white/70 transition-colors hover:bg-white/[0.05] hover:text-white"
-					>
-						<span className="flex w-[18px] shrink-0 items-center justify-center">
-							<ExternalLink size={15} />
-						</span>
-						<span className="truncate">Open in YouTube</span>
-					</a>
 				</nav>
 				<div className="mt-2 flex items-center gap-2.5 border-t border-white/[0.05] px-2 pt-2.5">
 					<div
 						className="flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold text-black"
 						style={{ backgroundColor: APPLE_RED }}
 					>
-						ZS
+						MD
 					</div>
-					<span className="truncate text-[12.5px] font-medium text-white/80">zesty singh</span>
+					<span className="truncate text-[12.5px] font-medium text-white/80">mdesigner</span>
 				</div>
 			</aside>
 
@@ -1045,14 +1036,14 @@ export default function MusicApp({ playback, setPlaybackState, setVisualizerData
 										const active = index === currentTrackIndex;
 										return (
 											<button
-												key={item.videoId}
+												key={item.id}
 												onClick={() => selectTrack(index)}
 												className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors ${
 													active ? "bg-white/[0.08]" : "hover:bg-white/[0.05]"
 												}`}
 											>
 												<img
-													src={ALBUM.artwork}
+													src={trackArtwork(item)}
 													alt=""
 													className="h-9 w-9 shrink-0 rounded-md object-cover"
 												/>

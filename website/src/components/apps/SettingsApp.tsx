@@ -28,31 +28,35 @@ export default function SettingsApp({ settings, updateSetting, wallpapersList }:
 						Wallpaper & Accents
 					</div>
 					<div className="bg-white/[0.03] border border-white/[0.05] rounded-xl p-3 space-y-4">
-						{/* Wallpapers Presets */}
-						<div>
-							<label className="text-[12px] text-white/50 block mb-2">Desktop Wallpaper</label>
-							<div className="grid grid-cols-4 gap-2">
-								{wallpapersList.map((wp, idx) => (
-									<button
-										key={idx}
-										onClick={() => updateSetting("wallpaper", idx)}
-										className={`relative aspect-[16/10] rounded-md overflow-hidden border-2 transition-all ${
-											settings.wallpaper === idx
-												? "border-white scale-[0.98]"
-												: "border-transparent opacity-60 hover:opacity-100 hover:scale-[1.02]"
-										}`}
-									>
-										<div
-											className="w-full h-full bg-cover bg-center"
-											style={{ backgroundImage: `url(${wp})` }}
-										/>
-										<div className="absolute inset-0 bg-black/10 hover:bg-black/0 transition-colors" />
-									</button>
-								))}
-							</div>
-						</div>
+						{/* Wallpaper picker: only meaningful when there is a choice */}
+						{wallpapersList.length > 1 && (
+							<>
+								<div>
+									<label className="text-[12px] text-white/50 block mb-2">Desktop Wallpaper</label>
+									<div className="grid grid-cols-4 gap-2">
+										{wallpapersList.map((wp, idx) => (
+											<button
+												key={idx}
+												onClick={() => updateSetting("wallpaper", idx)}
+												className={`relative aspect-[16/10] rounded-md overflow-hidden border-2 transition-all ${
+													settings.wallpaper === idx
+														? "border-white scale-[0.98]"
+														: "border-transparent opacity-60 hover:opacity-100 hover:scale-[1.02]"
+												}`}
+											>
+												<div
+													className="w-full h-full bg-cover bg-center"
+													style={{ backgroundImage: `url(${wp})` }}
+												/>
+												<div className="absolute inset-0 bg-black/10 hover:bg-black/0 transition-colors" />
+											</button>
+										))}
+									</div>
+								</div>
 
-						<div className="h-[1px] bg-white/5" />
+								<div className="h-[1px] bg-white/5" />
+							</>
+						)}
 
 						{/* Accent Color Pickers */}
 						<div>
