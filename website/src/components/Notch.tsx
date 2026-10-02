@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import type { CSSProperties } from "react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
-import { ArrowUpDown, Cpu, HardDrive, MemoryStick } from "lucide-react";
+import { ArrowUpDown, Cpu, HardDrive, MemoryStick, Repeat } from "lucide-react";
 import {
 	PlayIcon,
 	PauseIcon,
@@ -702,20 +702,61 @@ export default function Notch({
 		setIsTimerFinished(false);
 	};
 
-	const toggleCalendarMode = (e: React.MouseEvent) => {
+	const baseMusicMode = () =>
+		settings.musicModeEnabled && hasMedia && isPlaying ? "music" : "status";
+
+	// Click on the center time cycles: base → calendar → command-center → base,
+	// returning to music whenever media is present and playing.
+	const cycleTimeClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		if (isTimerFinished) {
 			resetTimer();
 			return;
 		}
-		if (!settings.calendarEnabled) return;
 		setNookMode((prev) => {
-			if (prev === "calendar") {
-				return hasMedia && isPlaying && settings.musicModeEnabled ? "music" : "status";
-			}
+			if (prev === "calendar") return "command-center";
+			if (prev === "command-center") return baseMusicMode();
+			if (!settings.calendarEnabled) return "command-center";
 			return "calendar";
 		});
 	};
+
+	// Center - Time (always visible). Shared by the status/command-center row and
+	// the music top row so the clock never disappears when the mode changes.
+	const renderTimeCenter = (withCycleHint = false) => (
+		<div className="time-center">
+			<div className="time-flip-container" onClick={cycleTimeClick}>
+				<AnimatePresence initial={false}>
+					{(isTimerRunning && isCompactTimerVisible) || isTimerFinished ? (
+						<motion.span
+							key="timer"
+							className={`time compact-timer ${isTimerFinished ? "timer-finished" : ""}`}
+							initial={{ rotateX: -90, opacity: 0 }}
+							animate={{ rotateX: 0, opacity: 1 }}
+							exit={{ rotateX: 90, opacity: 0 }}
+							transition={{ type: "spring", stiffness: 600, damping: 30 }}
+						>
+							{formatTimerTime(timerSeconds)}
+						</motion.span>
+					) : (
+						<motion.span
+							key="clock"
+							className="time"
+							initial={{ rotateX: -90, opacity: 0 }}
+							animate={{ rotateX: 0, opacity: 1 }}
+							exit={{ rotateX: 90, opacity: 0 }}
+							transition={{ type: "spring", stiffness: 600, damping: 30 }}
+						>
+							{time}
+							{withCycleHint && (
+								<Repeat size={9} strokeWidth={3} className="mode-cycle-hint" aria-hidden="true" />
+							)}
+						</motion.span>
+					)}
+				</AnimatePresence>
+			</div>
+		</div>
+	);
 
 	const handleWheel = (e: React.WheelEvent) => {
 		const target = e.target as HTMLElement;
@@ -731,11 +772,15 @@ export default function Notch({
 		const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
 		if (Math.abs(delta) < 5) return;
 
-		const musicBeforeStatus = isPlaying && hasMedia;
+		const musicBeforeStatus = isPlaying && hasMedia && settings.musicModeEnabled;
 		const modes: ("command-center" | "status" | "music" | "calendar")[] = musicBeforeStatus
 			? ["command-center", "music", "status", "calendar"]
 			: ["command-center", "status", "music", "calendar"];
-		const availableModes = modes.filter((m) => (m === "music" ? hasMedia : true));
+		const availableModes = modes.filter((m) => {
+			if (m === "music" && (!settings.musicModeEnabled || !hasMedia)) return false;
+			if (m === "calendar" && !settings.calendarEnabled) return false;
+			return true;
+		});
 
 		const currentIndex = availableModes.indexOf(nookMode);
 		if (currentIndex === -1) return;
@@ -800,7 +845,7 @@ export default function Notch({
 		if (nookMode === "calendar") return 310;
 		if (nookMode === "command-center") return isHovered ? 230 : 36;
 		if (nookMode === "status") return 36;
-		if (isMusicMode && isHovered) return 120;
+		if (isMusicMode && isHovered) return 156;
 		return 36;
 	};
 
@@ -993,6 +1038,8 @@ export default function Notch({
 										exit={{ opacity: 0, scale: 0.98, transition: { duration: 0.1 } }}
 										transition={{ type: "spring", stiffness: 500, damping: 30 }}
 									>
+										<div className="music-top-row">{renderTimeCenter(true)}</div>
+
 										<div className="compact-premium-layout">
 											<div className="album-art-section">
 												<motion.div
@@ -1236,35 +1283,7 @@ export default function Notch({
 												) : null}
 												</div>
 
-												<div className="time-center">
-													<div className="time-flip-container" onClick={toggleCalendarMode}>
-														<AnimatePresence initial={false}>
-															{(isTimerRunning && isCompactTimerVisible) || isTimerFinished ? (
-																<motion.span
-																	key="timer"
-																	className={`time compact-timer ${isTimerFinished ? "timer-finished" : ""}`}
-																	initial={{ rotateX: -90, opacity: 0 }}
-																	animate={{ rotateX: 0, opacity: 1 }}
-																	exit={{ rotateX: 90, opacity: 0 }}
-																	transition={{ type: "spring", stiffness: 600, damping: 30 }}
-																>
-																	{formatTimerTime(timerSeconds)}
-																</motion.span>
-															) : (
-																<motion.span
-																	key="clock"
-																	className="time"
-																	initial={{ rotateX: -90, opacity: 0 }}
-																	animate={{ rotateX: 0, opacity: 1 }}
-																	exit={{ rotateX: 90, opacity: 0 }}
-																	transition={{ type: "spring", stiffness: 600, damping: 30 }}
-																>
-																	{time}
-																</motion.span>
-															)}
-														</AnimatePresence>
-													</div>
-												</div>
+												{renderTimeCenter()}
 
 												<div className="side-content right">
 													{isMusicMode ? (
