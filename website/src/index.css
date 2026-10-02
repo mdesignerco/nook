@@ -1489,6 +1489,20 @@ body {
 	height: auto;
 }
 
+/* The clock becomes a flex row so the cycle hint sits on its vertical center
+   instead of hanging off the text baseline (line-height: 1 would drop it low).
+   Same technique the app uses for .compact-timer and the timer bell. */
+.time {
+	display: inline-flex;
+	align-items: center;
+}
+
+.compact-timer {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+}
+
 .time .mode-cycle-hint {
 	margin-left: 3px;
 	vertical-align: middle;
