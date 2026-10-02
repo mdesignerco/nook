@@ -14,7 +14,7 @@ import {
 	Clock
 } from "lucide-react";
 
-const GITHUB_REPO = "SehajveerSingh2005/bloom";
+const GITHUB_REPO = "mdesignerco/nook";
 
 interface GitHubRelease {
 	tag_name: string;
@@ -237,7 +237,7 @@ export default function ChangelogApp() {
 						GitHub <ExternalLink size={10} />
 					</a>
 				</div>
-				<p className="text-[12px] text-white/35">What's new in Bloom</p>
+				<p className="text-[12px] text-white/35">What's new in Nook</p>
 			</div>
 
 			{/* Content */}

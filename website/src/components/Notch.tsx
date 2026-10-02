@@ -468,7 +468,7 @@ export default function Notch({
 	onOpenApp,
 	updateSetting
 }: NotchProps) {
-	const [bloomMode, setBloomMode] = useState<"music" | "calendar" | "command-center" | "status">(
+	const [nookMode, setNookMode] = useState<"music" | "calendar" | "command-center" | "status">(
 		"status"
 	);
 	const [isHovered, setIsHovered] = useState(false);
@@ -516,8 +516,8 @@ export default function Notch({
 	const isAutoHide = settings.notchMode === "auto-hide";
 	const isHidden = !startupAnimating && isAutoHide && interactionState === "none" && !eventPeek;
 
-	const isCalendarMode = bloomMode === "calendar";
-	const isMusicMode = hasMedia && bloomMode === "music";
+	const isCalendarMode = nookMode === "calendar";
+	const isMusicMode = hasMedia && nookMode === "music";
 
 	const triggerEventPeek = useCallback((duration = 3000) => {
 		setEventPeek(true);
@@ -601,26 +601,26 @@ export default function Notch({
 		if (
 			hasMedia &&
 			isPlaying &&
-			bloomMode !== "calendar" &&
+			nookMode !== "calendar" &&
 			(isNewTrackWhilePlaying || justStartedPlaying)
 		) {
 			manualMusicRef.current = false;
-			setBloomMode("music");
+			setNookMode("music");
 		}
 
 		lastTrackRef.current = title;
 		lastPlayingRef.current = isPlaying;
-	}, [hasMedia, isPlaying, title, isHovered, bloomMode, isAutoHide, triggerEventPeek]);
+	}, [hasMedia, isPlaying, title, isHovered, nookMode, isAutoHide, triggerEventPeek]);
 
 	useEffect(() => {
 		let timer: number | undefined;
-		if (!isPlaying && bloomMode === "music" && !manualMusicRef.current) {
-			timer = window.setTimeout(() => setBloomMode("status"), 5000);
+		if (!isPlaying && nookMode === "music" && !manualMusicRef.current) {
+			timer = window.setTimeout(() => setNookMode("status"), 5000);
 		}
 		return () => {
 			if (timer) window.clearTimeout(timer);
 		};
-	}, [isPlaying, bloomMode]);
+	}, [isPlaying, nookMode]);
 
 	useEffect(() => {
 		const updateTime = () => {
@@ -633,10 +633,10 @@ export default function Notch({
 	}, []);
 
 	useEffect(() => {
-		if (!(isTimerRunning && bloomMode !== "calendar")) return;
+		if (!(isTimerRunning && nookMode !== "calendar")) return;
 		const id = window.setInterval(() => setIsCompactTimerVisible((prev) => !prev), 5000);
 		return () => window.clearInterval(id);
-	}, [isTimerRunning, bloomMode]);
+	}, [isTimerRunning, nookMode]);
 
 	useEffect(() => {
 		if (!isTimerRunning) return;
@@ -682,7 +682,7 @@ export default function Notch({
 			resetTimer();
 			return;
 		}
-		setBloomMode((prev) => {
+		setNookMode((prev) => {
 			if (prev === "calendar") {
 				return hasMedia && isPlaying ? "music" : "status";
 			}
@@ -710,20 +710,20 @@ export default function Notch({
 			: ["command-center", "status", "music", "calendar"];
 		const availableModes = modes.filter((m) => (m === "music" ? hasMedia : true));
 
-		const currentIndex = availableModes.indexOf(bloomMode);
+		const currentIndex = availableModes.indexOf(nookMode);
 		if (currentIndex === -1) return;
 
 		if (delta > 0) {
 			const nextIndex = (currentIndex + 1) % availableModes.length;
 			const nextMode = availableModes[nextIndex];
 			manualMusicRef.current = nextMode === "music";
-			setBloomMode(nextMode);
+			setNookMode(nextMode);
 			lastScrollTime.current = now;
 		} else if (delta < 0) {
 			const prevIndex = (currentIndex - 1 + availableModes.length) % availableModes.length;
 			const prevMode = availableModes[prevIndex];
 			manualMusicRef.current = prevMode === "music";
-			setBloomMode(prevMode);
+			setNookMode(prevMode);
 			lastScrollTime.current = now;
 		}
 	};
@@ -744,8 +744,8 @@ export default function Notch({
 
 	const getDynamicWidth = () => {
 		if (isCalendarMode) return 480;
-		if (bloomMode === "command-center" && isHovered) return 350;
-		if (bloomMode === "status" && isHovered) return Math.min(200 + 2 * 50, 380);
+		if (nookMode === "command-center" && isHovered) return 350;
+		if (nookMode === "status" && isHovered) return Math.min(200 + 2 * 50, 380);
 		if (isMusicMode && isHovered) return 340;
 
 		let w = 140;
@@ -761,9 +761,9 @@ export default function Notch({
 		if (!isExpanded || isHidden) {
 			return isImpacted ? 28.9 : 44.2;
 		}
-		if (bloomMode === "calendar") return 310;
-		if (bloomMode === "command-center") return isHovered ? 230 : 36;
-		if (bloomMode === "status") return 36;
+		if (nookMode === "calendar") return 310;
+		if (nookMode === "command-center") return isHovered ? 230 : 36;
+		if (nookMode === "status") return 36;
 		if (isMusicMode && isHovered) return 120;
 		return 36;
 	};
@@ -812,25 +812,25 @@ export default function Notch({
 			)}
 
 			<motion.div
-				className={`bloom ${isHovered ? "expanded" : ""} ${isImpacted ? "is-impacted" : ""} ${isCalendarMode ? "calendar-mode" : ""}`}
+				className={`nook ${isHovered ? "expanded" : ""} ${isImpacted ? "is-impacted" : ""} ${isCalendarMode ? "calendar-mode" : ""}`}
 				onMouseEnter={() => setIsNotchHovered(true)}
 				onMouseLeave={() => setIsNotchHovered(false)}
 				onWheel={handleWheel}
 				onHoverStart={() => {
 					setIsHovered(true);
-					setBloomMode(hasMedia ? "music" : "status");
+					setNookMode(hasMedia ? "music" : "status");
 				}}
 				onHoverEnd={() => {
 					setIsHovered(false);
 					const targetMode = hasMedia && isPlaying ? "music" : "status";
-					if (bloomMode === "music") {
-						setBloomMode(targetMode);
+					if (nookMode === "music") {
+						setNookMode(targetMode);
 					} else if (
-						bloomMode === "command-center" ||
-						bloomMode === "calendar" ||
-						bloomMode === "status"
+						nookMode === "command-center" ||
+						nookMode === "calendar" ||
+						nookMode === "status"
 					) {
-						setBloomMode(targetMode);
+						setNookMode(targetMode);
 					}
 				}}
 				onClick={(e) => e.stopPropagation()}
@@ -877,7 +877,7 @@ export default function Notch({
 				<AnimatePresence mode="wait">
 					{isReady && (
 						<motion.div
-							key="bloom-content"
+							key="nook-content"
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
 							exit={{ opacity: 0 }}
@@ -1253,7 +1253,7 @@ export default function Notch({
 							</AnimatePresence>
 
 							<AnimatePresence>
-								{bloomMode === "command-center" && (
+								{nookMode === "command-center" && (
 									<motion.div
 										className="command-center-content-minimal"
 										onClick={(e) => e.stopPropagation()}
@@ -1373,7 +1373,7 @@ export default function Notch({
 													e.stopPropagation();
 													onOpenApp("settings");
 												}}
-												title="Bloom Settings"
+												title="Nook Settings"
 											>
 												<SettingsIcon />
 											</button>
@@ -1383,7 +1383,7 @@ export default function Notch({
 													e.stopPropagation();
 													window.location.reload();
 												}}
-												title="Restart Bloom"
+												title="Restart Nook"
 											>
 												<ReloadIcon />
 											</button>

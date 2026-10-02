@@ -21,7 +21,7 @@ import wallpaper4 from "./assets/wallpaper-4.jpg";
 
 const wallpapersList = [wallpaperImg, wallpaper2, wallpaper3, wallpaper4];
 
-interface BloomSettings {
+interface NookSettings {
 	wallpaper: number;
 	dockMode: "fixed" | "auto-hide";
 	notchMode: "fixed" | "auto-hide";
@@ -29,7 +29,7 @@ interface BloomSettings {
 	isDockEnabled: boolean;
 }
 
-const defaultSettings: BloomSettings = {
+const defaultSettings: NookSettings = {
 	wallpaper: 2,
 	dockMode: "fixed",
 	notchMode: "fixed",
@@ -38,11 +38,13 @@ const defaultSettings: BloomSettings = {
 };
 
 export default function App() {
-	const [settings, setSettings] = useState<BloomSettings>(() => {
-		const saved = localStorage.getItem("bloom-settings");
+	const [settings, setSettings] = useState<NookSettings>(() => {
+		// Pre-4.2 demos stored the same blob under "bloom-settings"; migrate once.
+		const saved =
+			localStorage.getItem("nook-settings") ?? localStorage.getItem("bloom-settings");
 		if (saved) {
 			try {
-				return { ...defaultSettings, ...(JSON.parse(saved) as Partial<BloomSettings>) };
+				return { ...defaultSettings, ...(JSON.parse(saved) as Partial<NookSettings>) };
 			} catch {
 				return defaultSettings;
 			}
@@ -95,7 +97,7 @@ export default function App() {
 
 	const [playback, setPlayback] = useState({
 		isPlaying: false,
-		trackTitle: "Golden Hour Bloom",
+		trackTitle: "Golden Hour",
 		trackArtist: "Aesthetic Lo-Fi",
 		trackCover:
 			"https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=300&auto=format&fit=crop&q=60",
@@ -120,7 +122,7 @@ export default function App() {
 		root.style.setProperty("--accent-color", settings.accentColor);
 		root.style.setProperty("--accent-hover", settings.accentColor + "cc");
 		root.style.setProperty("--bg-glow", `${settings.accentColor}18`);
-		localStorage.setItem("bloom-settings", JSON.stringify(settings));
+		localStorage.setItem("nook-settings", JSON.stringify(settings));
 	}, [settings]);
 
 	const handleOpenApp = useCallback((appId: string) => {
@@ -202,7 +204,7 @@ export default function App() {
 						<div className="relative w-full h-full pointer-events-auto">
 							<Window
 								id="about"
-								title="the hell is bloom?!"
+								title="About Nook"
 								isOpen={openApps.includes("about")}
 								isFocused={focusedApp === "about"}
 								isMinimized={minimizedApps.includes("about")}
@@ -215,8 +217,8 @@ export default function App() {
 								viewport={viewport}
 							>
 								<AboutApp
-									githubUrl="https://github.com/SehajveerSingh2005/bloom"
-									downloadUrl="https://github.com/SehajveerSingh2005/bloom/releases/latest"
+									githubUrl="https://github.com/mdesignerco/nook"
+									downloadUrl="https://github.com/mdesignerco/nook/releases/latest"
 									accentColor={settings.accentColor}
 									onOpenApp={handleOpenApp}
 								/>
@@ -245,7 +247,7 @@ export default function App() {
 
 							<Window
 								id="settings"
-								title="bloom brain surgery"
+								title="Settings"
 								isOpen={openApps.includes("settings")}
 								isFocused={focusedApp === "settings"}
 								isMinimized={minimizedApps.includes("settings")}
@@ -317,7 +319,7 @@ export default function App() {
 
 							<Window
 								id="features"
-								title="bloom propaganda"
+								title="Features"
 								isOpen={openApps.includes("features")}
 								isFocused={focusedApp === "features"}
 								isMinimized={minimizedApps.includes("features")}
