@@ -1078,7 +1078,11 @@ body {
 
 /* Expanded music layout */
 .expanded-music-container {
+	display: flex;
+	flex-direction: column;
 	align-items: stretch;
+	position: relative;
+	z-index: 1;
 }
 
 .art-placeholder-mini {
@@ -1467,6 +1471,7 @@ body {
 	margin: 0;
 }
 
+/* Info row on top of the media panel (mirrors calendar / command center) */
 .music-top-row {
 	display: flex;
 	align-items: center;
@@ -1476,6 +1481,12 @@ body {
 	flex-shrink: 0;
 	position: relative;
 	z-index: 2;
+}
+
+.expanded-music-container > .compact-premium-layout {
+	flex: 1;
+	min-height: 0;
+	height: auto;
 }
 
 .time .mode-cycle-hint {
