@@ -1,7 +1,8 @@
 <div align="center">
 
 <img 
-  src="https://github.com/mdesignerco/nook/blob/main/src-tauri/icons/128x128.png" 
+  src="https://raw.githubusercontent.com/mdesignerco/nook/main/src-tauri/icons/128x128.png"
+  alt="Nook"
   width="72"
 />
 
@@ -61,32 +62,10 @@ Width, height, border-radius, position — all animate independently.
 It feels mechanical. In a good way.
 
 ---
-<!--
-## The Dock
 
- SHOWCASE: GIF — dock appearing on hover, drag-reorder, window previews 
-<!-- ![Dock Demo[❤️](your-dock-gif-url) -->
-<!--
-<p align="center">
-  <img width="576" height="102" alt="Nook Dock" src="https://github.com/user-attachments/assets/96229f0e-1246-4baf-b8ad-3e8f77142a12" />
-</p>
-
-A taskbar that actually moves.
-
-Nook replaces your native Windows taskbar.
-It sits at the bottom of your screen, always there when you need it.
-
-Drag to reorder.
-Hover for window previews.
-Right-click for context menus.
-
-It's not an overlay.
-It _is_ your taskbar.
--->
-<!-- SHOWCASE: GIF — dock hover previews in action -->
-<!-- ![Window Previews[❤️](your-preview-gif-url) -->
-
----
+<!-- The Dock section was intentionally removed on 2026-10-01. Kept as a note in case
+     it returns. Showcase image used:
+     https://github.com/user-attachments/assets/96229f0e-1246-4baf-b8ad-3e8f77142a12 -->
 
 ## Under the Hood
 
