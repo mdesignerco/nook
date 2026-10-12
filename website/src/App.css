@@ -29,3 +29,10 @@
 .nook-mascot-placeholder img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .nook-mascot button:focus-visible { outline: 2px solid #d68b26; outline-offset: 4px; border-radius: 16px; }
 @media (max-width: 640px) { .nook-mascot { right: 12px; bottom: max(90px, env(safe-area-inset-bottom)); width: 80px; height: 80px; } .nook-mascot > button { width: 80px !important; height: 80px !important; } }
+.nook-mascot-menu { position: absolute; right: 0; bottom: calc(100% + 12px); width: 224px; max-height: min(440px, 65vh); overflow-y: auto; padding: 8px; background: #121820; color: #f2f4f7; border: 1px solid #ffffff20; border-radius: 16px; box-shadow: 0 12px 36px #0008; }
+.nook-mascot-menu-title { padding: 8px 10px 12px; font-size: 11px; color: #d68b26; font-weight: 600; }
+.nook-mascot-menu button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; border: 0; border-radius: 8px; background: transparent; padding: 10px; color: inherit; cursor: pointer; text-align: left; font: inherit; font-size: 12px; }
+.nook-mascot-menu button:hover, .nook-mascot-menu button:focus-visible { background: #ffffff12; }
+.nook-window-open { margin-left: auto; height: 5px; width: 5px; border-radius: 50%; background: #d68b26; }
+.nook-mascot-character { width: 100%; height: 100%; }
+@media (max-width: 640px) { .nook-mascot-character > button { width: 80px !important; height: 80px !important; } }
