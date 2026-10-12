@@ -41,13 +41,9 @@ export default function App() {
 
 	const [viewport, setViewport] = useState({ w: window.innerWidth, h: window.innerHeight });
 	useEffect(() => {
-		const onResize = () => setViewport({ w: window.innerWidth, h: window.innerHeight });
-		window.addEventListener("resize", onResize);
-		return () => window.removeEventListener("resize", onResize);
-	}, []);
-
-	// Clamp positions when viewport shrinks so windows stay on screen
-	useEffect(() => {
+		const onResize = () => {
+		const viewport = { w: window.innerWidth, h: window.innerHeight };
+		setViewport(viewport);
 		setPositions((prev) => {
 			const clamp = (x: number, y: number, w: number, h: number) => ({
 				x: Math.max(16, Math.min(x, viewport.w - w - 16)),
@@ -64,7 +60,10 @@ export default function App() {
 				browser: clamp(prev.browser.x, prev.browser.y, 640, 450)
 			};
 		});
-	}, [viewport.w, viewport.h]);
+		};
+		window.addEventListener("resize", onResize);
+		return () => window.removeEventListener("resize", onResize);
+	}, []);
 
 	const [playback, setPlayback] = useState({
 		isPlaying: false,
@@ -188,7 +187,7 @@ export default function App() {
 							>
 								<AboutApp
 									githubUrl="https://github.com/mdesignerco/nook"
-									downloadUrl="https://github.com/mdesignerco/nook/releases/latest"
+									downloadUrl="https://github.com/mdesignerco/nook/releases/download/v4.2.0/Nook_4.2.0_x64-setup.exe"
 									accentColor={settings.accentColor}
 									onOpenApp={handleOpenApp}
 								/>

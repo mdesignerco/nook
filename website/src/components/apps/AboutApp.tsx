@@ -11,7 +11,7 @@ interface AboutAppProps {
 
 export default function AboutApp({ githubUrl, downloadUrl, accentColor }: AboutAppProps) {
 	const [releaseInfo, setReleaseInfo] = useState({
-		version: "v3.8.3",
+		version: "v4.2.0",
 		downloadUrl: downloadUrl
 	});
 
@@ -21,7 +21,7 @@ export default function AboutApp({ githubUrl, downloadUrl, accentColor }: AboutA
 			.then((data) => {
 				if (data?.tag_name) {
 					const asset = data.assets?.find(
-						(a: any) =>
+						(a: { name: string; browser_download_url?: string }) =>
 							a.name.endsWith(".exe") || a.name.endsWith(".msi") || a.name.endsWith(".zip")
 					);
 					setReleaseInfo({
@@ -31,7 +31,7 @@ export default function AboutApp({ githubUrl, downloadUrl, accentColor }: AboutA
 				}
 			})
 			.catch(() => {});
-	}, []);
+	}, [downloadUrl]);
 
 	return (
 		<div className="relative h-full w-full bg-transparent text-white flex flex-col select-none font-sans">

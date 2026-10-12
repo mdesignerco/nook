@@ -30,12 +30,12 @@ const getAttr = (distance: number, maxDist: number, minVal: number, maxVal: numb
 	return Math.max(minVal, val + minVal);
 };
 
-const debounce = (func: (...args: any[]) => void, delay: number) => {
+const debounce = <Args extends unknown[]>(func: (...args: Args) => void, delay: number) => {
 	let timeoutId: ReturnType<typeof setTimeout>;
-	return (...args: any[]) => {
+	return (...args: Args) => {
 		clearTimeout(timeoutId);
 		timeoutId = setTimeout(() => {
-			func.apply(this, args);
+			func(...args);
 		}, delay);
 	};
 };
@@ -196,7 +196,7 @@ const TextPressure: React.FC<TextPressureProps> = ({
         }
       `}</style>
 		);
-	}, [fontFamily, fontUrl, stroke, textColor, strokeColor, strokeWidth]);
+	}, [fontUrl, textColor, strokeColor, strokeWidth]);
 
 	return (
 		<div ref={containerRef} className="relative w-full h-full bg-transparent">

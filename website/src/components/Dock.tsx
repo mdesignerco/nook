@@ -78,13 +78,11 @@ const Dock = memo(function Dock({
 
 	// Interaction grace period
 	useEffect(() => {
-		if (isAnyInteraction) {
-			setInteractionState("active");
-		} else if (interactionState !== "none") {
-			setInteractionState("grace");
-			const timer = setTimeout(() => setInteractionState("none"), 800);
-			return () => clearTimeout(timer);
-		}
+		const transition = setTimeout(() => {
+			setInteractionState(prev => isAnyInteraction ? "active" : prev === "none" ? "none" : "grace");
+		}, 0);
+		const timer = !isAnyInteraction ? setTimeout(() => setInteractionState("none"), 800) : null;
+		return () => { clearTimeout(transition); if (timer !== null) clearTimeout(timer); };
 	}, [isAnyInteraction]);
 
 	const isHidden = settings.dockMode === "auto-hide" && interactionState === "none";

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import type { CSSProperties } from "react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
-import { ArrowUpDown, Cpu, HardDrive, MemoryStick, Repeat } from "lucide-react";
+import { ArrowUpDown, Cpu, HardDrive, MemoryStick, Repeat, Mail } from "lucide-react";
+import MailPanel from "./MailPanel";
 import {
 	PlayIcon,
 	PauseIcon,
@@ -299,27 +300,6 @@ function MoonIcon() {
 	);
 }
 
-function DockIcon() {
-	return (
-		<svg
-			width="18"
-			height="18"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="2.5"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-		>
-			<rect x="2" y="14" width="20" height="8" rx="2" />
-			<line x1="6" y1="18" x2="6.01" y2="18" strokeWidth="3.5" strokeLinecap="round" />
-			<line x1="10" y1="18" x2="10.01" y2="18" strokeWidth="3.5" strokeLinecap="round" />
-			<line x1="14" y1="18" x2="14.01" y2="18" strokeWidth="3.5" strokeLinecap="round" />
-			<line x1="18" y1="18" x2="18.01" y2="18" strokeWidth="3.5" strokeLinecap="round" />
-		</svg>
-	);
-}
-
 function NotchIcon() {
 	return (
 		<svg
@@ -392,8 +372,8 @@ function BatterySaverIcon() {
 	);
 }
 
-function Calendar() {
-	const [date] = useState(new Date());
+function Calendar({ selectedDay, onSelect }: { selectedDay: number | null; onSelect: (day: number | null) => void }) {
+	const [date, setDate] = useState(new Date());
 
 	const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
 	const firstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay();
@@ -416,18 +396,21 @@ function Calendar() {
 
 	for (let i = 1; i <= totalDays; i++) {
 		days.push(
-			<div key={i} className={`calendar-day ${isCurrentMonth && i === today ? "today" : ""}`}>
+			<button type="button" aria-label={`Select ${monthName} ${i}`} aria-pressed={selectedDay === i} onClick={() => onSelect(selectedDay === i ? null : i)} key={i} className={`calendar-day ${selectedDay === i ? "demo-day-selected" : ""} ${isCurrentMonth && i === today ? "today" : ""}`}>
 				{i}
-			</div>
+				{[5, 12, 18, 24].includes(i) && <span className="demo-event-dot" />}
+			</button>
 		);
 	}
 
 	return (
 		<div className="calendar-container">
 			<div className="calendar-header">
+				<button aria-label="Previous month" onClick={() => { setDate(new Date(currentYear, currentMonth - 1, 1)); onSelect(null); }}>‹</button>
 				<span className="month-year">
 					{monthName} {currentYear}
 				</span>
+				<button aria-label="Next month" onClick={() => { setDate(new Date(currentYear, currentMonth + 1, 1)); onSelect(null); }}>›</button>
 			</div>
 			<div className="calendar-grid">
 				{["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
@@ -453,6 +436,15 @@ export default function Notch({
 		"status"
 	);
 	const [isHovered, setIsHovered] = useState(false);
+	const [mailOpen, setMailOpen] = useState(false);
+	const [selectedCalendarDay, setSelectedCalendarDay] = useState<number | null>(null);
+	const [mailPreview, setMailPreview] = useState(false);
+	const showMail = mailOpen || (mailPreview && nookMode !== "calendar" && nookMode !== "command-center");
+	useEffect(() => {
+		if (!mailPreview || isHovered || mailOpen || nookMode === "calendar" || nookMode === "command-center") return;
+		const timeout = window.setTimeout(() => setMailPreview(false), 8000);
+		return () => window.clearTimeout(timeout);
+	}, [mailPreview, mailOpen, isHovered, nookMode]);
 	const [isNotchHovered, setIsNotchHovered] = useState(false);
 	const [isEdgeHovered, setIsEdgeHovered] = useState(false);
 	const [isReady, setIsReady] = useState(false);
@@ -512,6 +504,7 @@ export default function Notch({
 		if (eventPeekTimeoutRef.current) window.clearTimeout(eventPeekTimeoutRef.current);
 		eventPeekTimeoutRef.current = window.setTimeout(() => setEventPeek(false), duration);
 	}, []);
+	const mailAccess = <button className="demo-mail-access" aria-label="Open 5 unread demo messages" title="Open mail · Right-click to simulate a notification" onContextMenu={e => { e.preventDefault(); e.stopPropagation(); setMailPreview(true); triggerEventPeek(8000); }} onClick={e => { e.stopPropagation(); setMailOpen(true); }}><Mail size={13} /><span>5</span></button>;
 
 	useEffect(() => {
 		const raf = requestAnimationFrame(() => setIsReady(true));
@@ -800,13 +793,6 @@ export default function Notch({
 		}
 	};
 
-	const toggleDockModeSetting = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		if (updateSetting) {
-			updateSetting("dockMode", settings.dockMode === "fixed" ? "auto-hide" : "fixed");
-		}
-	};
-
 	const NOTCH_MODES: NookSettings["notchMode"][] = ["fixed", "smart", "peek"];
 	const NOTCH_MODE_LABELS: Record<NookSettings["notchMode"], string> = {
 		fixed: "Fixed",
@@ -822,6 +808,7 @@ export default function Notch({
 	};
 
 	const getDynamicWidth = () => {
+		if (showMail) return 360;
 		if (isCalendarMode) return 480;
 		if (nookMode === "command-center" && isHovered) return 350;
 		// Each placed widget chip claims horizontal room beside the clock.
@@ -830,6 +817,7 @@ export default function Notch({
 		if (isMusicMode && isHovered) return settings.mediaLayout === "compact" ? 300 : 340;
 
 		let w = 140;
+		if (isHovered) w += 40;
 		if (isMusicMode) {
 			w = 140;
 			if (isPlaying) w += 30;
@@ -842,6 +830,7 @@ export default function Notch({
 		if (!isExpanded || isHidden) {
 			return isImpacted ? 28.9 : 44.2;
 		}
+		if (showMail) return 184;
 		if (nookMode === "calendar") return 310;
 		if (nookMode === "command-center") return isHovered ? 230 : 36;
 		if (nookMode === "status") return 36;
@@ -957,6 +946,8 @@ export default function Notch({
 					setNookMode(hasMedia ? "music" : "status");
 				}}
 				onHoverEnd={() => {
+					if (mailOpen) setMailPreview(false);
+					setMailOpen(false);
 					setIsHovered(false);
 					const targetMode = hasMedia && isPlaying ? "music" : "status";
 					if (nookMode === "music") {
@@ -1029,7 +1020,9 @@ export default function Notch({
 							}}
 						>
 							<AnimatePresence mode="wait">
-								{isHovered && isMusicMode && !isCalendarMode ? (
+								{showMail ? (
+									<motion.div key="mail-panel" style={{ width: "100%", height: "100%" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><MailPanel onClose={() => { setMailOpen(false); setMailPreview(false); }} /></motion.div>
+								) : isHovered && isMusicMode && !isCalendarMode ? (
 									<motion.div
 										key="expanded-music"
 										className="expanded-music-container"
@@ -1038,7 +1031,7 @@ export default function Notch({
 										exit={{ opacity: 0, scale: 0.98, transition: { duration: 0.1 } }}
 										transition={{ type: "spring", stiffness: 500, damping: 30 }}
 									>
-										<div className="music-top-row">{renderTimeCenter(true)}</div>
+										<div className="music-top-row">{renderTimeCenter(true)}{mailAccess}</div>
 
 										<div className="compact-premium-layout">
 											<div className="album-art-section">
@@ -1356,6 +1349,7 @@ export default function Notch({
 													renderWidgetZone(settings.statusWidgets.right)
 												) : null}
 												</div>
+												{isHovered && mailAccess}
 											</motion.div>
 										</div>
 									</motion.div>
@@ -1363,7 +1357,7 @@ export default function Notch({
 							</AnimatePresence>
 
 							<AnimatePresence>
-								{nookMode === "command-center" && (
+								{!showMail && nookMode === "command-center" && (
 									<motion.div
 										className="command-center-content-minimal"
 										onClick={(e) => e.stopPropagation()}
@@ -1388,22 +1382,6 @@ export default function Notch({
 													<span className="cc-pill-title">Wi-Fi</span>
 													<span className="cc-pill-status">
 														{wifiEnabled ? "Connected" : "Off"}
-													</span>
-												</div>
-											</div>
-
-											<div
-												className={`cc-pill-tile ${settings.dockMode === "fixed" ? "active" : ""}`}
-												onClick={toggleDockModeSetting}
-												title="Cycle dock mode: Fixed / Auto Hide"
-											>
-												<div className="cc-pill-icon-wrapper">
-													<DockIcon />
-												</div>
-												<div className="cc-pill-info">
-													<span className="cc-pill-title">Dock Mode</span>
-													<span className="cc-pill-status">
-														{settings.dockMode === "fixed" ? "Fixed" : "Auto Hide"}
 													</span>
 												</div>
 											</div>
@@ -1439,20 +1417,11 @@ export default function Notch({
 														{NOTCH_MODE_LABELS[settings.notchMode]}
 													</span>
 												</div>
+												</div>
+												<button className={`cc-pill-tile ${dndActive ? "active" : ""}`} onClick={(e) => { e.stopPropagation(); setDndActive(prev => !prev); }} aria-pressed={dndActive}><div className="cc-pill-icon-wrapper"><MoonIcon /></div><div className="cc-pill-info"><span className="cc-pill-title">Focus</span><span className="cc-pill-status">{dndActive ? "On" : "Off"}</span></div></button>
 											</div>
-										</div>
 
-										<div className="cc-circular-actions-row">
-											<button
-												className={`cc-circular-btn ${dndActive ? "active" : ""}`}
-												onClick={(e) => {
-													e.stopPropagation();
-													setDndActive((prev) => !prev);
-												}}
-												title={`Focus / DND: ${dndActive ? "On" : "Off"}`}
-											>
-												<MoonIcon />
-											</button>
+											<div className="cc-circular-actions-row">
 											<button
 												className={`cc-circular-btn ${batterySaverEnabled ? "active" : ""}`}
 												onClick={(e) => {
@@ -1559,7 +1528,7 @@ export default function Notch({
 							</AnimatePresence>
 
 							<AnimatePresence>
-								{isCalendarMode && (
+								{!showMail && isCalendarMode && (
 									<motion.div
 										className="calendar-timer-content split-view"
 										onClick={(e) => e.stopPropagation()}
@@ -1569,10 +1538,11 @@ export default function Notch({
 										transition={{ type: "spring", stiffness: 400, damping: 30 }}
 									>
 										<div className="calendar-column">
-											<Calendar />
+											<Calendar selectedDay={selectedCalendarDay} onSelect={setSelectedCalendarDay} />
 										</div>
 
 										<div className="timer-column">
+											{selectedCalendarDay !== null ? <section className="demo-day-agenda"><header><strong>Day {selectedCalendarDay}</strong><button onClick={() => setSelectedCalendarDay(null)}>Back</button></header><span className="demo-agenda-label">Demo agenda</span>{[5, 12, 18, 24].includes(selectedCalendarDay) ? <><p><strong>09:00</strong><br />Team standup</p><p><strong>14:30</strong><br />Design review</p></> : <p>No events on this day</p>}</section> : (
 											<div className="timer-section-new">
 												<div className="timer-display-large">
 													<span className="timer-time-large">{formatTimerTime(timerSeconds)}</span>
@@ -1599,6 +1569,7 @@ export default function Notch({
 													))}
 												</div>
 											</div>
+											)}
 										</div>
 									</motion.div>
 								)}

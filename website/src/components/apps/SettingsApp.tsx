@@ -273,6 +273,7 @@ export default function SettingsApp({ settings, updateSetting, wallpapersList }:
 					</div>
 				</Section>
 
+				<Section title="Calendar & Mail"><div className="px-4 py-3 text-xs text-white/70 leading-relaxed">Demo data only. Select calendar days to view an agenda. The mail icon opens five sample unread messages; right-click it to simulate an arrival. Desktop calendar sync and Gmail credentials are not required or collected here.</div></Section>
 				{/* Music */}
 				<Section title="Music Notch">
 					<div className="divide-y divide-white/5">
@@ -372,31 +373,6 @@ export default function SettingsApp({ settings, updateSetting, wallpapersList }:
 					</div>
 				</Section>
 
-				{/* Desktop Elements */}
-				<Section title="Desktop Elements">
-					<div className="divide-y divide-white/5">
-						<Row title="Show Nook Dock" description="Display the custom application bar">
-							<Toggle
-								label="Show Nook Dock"
-								checked={settings.isDockEnabled}
-								onChange={(v) => updateSetting("isDockEnabled", v)}
-							/>
-						</Row>
-						{settings.isDockEnabled && (
-							<Row title="Dock Behavior" description="Choose auto-hide behavior">
-								<Select
-									label="Dock Behavior"
-									value={settings.dockMode}
-									onChange={(v) => updateSetting("dockMode", v)}
-									options={[
-										{ value: "fixed", label: "Fixed (Always On)" },
-										{ value: "auto-hide", label: "Auto Hide" }
-									]}
-								/>
-							</Row>
-						)}
-					</div>
-				</Section>
 			</div>
 
 			<div className="px-5 py-3 border-t border-white/[0.05] bg-white/[0.01] flex justify-between items-center text-[10px] text-white/30">
