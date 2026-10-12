@@ -1,3 +1,8 @@
+// INTENTIONALLY NOT USED: Custom Dock icon preserved for potential future dock UI.
+
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 export function DockIcon() {
 	return (
 		<svg

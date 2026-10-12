@@ -55,8 +55,10 @@ windows = { version = "0.61", features = [
 	"Devices_Radios",
 	"System_Power",
 	"Win32_NetworkManagement_IpHelper",
-	"Win32_NetworkManagement_Ndis"
+	"Win32_NetworkManagement_Ndis",
+	"Win32_Security_Cryptography"
 ] }
+windows-core = "0.61"
 base64 = "0.22"
 tauri-plugin-autostart = "2.5.1"
 tauri-plugin-updater = "2"
@@ -65,7 +67,11 @@ window-vibrancy = "0.7.1"
 wmi = "0.14"
 tokio = { version = "1", features = ["time", "sync"] }
 image = "0.25"
-tauri-plugin-drag = "2.1.1"
 tauri-plugin-dialog = "2"
 rustfft = "6"
-
+imap = "2.4"
+mailparse = "0.16"
+native-tls = "0.2"
+ical = "0.11"
+rrule = "0.14"
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }

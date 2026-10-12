@@ -1,6 +1,5 @@
 import {
 	WifiIcon,
-	DockIcon,
 	BluetoothIcon,
 	NotchIcon,
 	MoonIcon,
@@ -17,8 +16,6 @@ interface QuickSettingsPanelProps {
 	wifiEnabled: boolean;
 	onToggleWifi: () => void;
 	onWifiContextMenu: (e: React.MouseEvent) => void | Promise<void>;
-	dockMode: string;
-	onCycleDockMode: (e: React.MouseEvent) => void | Promise<void>;
 	bluetoothEnabled: boolean;
 	onToggleBluetooth: () => void;
 	onBluetoothContextMenu: (e: React.MouseEvent) => void | Promise<void>;
@@ -45,8 +42,6 @@ export function QuickSettingsPanel({
 	wifiEnabled,
 	onToggleWifi,
 	onWifiContextMenu,
-	dockMode,
-	onCycleDockMode,
 	bluetoothEnabled,
 	onToggleBluetooth,
 	onBluetoothContextMenu,
@@ -88,24 +83,6 @@ export function QuickSettingsPanel({
 					</div>
 				</div>
 
-				{/* Dock Mode Pill */}
-				<div
-					className={`cc-pill-tile ${dockMode === "fixed" ? "active" : ""}`}
-					onClick={(e) => {
-						e.stopPropagation();
-						onCycleDockMode(e);
-					}}
-					title="Cycle dock mode: Fixed / Smart / Peek"
-				>
-					<div className="cc-pill-icon-wrapper">
-						<DockIcon />
-					</div>
-					<div className="cc-pill-info">
-						<span className="cc-pill-title">Dock Mode</span>
-						<span className="cc-pill-status">{dockModeLabel(dockMode)}</span>
-					</div>
-				</div>
-
 				{/* Bluetooth Pill */}
 				<div
 					className={`cc-pill-tile ${bluetoothEnabled ? "active" : ""}`}
@@ -142,20 +119,28 @@ export function QuickSettingsPanel({
 						<span className="cc-pill-status">{dockModeLabel(notchMode)}</span>
 					</div>
 				</div>
-			</div>
 
-			{/* Circular Actions Row */}
-			<div className="cc-circular-actions-row">
-				<button
-					className={`cc-circular-btn ${dndActive ? "active" : ""}`}
+				{/* Focus / DND Pill */}
+				<div
+					className={`cc-pill-tile ${dndActive ? "active" : ""}`}
 					onClick={(e) => {
 						e.stopPropagation();
 						onToggleDnd();
 					}}
-					title={`Focus / DND: ${dndActive ? "On" : "Off"}`}
+					title="Focus assist (Do Not Disturb): On / Off"
 				>
-					<MoonIcon />
-				</button>
+					<div className="cc-pill-icon-wrapper">
+						<MoonIcon />
+					</div>
+					<div className="cc-pill-info">
+						<span className="cc-pill-title">Focus</span>
+						<span className="cc-pill-status">{dndActive ? "On" : "Off"}</span>
+					</div>
+				</div>
+			</div>
+
+			{/* Circular Actions Row */}
+			<div className="cc-circular-actions-row">
 				<button
 					className={`cc-circular-btn ${batterySaverEnabled ? "active" : ""}`}
 					onClick={(e) => {

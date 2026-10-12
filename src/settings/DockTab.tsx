@@ -1,3 +1,6 @@
+// INTENTIONALLY NOT WIRED: Dock tab hidden for future re-enablement (island-only build).
+// useSettings exposes dockIconOnly/toggleDockIconOnly; DockTab can be re-added to Settings tabs.
+
 import { Monitor, Eye, EyeOff, Circle, Maximize2, Keyboard } from "lucide-react";
 import { SettingRow } from "./SettingRow";
 

@@ -1,3 +1,5 @@
+// DockTab intentionally not wired (hidden for future) — keep exported for optional re-integration.
+
 export { useSettings } from "./useSettings";
 export { SettingRow } from "./SettingRow";
 export { GeneralTab } from "./GeneralTab";

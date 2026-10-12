@@ -60,6 +60,30 @@ export function useSettings() {
 		left: ["weather"],
 		right: ["battery"]
 	});
+	const [calendarSyncEnabled, setCalendarSyncEnabled] = useState(
+		() => localStorage.getItem("nook-calendar-sync-enabled") === "true"
+	);
+	const [calendarIcalUrl, setCalendarIcalUrl] = useState(
+		() => localStorage.getItem("nook-calendar-ical-url") || ""
+	);
+	const [calendarInterval, setCalendarInterval] = useState(() => {
+		const val = localStorage.getItem("nook-calendar-interval");
+		return val !== null ? parseInt(val) : 30;
+	});
+	const [mailEnabled, setMailEnabled] = useState(
+		() => localStorage.getItem("nook-mail-enabled") === "true"
+	);
+	const [mailAddress, setMailAddress] = useState(
+		() => localStorage.getItem("nook-mail-address") || ""
+	);
+	const [mailImapHost, setMailImapHost] = useState(
+		() => localStorage.getItem("nook-mail-imap-host") || "imap.gmail.com"
+	);
+	const [mailInterval, setMailInterval] = useState(() => {
+		const val = localStorage.getItem("nook-mail-interval");
+		return val !== null ? parseInt(val) : 5;
+	});
+	const [mailHasPassword, setMailHasPassword] = useState(false);
 	const [dockEnabled, setDockEnabled] = useState(true);
 	const [dockPreviewEnabled, setDockPreviewEnabled] = useState(true);
 	const [dockIconOnly, setDockIconOnly] = useState(
@@ -183,6 +207,17 @@ export function useSettings() {
 					}
 				} catch {}
 			}
+
+			apply(getVal("nook-calendar-sync-enabled"), setCalendarSyncEnabled, readBool);
+			const calUrl = getVal("nook-calendar-ical-url");
+			if (calUrl) setCalendarIcalUrl(calUrl);
+			apply(getVal("nook-calendar-interval"), setCalendarInterval, (v) => parseInt(v) || 30);
+			apply(getVal("nook-mail-enabled"), setMailEnabled, readBool);
+			const mailAddr = getVal("nook-mail-address");
+			if (mailAddr) setMailAddress(mailAddr);
+			const mailHost = getVal("nook-mail-imap-host");
+			if (mailHost) setMailImapHost(mailHost);
+			apply(getVal("nook-mail-interval"), setMailInterval, (v) => parseInt(v) || 5);
 		} catch (e) {
 			console.error("Failed to load settings:", e);
 		}
@@ -199,6 +234,10 @@ export function useSettings() {
 		getVersion()
 			.then((ver) => setAppVersion(ver || "3.1.2"))
 			.catch(() => setAppVersion("3.1.2"));
+
+		invoke("has_mail_password")
+			.then((has) => setMailHasPassword(Boolean(has)))
+			.catch(() => {});
 
 		checkForUpdates(false);
 	}, []);
@@ -238,7 +277,14 @@ export function useSettings() {
 		"nook-theme-opacity": setThemeOpacity,
 		"nook-theme-saturation": setThemeSaturation,
 		"nook-theme-brightness": setThemeBrightness,
-		"nook-weather-city": (v) => setCityName(v || "")
+		"nook-weather-city": (v) => setCityName(v || ""),
+		"nook-calendar-sync-enabled": setCalendarSyncEnabled,
+		"nook-calendar-ical-url": (v) => setCalendarIcalUrl(v || ""),
+		"nook-calendar-interval": setCalendarInterval,
+		"nook-mail-enabled": setMailEnabled,
+		"nook-mail-address": (v) => setMailAddress(v || ""),
+		"nook-mail-imap-host": (v) => setMailImapHost(v || ""),
+		"nook-mail-interval": setMailInterval
 	});
 
 	// ── Listen for system accent changes (adaptive theme) ──
@@ -534,6 +580,71 @@ export function useSettings() {
 		saveSetting("nook-status-widgets", JSON.stringify(config));
 	};
 
+	// ── Calendar sync (Google Calendar via secret .ics URL) ──
+	const toggleCalendarSync = () => {
+		const next = !calendarSyncEnabled;
+		setCalendarSyncEnabled(next);
+		saveSetting("nook-calendar-sync-enabled", String(next));
+	};
+
+	const saveCalendarUrl = (url: string) => {
+		setCalendarIcalUrl(url);
+		saveSetting("nook-calendar-ical-url", url);
+	};
+
+	const saveCalendarInterval = (minutes: number) => {
+		const safe = !minutes || minutes < 1 ? 30 : minutes;
+		setCalendarInterval(safe);
+		saveSetting("nook-calendar-interval", safe.toString());
+	};
+
+	const testCalendarUrl = async (url: string): Promise<number> => {
+		const count = await invoke<number>("test_ical_url", { url });
+		return count;
+	};
+
+	// ── Mail (Gmail IMAP with App Password) ──
+	const toggleMail = () => {
+		const next = !mailEnabled;
+		setMailEnabled(next);
+		saveSetting("nook-mail-enabled", String(next));
+	};
+
+	const saveMailAddress = (address: string) => {
+		setMailAddress(address);
+		saveSetting("nook-mail-address", address);
+	};
+
+	const saveMailHost = (host: string) => {
+		setMailImapHost(host);
+		saveSetting("nook-mail-imap-host", host);
+	};
+
+	const saveMailInterval = (minutes: number) => {
+		const safe = !minutes || minutes < 1 ? 30 : minutes;
+		setMailInterval(safe);
+		saveSetting("nook-mail-interval", safe.toString());
+	};
+
+	const testMailConnection = async (
+		address: string,
+		host: string,
+		password: string
+	): Promise<number> => {
+		const unread = await invoke<number>("test_imap_connection", { address, host, password });
+		return unread;
+	};
+
+	const saveMailPassword = async (password: string): Promise<void> => {
+		await invoke("save_mail_password", { password });
+		setMailHasPassword(true);
+	};
+
+	const clearMailPassword = async (): Promise<void> => {
+		await invoke("clear_mail_password");
+		setMailHasPassword(false);
+	};
+
 	// ── Theme handlers ──
 	const handleThemeModeChange = async (mode: string) => {
 		setThemeMode(mode);
@@ -740,6 +851,29 @@ export function useSettings() {
 		// Widgets
 		statusWidgets,
 		handleWidgetsChange,
+
+		// Calendar sync
+		calendarSyncEnabled,
+		toggleCalendarSync,
+		calendarIcalUrl,
+		saveCalendarUrl,
+		calendarInterval,
+		saveCalendarInterval,
+		testCalendarUrl,
+
+		// Mail
+		mailEnabled,
+		toggleMail,
+		mailAddress,
+		saveMailAddress,
+		mailImapHost,
+		saveMailHost,
+		mailInterval,
+		saveMailInterval,
+		mailHasPassword,
+		testMailConnection,
+		saveMailPassword,
+		clearMailPassword,
 
 		// Dock
 		dockEnabled,

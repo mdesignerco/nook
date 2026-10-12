@@ -161,6 +161,25 @@ function SettingsApp() {
 							handleCityClear={settings.handleCityClear}
 							statusWidgets={settings.statusWidgets}
 							handleWidgetsChange={settings.handleWidgetsChange}
+							calendarSyncEnabled={settings.calendarSyncEnabled}
+							toggleCalendarSync={settings.toggleCalendarSync}
+							calendarIcalUrl={settings.calendarIcalUrl}
+							saveCalendarUrl={settings.saveCalendarUrl}
+							calendarInterval={settings.calendarInterval}
+							saveCalendarInterval={settings.saveCalendarInterval}
+							testCalendarUrl={settings.testCalendarUrl}
+							mailEnabled={settings.mailEnabled}
+							toggleMail={settings.toggleMail}
+							mailAddress={settings.mailAddress}
+							saveMailAddress={settings.saveMailAddress}
+							mailImapHost={settings.mailImapHost}
+							saveMailHost={settings.saveMailHost}
+							mailInterval={settings.mailInterval}
+							saveMailInterval={settings.saveMailInterval}
+							mailHasPassword={settings.mailHasPassword}
+							testMailConnection={settings.testMailConnection}
+							saveMailPassword={settings.saveMailPassword}
+							clearMailPassword={settings.clearMailPassword}
 						/>
 					)}
 					{activeTab === "overlays" && (

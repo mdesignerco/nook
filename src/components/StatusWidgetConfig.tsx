@@ -28,14 +28,11 @@ import {
 	X,
 	ArrowLeftRight,
 	ChevronUp,
-	ChevronDown
+	ChevronDown,
+	Mail
 } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
-
-export interface WidgetConfig {
-	left: string[];
-	right: string[];
-}
+import type { WidgetConfig } from "../settings/types";
 
 interface WidgetDef {
 	id: string;
@@ -50,7 +47,8 @@ const WIDGET_DEFS: WidgetDef[] = [
 	{ id: "cpu", label: "CPU", icon: Cpu, color: "#f97316" },
 	{ id: "ram", label: "RAM", icon: MemoryStick, color: "#a78bfa" },
 	{ id: "disk", label: "Disk", icon: HardDrive, color: "#38bdf8" },
-	{ id: "net", label: "Net", icon: ArrowUpDown, color: "#2dd4bf" }
+	{ id: "net", label: "Net", icon: ArrowUpDown, color: "#2dd4bf" },
+	{ id: "mail", label: "Mail", icon: Mail, color: "#f472b6" }
 ];
 
 const DEFAULT_CONFIG: WidgetConfig = {

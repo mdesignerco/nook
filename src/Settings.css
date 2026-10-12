@@ -910,3 +910,167 @@ input:checked + .slider:before {
 	background: rgba(239, 68, 68, 0.25);
 	color: #ef4444;
 }
+
+.settings-input-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 6px;
+}
+
+.settings-input-row:first-child {
+	margin-top: 0;
+}
+
+.settings-text-input {
+	flex: 1;
+	min-width: 0;
+	background: var(--nook-group-bg, rgba(255, 255, 255, 0.1));
+	border: 1px solid var(--nook-border, rgba(255, 255, 255, 0.08));
+	border-radius: 6px;
+	color: var(--nook-text, white);
+	font-size: 11px;
+	padding: 5px 8px;
+	outline: none;
+	font-family: inherit;
+	transition: border-color 0.15s ease;
+}
+
+.settings-text-input:focus {
+	border-color: var(--nook-accent, #007aff);
+}
+
+.settings-text-input::placeholder {
+	color: var(--nook-text-muted, rgba(255, 255, 255, 0.3));
+}
+
+.settings-action-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	flex-shrink: 0;
+	background: var(--nook-group-bg, rgba(255, 255, 255, 0.1));
+	border: 1px solid var(--nook-border, rgba(255, 255, 255, 0.08));
+	border-radius: 6px;
+	color: var(--nook-text, white);
+	font-size: 11px;
+	padding: 5px 8px;
+	cursor: pointer;
+	white-space: nowrap;
+	transition:
+		background 0.15s ease,
+		border-color 0.15s ease;
+}
+
+.settings-action-btn:hover:not(:disabled) {
+	background: var(--nook-border, rgba(255, 255, 255, 0.16));
+}
+
+.settings-action-btn:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+.settings-action-btn--danger {
+	color: rgb(248, 113, 113);
+	border-color: rgba(248, 113, 113, 0.35);
+}
+
+.settings-action-btn--danger:hover:not(:disabled) {
+	background: rgba(248, 113, 113, 0.15);
+}
+
+.settings-input-label {
+	font-size: 10px;
+	color: var(--nook-text-muted, rgba(255, 255, 255, 0.4));
+	min-width: 44px;
+	text-align: right;
+}
+
+.settings-test-result {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 10px;
+	margin-top: 6px;
+	color: var(--nook-text-muted, rgba(255, 255, 255, 0.5));
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.settings-test-result.ok {
+	color: rgb(74, 222, 128);
+}
+
+.settings-test-result.err {
+	color: rgb(248, 113, 113);
+}
+
+.nook-loader {
+	animation: nook-loader-spin 0.8s linear infinite;
+}
+
+@keyframes nook-loader-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.settings-guide {
+	margin-top: 6px;
+}
+
+.settings-guide-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 14px;
+}
+
+.settings-link-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	background: none;
+	border: none;
+	padding: 0;
+	color: var(--nook-accent, #007aff);
+	font-size: 11px;
+	font-family: inherit;
+	cursor: pointer;
+	opacity: 0.9;
+}
+
+.settings-link-btn:hover {
+	opacity: 1;
+	text-decoration: underline;
+}
+
+.settings-guide-chevron {
+	transition: transform 0.15s ease;
+}
+
+.settings-guide-chevron.open {
+	transform: rotate(180deg);
+}
+
+.settings-guide-steps {
+	margin: 6px 0 0;
+	padding-left: 18px;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	font-size: 11px;
+	line-height: 1.4;
+	color: var(--nook-text-muted, rgba(255, 255, 255, 0.55));
+}
+
+.settings-guide-steps li::marker {
+	color: var(--nook-accent, #007aff);
+}
+
+.settings-field-hint {
+	margin-top: 4px;
+	font-size: 11px;
+	color: var(--nook-text-muted, rgba(255, 255, 255, 0.35));
+}

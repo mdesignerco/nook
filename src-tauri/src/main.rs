@@ -1,6 +1,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod commands;
+mod dnd;
+mod integrations;
 mod services;
 mod state;
 mod types;
@@ -147,6 +149,8 @@ fn main() {
             set_brightness,
             get_battery_saver_state,
             open_battery_saver_settings,
+            dnd::get_dnd_state,
+            dnd::set_dnd_state,
             get_system_accent_color,
             get_cpu_usage,
             get_ram_usage,
@@ -158,7 +162,12 @@ fn main() {
             write_settings_to_path,
             updater::check_for_updates,
             updater::install_update,
-            updater::get_update_state
+            updater::get_update_state,
+            integrations::test_ical_url,
+            integrations::test_imap_connection,
+            integrations::save_mail_password,
+            integrations::clear_mail_password,
+            integrations::has_mail_password
         ])
         .setup(|app| {
             init_taskbar_marker(app.handle());
@@ -247,6 +256,12 @@ fn main() {
             }
             setup_thumbnail_capture(app.handle().clone());
             trigger_app_scan();
+
+            // Calendar + mail integrations: background pollers keep their own
+            // loops and only wake the UI via change-detected events. They read
+            // feature toggles from the settings cache each tick.
+            integrations::spawn_calendar_poller(app.handle().clone());
+            integrations::spawn_mail_poller(app.handle().clone());
             let tx = setup_system_worker(app.handle().clone());
             let _ = COMMAND_SENDER.set(tx.clone());
             let _hook = services::setup_keyboard_hook(app.handle().clone());

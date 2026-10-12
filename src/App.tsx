@@ -1,5 +1,5 @@
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
-import { useEffect, useState, useCallback, useRef, memo } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo, memo } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
@@ -22,8 +22,43 @@ import { ClickableTime } from "./components/ClickableTime";
 import { QuickSettingsPanel } from "./components/QuickSettingsPanel";
 import { useWeather } from "./hooks/useWeather";
 import { useSettingsSync } from "./hooks/useSettingsSync";
-import type { WidgetConfig } from "./components/StatusWidgetConfig";
-import { Cpu, MemoryStick, HardDrive, ArrowUpDown, Play, Pause, RotateCcw } from "lucide-react";
+import { useCalendarEvents, type CalendarEventItem } from "./hooks/useCalendarEvents";
+import { useMail, type MailSummary } from "./hooks/useMail";
+import { TitleMarquee, type MediaInfo } from "./media";
+import type { WidgetConfig } from "./settings/types";
+import {
+	Cpu,
+	MemoryStick,
+	HardDrive,
+	ArrowUpDown,
+	Play,
+	Pause,
+	RotateCcw,
+	Mail,
+	ChevronLeft,
+	ChevronRight
+} from "lucide-react";
+import { openUrl } from "@tauri-apps/plugin-opener";
+
+// Gmail brand mark (lucide-react ships no brand icons).
+const GmailIcon = ({ size = 18 }: { size?: number }) => (
+	<svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+		<path fill="#4caf50" d="M45 16.2l-5 2.75-5 4.75V40h7a3 3 0 0 0 3-3z" />
+		<path fill="#1e88e5" d="M3 16.2l3.614 1.71L13 23.7V40H6a3 3 0 0 1-3-3z" />
+		<polygon
+			fill="#e53935"
+			points="35,11.2 24,19.45 13,11.2 12,17 13,23.7 24,31.95 35,23.7 36,17"
+		/>
+		<path
+			fill="#c62828"
+			d="M3 12.298V16.2l10 7.5V11.2L9.876 8.859A4.298 4.298 0 0 0 7.298 8C4.924 8 3 9.924 3 12.298z"
+		/>
+		<path
+			fill="#fbc02d"
+			d="M45 12.298V16.2l-10 7.5V11.2l3.124-2.341A4.298 4.298 0 0 1 40.702 8C43.076 8 45 9.924 45 12.298z"
+		/>
+	</svg>
+);
 
 // Pomodoro timer limit.
 const MAX_TIMER_SECONDS = 180 * 60;
@@ -268,16 +303,6 @@ export const Visualizer = memo(function Visualizer({
 	);
 });
 
-// Number of week rows the current month occupies. Calendar mode sizes the
-// notch to the month so five-row months stay compact and six-row months never
-// clip the last row.
-const calendarMonthRows = (() => {
-	const now = new Date();
-	const firstWeekday = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
-	const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-	return Math.ceil((firstWeekday + daysInMonth) / 7);
-})();
-
 // Odometer-style digit for the timer clock. When the value changes the old
 // digit rolls up and out while the new one rolls in from below with a slight
 // 3D tilt — no card chrome, just the numerals.
@@ -306,69 +331,66 @@ const RollDigit = memo(function RollDigit({
 	);
 });
 
-interface MediaInfo {
-	title: string;
-	artist: string;
-	is_playing: boolean;
-	has_media: boolean;
-	artwork?: string[];
-	position_ms?: number;
-	duration_ms?: number;
-	seek_enabled?: boolean;
-	position_updated_at?: number;
-}
-
-const MARQUEE_SPEED = 30; // px/s — constant for all titles
-const MARQUEE_MIN_DURATION = 5; // floor so short titles don't flicker
-
-const TitleMarquee = ({ title }: { title: string }) => {
-	const textRef = useRef<HTMLSpanElement>(null);
-	const containerRef = useRef<HTMLDivElement>(null);
-	const [isOverflowing, setIsOverflowing] = useState(false);
-	const [scrollDistance, setScrollDistance] = useState(0);
-	const [scrollDuration, setScrollDuration] = useState(8);
-
-	useEffect(() => {
-		const check = () => {
-			if (textRef.current && containerRef.current) {
-				const textWidth = textRef.current.scrollWidth;
-				const containerWidth = containerRef.current.clientWidth;
-				const overflow = textWidth > containerWidth;
-				setIsOverflowing(overflow);
-				if (overflow) {
-					const distance = textWidth - containerWidth;
-					setScrollDistance(distance);
-					setScrollDuration(Math.max(distance / MARQUEE_SPEED, MARQUEE_MIN_DURATION));
-				}
-			}
-		};
-		check();
-		const observer = new ResizeObserver(check);
-		if (containerRef.current) observer.observe(containerRef.current);
-		return () => observer.disconnect();
-	}, [title]);
-
+function SkipButton({
+	direction,
+	animateBack,
+	animateFront,
+	onClick
+}: {
+	direction: "prev" | "next";
+	animateBack: ReturnType<typeof useAnimation>;
+	animateFront: ReturnType<typeof useAnimation>;
+	onClick: () => void;
+}) {
+	const Icon = direction === "prev" ? SkipBackIcon : SkipForwardIcon;
+	const className = direction === "prev" ? "previous-btn" : "next-btn";
 	return (
-		<div
-			ref={containerRef}
-			className="premium-title-wrap"
-			style={{ width: "100%", overflow: "hidden" }}
+		<motion.button
+			className={`sleek-btn ${className}`}
+			onClick={(e) => {
+				e.stopPropagation();
+				onClick();
+			}}
+			whileHover={{ scale: 1.2 }}
+			whileTap={{ scale: 0.9 }}
+			transition={{ type: "spring", stiffness: 400, damping: 25 }}
 		>
-			<span
-				ref={textRef}
-				className={`premium-title ${isOverflowing ? "marquee" : ""}`}
-				style={
-					{
-						"--scroll-distance": isOverflowing ? `-${scrollDistance}px` : undefined,
-						"--scroll-duration": `${scrollDuration}s`
-					} as React.CSSProperties
-				}
+			<div
+				style={{
+					position: "relative",
+					width: 32,
+					height: 16,
+					overflow: "hidden"
+				}}
 			>
-				{title}
-			</span>
-		</div>
+				<motion.div
+					animate={animateBack}
+					style={{
+						position: "absolute",
+						inset: 0,
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center"
+					}}
+				>
+					<Icon size={32} />
+				</motion.div>
+				<motion.div
+					animate={animateFront}
+					style={{
+						position: "absolute",
+						inset: 0,
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center"
+					}}
+				>
+					<Icon size={32} />
+				</motion.div>
+			</div>
+		</motion.button>
 	);
-};
+}
 
 function App() {
 	useEffect(() => {
@@ -387,6 +409,10 @@ function App() {
 	const [isCharging, setIsCharging] = useState(false);
 	const [showPowerPulse, setShowPowerPulse] = useState(false);
 	const [showLowBatteryPulse, setShowLowBatteryPulse] = useState(false);
+	const [mailPulse, setMailPulse] = useState<MailSummary | null>(null);
+	const [mailPanelOpen, setMailPanelOpen] = useState(false);
+	const [mailMessageIndex, setMailMessageIndex] = useState(0);
+	const mailPulseTimeoutRef = useRef<any>(null);
 	const [lowBatteryThreshold, setLowBatteryThreshold] = useState(() =>
 		parseInt(localStorage.getItem("nook-low-battery-threshold") || "20")
 	);
@@ -688,6 +714,12 @@ function App() {
 	const [settingsCalendarEnabled, setSettingsCalendarEnabled] = useState(
 		() => localStorage.getItem("nook-calendar-enabled") !== "false"
 	);
+	const [settingsCalendarSyncEnabled, setSettingsCalendarSyncEnabled] = useState(
+		() => localStorage.getItem("nook-calendar-sync-enabled") === "true"
+	);
+	const [settingsMailEnabled, setSettingsMailEnabled] = useState(
+		() => localStorage.getItem("nook-mail-enabled") === "true"
+	);
 	const [settingsTimerSoundEnabled, setSettingsTimerSoundEnabled] = useState(
 		() => localStorage.getItem("nook-timer-sound-enabled") !== "false"
 	);
@@ -726,6 +758,48 @@ function App() {
 		tempUnit
 	} = useWeather(settingsWeatherEnabled);
 
+	// Google Calendar sync (backend emits `calendar-events-updated`)
+	const { events: calendarEvents } = useCalendarEvents(settingsCalendarSyncEnabled);
+
+	// Unread mail (backend emits `mail-updated` / `mail-arrived`)
+	const onMailArrive = useCallback(
+		(summary: MailSummary) => {
+			setMailPulse(summary);
+			if (mailPulseTimeoutRef.current) clearTimeout(mailPulseTimeoutRef.current);
+			if (notchMode === "peek") triggerEventPeek(8000);
+		},
+		[notchMode, triggerEventPeek]
+	);
+	const { mail } = useMail(settingsMailEnabled, onMailArrive);
+
+	// Calendar view state: which month is shown and which day (if any) is
+	// selected so the right column shows that day's agenda instead of the timer.
+	const [calendarMonth, setCalendarMonth] = useState(() => new Date());
+	const [selectedDate, setSelectedDate] = useState<string | null>(null);
+	const calendarMonthRows = useMemo(() => {
+		const firstWeekday = new Date(
+			calendarMonth.getFullYear(),
+			calendarMonth.getMonth(),
+			1
+		).getDay();
+		const daysInMonth = new Date(
+			calendarMonth.getFullYear(),
+			calendarMonth.getMonth() + 1,
+			0
+		).getDate();
+		return Math.ceil((firstWeekday + daysInMonth) / 7);
+	}, [calendarMonth]);
+	const selectedDayEvents = useMemo(
+		() =>
+			selectedDate
+				? calendarEvents
+						.filter((e) => e.date === selectedDate)
+						.slice()
+						.sort((a, b) => (a.start ?? "99:99").localeCompare(b.start ?? "99:99"))
+				: [],
+		[selectedDate, calendarEvents]
+	);
+
 	useEffect(() => {
 		if (!windowLabel) return;
 
@@ -741,6 +815,8 @@ function App() {
 
 				setSettingsWeatherEnabled(getVal("nook-weather-enabled", "true") !== "false");
 				setSettingsCalendarEnabled(getVal("nook-calendar-enabled", "true") !== "false");
+				setSettingsCalendarSyncEnabled(getVal("nook-calendar-sync-enabled", "false") === "true");
+				setSettingsMailEnabled(getVal("nook-mail-enabled", "false") === "true");
 				setSettingsTimerSoundEnabled(getVal("nook-timer-sound-enabled", "true") !== "false");
 				setSettingsMusicModeEnabled(getVal("nook-music-mode-enabled", "true") !== "false");
 				setSettingsMusicCompactNotch(getVal("nook-music-compact-notch", "true") !== "false");
@@ -870,6 +946,8 @@ function App() {
 		{
 			"nook-weather-enabled": setSettingsWeatherEnabled,
 			"nook-calendar-enabled": setSettingsCalendarEnabled,
+			"nook-calendar-sync-enabled": setSettingsCalendarSyncEnabled,
+			"nook-mail-enabled": setSettingsMailEnabled,
 			"nook-timer-sound-enabled": setSettingsTimerSoundEnabled,
 			"nook-music-mode-enabled": setSettingsMusicModeEnabled,
 			"nook-music-compact-notch": setSettingsMusicCompactNotch,
@@ -939,6 +1017,35 @@ function App() {
 	const [nookMode, setnookMode] = useState<"music" | "calendar" | "command-center" | "status">(
 		"status"
 	);
+
+	// Sync the real Windows DND state whenever the command-center opens
+	useEffect(() => {
+		if (nookMode !== "command-center") return;
+
+		let cancelled = false;
+		invoke<string>("get_dnd_state")
+			.then((state) => {
+				if (!cancelled) setDndActive(state === "priority" || state === "alarms");
+			})
+			.catch(() => {});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [nookMode]);
+
+	const toggleDnd = async () => {
+		const next = dndActive ? "off" : "priority";
+		setDndActive(next === "priority");
+
+		try {
+			await invoke("set_dnd_state", { mode: next });
+			const state = await invoke<string>("get_dnd_state");
+			setDndActive(state === "priority" || state === "alarms");
+		} catch {
+			setDndActive(dndActive);
+		}
+	};
 
 	// Window height is now kept constant to prevent rendering layout lag and sharp corners
 
@@ -1580,22 +1687,6 @@ function App() {
 		[openWifiSettings]
 	);
 
-	const toggleDockModeSetting = useCallback(
-		async (e: React.MouseEvent) => {
-			e.stopPropagation();
-			const nextMode = dockMode === "fixed" ? "smart" : dockMode === "smart" ? "peek" : "fixed";
-			setDockMode(nextMode);
-			localStorage.setItem("nook-dock-mode", nextMode);
-			invoke("save_setting", { key: "nook-dock-mode", value: nextMode }).catch(console.error);
-			try {
-				await invoke("change_dock_mode", { mode: nextMode });
-			} catch (err) {
-				console.error("Failed to change dock mode:", err);
-			}
-		},
-		[dockMode]
-	);
-
 	const toggleNotchModeSetting = useCallback(
 		async (e: React.MouseEvent) => {
 			e.stopPropagation();
@@ -1676,6 +1767,36 @@ function App() {
 						</span>
 					</div>
 				);
+			case "mail":
+				if (!settingsMailEnabled || !mail || mail.unread <= 0) return null;
+				return (
+					<div
+						className="passive-feature"
+						key="mail"
+						role="button"
+						tabIndex={0}
+						aria-label="Open mail panel"
+						onClick={(e) => {
+							e.stopPropagation();
+							setMailPanelOpen(true);
+						}}
+						onKeyDown={(e) => {
+							if (e.key === "Enter" || e.key === " ") {
+								e.preventDefault();
+								e.stopPropagation();
+								setMailPanelOpen(true);
+							}
+						}}
+						title={
+							mail.has_more
+								? `${mail.subject} — ${mail.from} (+${mail.unread - 1} more)`
+								: `${mail.subject} — ${mail.from}`
+						}
+					>
+						<Mail size={12} strokeWidth={2.2} />
+						<span className="label">{mail.unread}</span>
+					</div>
+				);
 			default:
 				return null;
 		}
@@ -1692,25 +1813,34 @@ function App() {
 
 	// Calculate width dynamically based on enabled features
 	const getDynamicWidth = () => {
-		if (isCalendarMode) return 480;
-		if (nookMode === "command-center" && isHovered) return 350;
-		if (nookMode === "status" && isHovered) {
+		if (isMailView) return 360;
+		let w: number;
+		if (isCalendarMode) {
+			w = 480;
+		} else if (nookMode === "command-center" && isHovered) {
+			w = 350;
+		} else if (nookMode === "status" && isHovered) {
 			const totalWidgets = statusWidgets.left.length + statusWidgets.right.length;
-			return Math.min(200 + totalWidgets * 50, 380);
-		}
-		if (isMusicMode && isHovered) return mediaLayout === "compact" ? 300 : 340;
-		if ((showPowerPulse || showLowBatteryPulse || showUpdatePulse) && !isHovered) return 200;
-
-		let w = 140;
-		if (isMusicMode) {
+			w = Math.min(200 + totalWidgets * 50, 380);
+		} else if (isMusicMode && isHovered) {
+			w = mediaLayout === "compact" ? 300 : 340;
+		} else if ((showPowerPulse || showLowBatteryPulse || showUpdatePulse) && !isHovered) {
+			w = 200;
+		} else {
 			w = 140;
-			if (settingsVisualizerEnabled && isPlaying) w += 30;
-			if (settingsAlbumArtEnabled) w += 30;
+			if (isMusicMode) {
+				w = 140;
+				if (settingsMailEnabled && mail && mail.unread > 0) w += 40;
+				if (settingsVisualizerEnabled && isPlaying) w += 30;
+				if (settingsAlbumArtEnabled) w += 30;
 
-			if (isHovered) {
-				w += 60;
+				if (isHovered) {
+					w += 60;
+				}
 			}
 		}
+
+		// The mail pulse banner needs room to show even while hovering.
 
 		return w;
 	};
@@ -1719,23 +1849,50 @@ function App() {
 		if (!isExpanded || !isVisible || isHidden) {
 			return isImpacted ? 28.9 : 44.2;
 		}
+		let h: number;
+		if (isMailView) return 184;
 		// Sized to the calendar's week-row count plus the timer's fixed content.
-		if (nookMode === "calendar") return calendarMonthRows >= 6 ? 305 : 273;
-		if (nookMode === "command-center") return isHovered ? 230 : 36;
-		if (nookMode === "status") return 36;
-		if (isMusicMode && isHovered) {
+		if (nookMode === "calendar") {
+			h = calendarMonthRows >= 6 ? 305 : 273;
+		} else if (nookMode === "command-center") {
+			h = isHovered ? 230 : 36;
+		} else if (nookMode === "status") {
+			h = 36;
+		} else if (isMusicMode && isHovered) {
 			const hasProgressBar = (mediaInfo.duration_ms ?? 0) > 0;
 			// +36px for the info row rendered on top of the media panel.
-			let h = mediaLayout === "compact" ? (hasProgressBar ? 168 : 152) : 138;
-			if (mediaLayout === "compact") {
-				if (compactVolumeExpanded) h += 36;
-			}
-			return h;
+			h = mediaLayout === "compact" ? (hasProgressBar ? 168 : 152) : 138;
+			if (mediaLayout === "compact" && compactVolumeExpanded) h += 36;
+		} else {
+			h = 36;
 		}
-		return 36;
+		// The mail banner auto-expands the notch so the arrival is noticeable.
+		return h;
 	};
 
 	const isCalendarMode = nookMode === "calendar";
+	const isMailView =
+		settingsMailEnabled &&
+		(mailPanelOpen || (!!mailPulse && nookMode !== "calendar" && nookMode !== "command-center"));
+	const displayedMail = mailPanelOpen ? mail : mailPulse || mail;
+	const mailMessages = displayedMail?.messages?.slice(0, 5) || [];
+	const activeMailIndex = Math.min(mailMessageIndex, Math.max(0, mailMessages.length - 1));
+	const activeMail = mailMessages[activeMailIndex] || displayedMail;
+	useEffect(() => {
+		setMailMessageIndex(0);
+	}, [displayedMail?.updated_at, mailPanelOpen]);
+	useEffect(() => {
+		if (
+			!mailPulse ||
+			isHovered ||
+			mailPanelOpen ||
+			nookMode === "calendar" ||
+			nookMode === "command-center"
+		)
+			return;
+		mailPulseTimeoutRef.current = setTimeout(() => setMailPulse(null), 8000);
+		return () => clearTimeout(mailPulseTimeoutRef.current);
+	}, [mailPulse, isHovered, mailPanelOpen, nookMode]);
 
 	// Close compact media player expansions when notch is unhovered or mode changes
 	useEffect(() => {
@@ -1814,6 +1971,11 @@ function App() {
 					}}
 					onHoverEnd={() => {
 						setIsHovered(false);
+						if (mailPanelOpen) {
+							setMailPanelOpen(false);
+							setMailPulse(null);
+							setMailMessageIndex(0);
+						}
 						const targetMode =
 							mediaInfo.has_media && isPlaying && settingsMusicCompactNotch ? "music" : "status";
 						if (nookMode === "music") {
@@ -1887,7 +2049,84 @@ function App() {
 							>
 								{/* Faster Waiting Transition Area */}
 								<AnimatePresence mode="wait">
-									{isHovered && isMusicMode && !isCalendarMode ? (
+									{isMailView ? (
+										<motion.section
+											key="mail-view"
+											className="mail-panel"
+											aria-label="Gmail"
+											onClick={(e) => e.stopPropagation()}
+											onKeyDown={(e) => {
+												if (e.key === "Escape") {
+													e.stopPropagation();
+													setMailPanelOpen(false);
+													setMailPulse(null);
+												}
+											}}
+											initial={{ opacity: 0, y: 6 }}
+											animate={{ opacity: 1, y: 0 }}
+											exit={{ opacity: 0, y: -6 }}
+										>
+											<header className="mail-panel-header">
+												<GmailIcon size={22} />
+												<span>Gmail</span>
+												<span className="mail-panel-count">
+													{displayedMail?.unread || 0} unread
+												</span>
+											</header>
+											<div className="mail-panel-message" role="status">
+												<span className="mail-panel-from">
+													{displayedMail?.unread
+														? activeMail?.from || "Unknown sender"
+														: "You're all caught up"}
+												</span>
+												<strong>
+													{displayedMail?.unread
+														? activeMail?.subject || "(no subject)"
+														: "No unread messages"}
+												</strong>
+											</div>
+											<footer className="mail-panel-actions">
+												{mailMessages.length > 1 && (
+													<div className="mail-navigation">
+														<button
+															aria-label="Previous unread message"
+															disabled={activeMailIndex === 0}
+															onClick={() => setMailMessageIndex(activeMailIndex - 1)}
+														>
+															<ChevronLeft size={16} />
+														</button>
+														<span>
+															{activeMailIndex + 1} / {mailMessages.length}
+														</span>
+														<button
+															aria-label="Next unread message"
+															disabled={activeMailIndex === mailMessages.length - 1}
+															onClick={() => setMailMessageIndex(activeMailIndex + 1)}
+														>
+															<ChevronRight size={16} />
+														</button>
+													</div>
+												)}
+												<button
+													className="mail-back"
+													onClick={() => {
+														setMailPanelOpen(false);
+														setMailPulse(null);
+													}}
+												>
+													Back
+												</button>
+												<button
+													className="mail-open"
+													onClick={() => {
+														openUrl("https://mail.google.com").catch(() => {});
+													}}
+												>
+													Open Gmail ↗
+												</button>
+											</footer>
+										</motion.section>
+									) : isHovered && isMusicMode && !isCalendarMode ? (
 										<motion.div
 											key="expanded-music"
 											className="expanded-music-container"
@@ -1907,6 +2146,7 @@ function App() {
 													cycleHint
 													showUpdateDot={updateAvailable && showUpdateIndicator}
 												/>
+												{renderStatusWidget("mail")}
 											</div>
 
 											{mediaLayout === "compact" ? (
@@ -2008,50 +2248,12 @@ function App() {
 														</div>
 
 														<div className="controls-row-sleek">
-															<motion.button
-																className="sleek-btn previous-btn"
-																onClick={(e) => {
-																	e.stopPropagation();
-																	animatePrev();
-																}}
-																whileHover={{ scale: 1.2 }}
-																whileTap={{ scale: 0.9 }}
-																transition={{ type: "spring", stiffness: 400, damping: 25 }}
-															>
-																<div
-																	style={{
-																		position: "relative",
-																		width: 32,
-																		height: 16,
-																		overflow: "hidden"
-																	}}
-																>
-																	<motion.div
-																		animate={prevBack}
-																		style={{
-																			position: "absolute",
-																			inset: 0,
-																			display: "flex",
-																			alignItems: "center",
-																			justifyContent: "center"
-																		}}
-																	>
-																		<SkipBackIcon size={32} />
-																	</motion.div>
-																	<motion.div
-																		animate={prevFront}
-																		style={{
-																			position: "absolute",
-																			inset: 0,
-																			display: "flex",
-																			alignItems: "center",
-																			justifyContent: "center"
-																		}}
-																	>
-																		<SkipBackIcon size={32} />
-																	</motion.div>
-																</div>
-															</motion.button>
+															<SkipButton
+																direction="prev"
+																animateBack={prevBack}
+																animateFront={prevFront}
+																onClick={animatePrev}
+															/>
 
 															<motion.button
 																className="sleek-btn play-pause-btn-floating"
@@ -2081,50 +2283,12 @@ function App() {
 																</AnimatePresence>
 															</motion.button>
 
-															<motion.button
-																className="sleek-btn next-btn"
-																onClick={(e) => {
-																	e.stopPropagation();
-																	animateNext();
-																}}
-																whileHover={{ scale: 1.2 }}
-																whileTap={{ scale: 0.9 }}
-																transition={{ type: "spring", stiffness: 400, damping: 25 }}
-															>
-																<div
-																	style={{
-																		position: "relative",
-																		width: 32,
-																		height: 16,
-																		overflow: "hidden"
-																	}}
-																>
-																	<motion.div
-																		animate={nextBack}
-																		style={{
-																			position: "absolute",
-																			inset: 0,
-																			display: "flex",
-																			alignItems: "center",
-																			justifyContent: "center"
-																		}}
-																	>
-																		<SkipForwardIcon size={32} />
-																	</motion.div>
-																	<motion.div
-																		animate={nextFront}
-																		style={{
-																			position: "absolute",
-																			inset: 0,
-																			display: "flex",
-																			alignItems: "center",
-																			justifyContent: "center"
-																		}}
-																	>
-																		<SkipForwardIcon size={32} />
-																	</motion.div>
-																</div>
-															</motion.button>
+															<SkipButton
+																direction="next"
+																animateBack={nextBack}
+																animateFront={nextFront}
+																onClick={animateNext}
+															/>
 														</div>
 
 														<div className="volume-slider-container">
@@ -2339,9 +2503,10 @@ function App() {
 																	>
 																		{statusWidgets.right.map(renderStatusWidget)}
 																	</motion.div>
-																) : null}
-															</div>
-														</motion.div>
+															) : null}
+														</div>
+														{isMusicMode && renderStatusWidget("mail")}
+													</motion.div>
 													)}
 												</AnimatePresence>
 											</div>
@@ -2351,7 +2516,7 @@ function App() {
 
 								{/* Command Center / Quick Settings Panel */}
 								<AnimatePresence>
-									{nookMode === "command-center" && (
+									{!isMailView && nookMode === "command-center" && (
 										<motion.div
 											className="command-center-content-minimal"
 											onClick={(e) => e.stopPropagation()}
@@ -2364,15 +2529,13 @@ function App() {
 												wifiEnabled={wifiEnabled}
 												onToggleWifi={toggleWifi}
 												onWifiContextMenu={handleWifiRightClick}
-												dockMode={dockMode}
-												onCycleDockMode={toggleDockModeSetting}
 												bluetoothEnabled={bluetoothEnabled}
 												onToggleBluetooth={toggleBluetooth}
 												onBluetoothContextMenu={handleBluetoothRightClick}
 												notchMode={notchMode}
 												onCycleNotchMode={toggleNotchModeSetting}
 												dndActive={dndActive}
-												onToggleDnd={() => setDndActive((prev) => !prev)}
+												onToggleDnd={toggleDnd}
 												batterySaverEnabled={batterySaverEnabled}
 												onOpenBatterySaver={openBatterySaverSettings}
 												onOpenSystemTray={openSystemTray}
@@ -2390,7 +2553,7 @@ function App() {
 
 								{/* Calendar & Timer Split View */}
 								<AnimatePresence>
-									{settingsCalendarEnabled && isCalendarMode && (
+									{!isMailView && settingsCalendarEnabled && isCalendarMode && (
 										<motion.div
 											className="calendar-timer-content split-view"
 											onClick={(e) =>
@@ -2402,11 +2565,34 @@ function App() {
 											transition={{ type: "spring", stiffness: 400, damping: 30 }}
 										>
 											<div className="calendar-column">
-												<Calendar />
+												<Calendar
+													events={calendarEvents}
+													month={calendarMonth}
+													onMonthChange={(next) => {
+														setCalendarMonth(next);
+														setSelectedDate(null);
+													}}
+													selectedDate={selectedDate}
+													onSelectDate={(d) => setSelectedDate((prev) => (prev === d ? null : d))}
+												/>
 											</div>
 
 											<div className="timer-column">
-												<div className={`timer-section-new state-${timerState}`}>
+												{selectedDate && selectedDayEvents.length > 0 && (
+													<DayAgenda
+														date={selectedDate}
+														items={selectedDayEvents}
+														onClose={() => setSelectedDate(null)}
+													/>
+												)}
+												<div
+													className={`timer-section-new state-${timerState}`}
+													style={
+														selectedDate && selectedDayEvents.length > 0
+															? { display: "none" }
+															: undefined
+													}
+												>
 													<div className="timer-main">
 														<div className="timer-status">
 															{isEditingTimer
@@ -2506,15 +2692,39 @@ function App() {
 	);
 }
 
-function Calendar() {
-	const [date] = useState(new Date());
-
+function Calendar({
+	events = [],
+	month,
+	onMonthChange,
+	selectedDate,
+	onSelectDate
+}: {
+	events: CalendarEventItem[];
+	month: Date;
+	onMonthChange: (next: Date) => void;
+	selectedDate: string | null;
+	onSelectDate: (date: string) => void;
+}) {
 	const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
 	const firstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay();
 
-	const currentMonth = date.getMonth();
-	const currentYear = date.getFullYear();
-	const monthName = date.toLocaleString("default", { month: "long" });
+	const currentMonth = month.getMonth();
+	const currentYear = month.getFullYear();
+	const monthName = month.toLocaleString("default", { month: "long" });
+
+	// Map "YYYY-MM-DD" → list of events so each grid cell can show its dots.
+	const eventsByDate = useMemo(() => {
+		const map = new Map<string, CalendarEventItem[]>();
+		for (const e of events) {
+			const list = map.get(e.date);
+			if (list) {
+				list.push(e);
+			} else {
+				map.set(e.date, [e]);
+			}
+		}
+		return map;
+	}, [events]);
 
 	const totalDays = daysInMonth(currentYear, currentMonth);
 	const startDay = firstDayOfMonth(currentYear, currentMonth);
@@ -2529,21 +2739,75 @@ function Calendar() {
 	const today = new Date().getDate();
 	const isCurrentMonth =
 		new Date().getMonth() === currentMonth && new Date().getFullYear() === currentYear;
+	const dateKey = (day: number) =>
+		`${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
 	for (let i = 1; i <= totalDays; i++) {
+		const key = dateKey(i);
+		const dayEvents = eventsByDate.get(key) || [];
+		const selectable = dayEvents.length > 0;
 		days.push(
-			<div key={i} className={`calendar-day ${isCurrentMonth && i === today ? "today" : ""}`}>
+			<div
+				key={i}
+				className={`calendar-day ${isCurrentMonth && i === today ? "today" : ""} ${
+					selectable ? "with-events selectable" : ""
+				} ${selectedDate === key ? "selected" : ""}`}
+				onClick={
+					selectable
+						? (e) => {
+								e.stopPropagation();
+								onSelectDate(key);
+							}
+						: undefined
+				}
+			>
 				{i}
+				{selectable && (
+					<div
+						className="calendar-dot-row"
+						title={dayEvents
+							.map((e) => (e.all_day || !e.start ? e.title : `${e.start} ${e.title}`))
+							.join(" • ")}
+					>
+						{dayEvents.slice(0, 3).map((_, idx) => (
+							<span key={idx} className="calendar-dot" />
+						))}
+					</div>
+				)}
 			</div>
 		);
 	}
 
+	const shiftMonth = (delta: number) => {
+		onMonthChange(new Date(currentYear, currentMonth + delta, 1));
+	};
+
 	return (
 		<div className="calendar-container">
 			<div className="calendar-header">
+				<button
+					className="calendar-nav"
+					onClick={(e) => {
+						e.stopPropagation();
+						shiftMonth(-1);
+					}}
+					title="Previous month"
+				>
+					<ChevronLeft size={14} strokeWidth={2.4} />
+				</button>
 				<span className="month-year">
 					{monthName} {currentYear}
 				</span>
+				<button
+					className="calendar-nav"
+					onClick={(e) => {
+						e.stopPropagation();
+						shiftMonth(1);
+					}}
+					title="Next month"
+				>
+					<ChevronRight size={14} strokeWidth={2.4} />
+				</button>
 			</div>
 			<div className="calendar-grid">
 				{["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
@@ -2552,6 +2816,41 @@ function Calendar() {
 					</div>
 				))}
 				{days}
+			</div>
+		</div>
+	);
+}
+
+function DayAgenda({
+	date,
+	items,
+	onClose
+}: {
+	date: string;
+	items: CalendarEventItem[];
+	onClose: () => void;
+}) {
+	const label = new Date(`${date}T00:00:00`).toLocaleDateString("default", {
+		weekday: "short",
+		month: "short",
+		day: "numeric"
+	});
+
+	return (
+		<div className="day-agenda" onClick={(e) => e.stopPropagation()}>
+			<div className="day-agenda-header">
+				<span className="day-agenda-date">{label}</span>
+				<button className="day-agenda-back" onClick={onClose} title="Back to timer">
+					<ChevronLeft size={14} strokeWidth={2.4} />
+				</button>
+			</div>
+			<div className="day-agenda-list">
+				{items.map((e, idx) => (
+					<div className="day-agenda-item" key={idx} title={e.title}>
+						<span className="day-agenda-time">{e.all_day || !e.start ? "All day" : e.start}</span>
+						<span className="day-agenda-title">{e.title}</span>
+					</div>
+				))}
 			</div>
 		</div>
 	);
