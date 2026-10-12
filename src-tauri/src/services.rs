@@ -1009,119 +1009,128 @@ pub fn setup_system_worker(app_handle: AppHandle) -> Sender<SystemCommand> {
                         .ok();
                 }
                 while let Ok(cmd) = rx.try_recv() {
-                    if let Some(ref aev) = audio_endpoint_volume {
-                        match cmd {
-                            SystemCommand::VolumeMute => {
-                                if let Ok(muted) = aev.GetMute() {
-                                    let _ = aev.SetMute(!muted.as_bool(), std::ptr::null());
-                                    hide_osd();
-                                }
+                    match cmd {
+                        SystemCommand::VolumeMute => {
+                            let Some(ref aev) = audio_endpoint_volume else {
+                                continue;
+                            };
+                            if let Ok(muted) = aev.GetMute() {
+                                let _ = aev.SetMute(!muted.as_bool(), std::ptr::null());
+                                hide_osd();
                             }
-                            SystemCommand::VolumeUp => {
-                                if let (Ok(vol), Ok(muted)) =
-                                    (aev.GetMasterVolumeLevelScalar(), aev.GetMute())
-                                {
-                                    let _ = aev.SetMasterVolumeLevelScalar(
-                                        (vol + 0.05).min(1.0),
-                                        std::ptr::null(),
-                                    );
-                                    if muted.as_bool() {
-                                        let _ = aev.SetMute(false, std::ptr::null());
-                                    }
-                                    hide_osd();
-                                }
-                            }
-                            SystemCommand::VolumeDown => {
-                                if let Ok(vol) = aev.GetMasterVolumeLevelScalar() {
-                                    let _ = aev.SetMasterVolumeLevelScalar(
-                                        (vol - 0.05).max(0.0),
-                                        std::ptr::null(),
-                                    );
-                                    hide_osd();
-                                }
-                            }
-                            SystemCommand::SetVolume(volume) => {
+                        }
+                        SystemCommand::VolumeUp => {
+                            let Some(ref aev) = audio_endpoint_volume else {
+                                continue;
+                            };
+                            if let (Ok(vol), Ok(muted)) =
+                                (aev.GetMasterVolumeLevelScalar(), aev.GetMute())
+                            {
                                 let _ = aev.SetMasterVolumeLevelScalar(
-                                    volume.clamp(0.0, 1.0),
+                                    (vol + 0.05).min(1.0),
                                     std::ptr::null(),
                                 );
-                                if volume > 0.0 {
+                                if muted.as_bool() {
                                     let _ = aev.SetMute(false, std::ptr::null());
                                 }
                                 hide_osd();
                             }
-                            SystemCommand::MediaPlayPause => {
-                                if let Some(ref mgr) = manager {
-                                    if let Ok(session) = mgr.GetCurrentSession() {
-                                        let _ = session.TryTogglePlayPauseAsync();
-                                    }
-                                }
-                            }
-                            SystemCommand::MediaNext => {
-                                if let Some(ref mgr) = manager {
-                                    if let Ok(session) = mgr.GetCurrentSession() {
-                                        let _ = session.TrySkipNextAsync();
-                                    }
-                                }
-                            }
-                            SystemCommand::MediaPrevious => {
-                                if let Some(ref mgr) = manager {
-                                    if let Ok(session) = mgr.GetCurrentSession() {
-                                        let _ = session.TrySkipPreviousAsync();
-                                    }
-                                }
-                            }
-                            SystemCommand::MediaSeek(position_ms) => {
-                                if let Some(ref mgr) = manager {
-                                    if let Ok(session) = mgr.GetCurrentSession() {
-                                        let ticks = position_ms * 10_000;
-                                        let _ = session.TryChangePlaybackPositionAsync(ticks);
-                                    }
-                                }
-                            }
-                            SystemCommand::ToggleVisibility(visible) => {
-                                let _ = handle_system.emit("visibility-change", visible);
-                                if let Some(w) = handle_system.get_webview_window("bottom-corners")
-                                {
-                                    if visible {
-                                        let _ = w.show();
-                                    } else {
-                                        let _ = w.hide();
-                                    }
-                                }
-                            }
-                            SystemCommand::BrightnessUp => {
-                                let new_val =
-                                    (CURRENT_BRIGHTNESS.load(Ordering::Relaxed) + 10).min(100);
-                                CURRENT_BRIGHTNESS.store(new_val, Ordering::Relaxed);
-                                LAST_BRIGHTNESS_CHANGE.store(get_now_ms(), Ordering::Relaxed);
-                                let _ = handle_system.emit(
-                                    "brightness-change",
-                                    BrightnessChangeEvent {
-                                        brightness: new_val,
-                                    },
+                        }
+                        SystemCommand::VolumeDown => {
+                            let Some(ref aev) = audio_endpoint_volume else {
+                                continue;
+                            };
+                            if let Ok(vol) = aev.GetMasterVolumeLevelScalar() {
+                                let _ = aev.SetMasterVolumeLevelScalar(
+                                    (vol - 0.05).max(0.0),
+                                    std::ptr::null(),
                                 );
-                                if let Some(tx) = BRIGHTNESS_SENDER.get() {
-                                    let _ = tx.send(new_val);
-                                }
                                 hide_osd();
                             }
-                            SystemCommand::BrightnessDown => {
-                                let current = CURRENT_BRIGHTNESS.load(Ordering::Relaxed);
-                                let new_val = current.saturating_sub(10);
-                                CURRENT_BRIGHTNESS.store(new_val, Ordering::Relaxed);
-                                LAST_BRIGHTNESS_CHANGE.store(get_now_ms(), Ordering::Relaxed);
-                                let _ = handle_system.emit(
-                                    "brightness-change",
-                                    BrightnessChangeEvent {
-                                        brightness: new_val,
-                                    },
-                                );
-                                if let Some(tx) = BRIGHTNESS_SENDER.get() {
-                                    let _ = tx.send(new_val);
-                                }
-                                hide_osd();
+                        }
+                        SystemCommand::SetVolume(volume) => {
+                            let Some(ref aev) = audio_endpoint_volume else {
+                                continue;
+                            };
+                            let _ = aev.SetMasterVolumeLevelScalar(
+                                volume.clamp(0.0, 1.0),
+                                std::ptr::null(),
+                            );
+                            if volume > 0.0 {
+                                let _ = aev.SetMute(false, std::ptr::null());
                             }
+                            hide_osd();
+                        }
+                        SystemCommand::MediaPlayPause => {
+                            if let Some(ref mgr) = manager {
+                                if let Ok(session) = mgr.GetCurrentSession() {
+                                    let _ = session.TryTogglePlayPauseAsync();
+                                }
+                            }
+                        }
+                        SystemCommand::MediaNext => {
+                            if let Some(ref mgr) = manager {
+                                if let Ok(session) = mgr.GetCurrentSession() {
+                                    let _ = session.TrySkipNextAsync();
+                                }
+                            }
+                        }
+                        SystemCommand::MediaPrevious => {
+                            if let Some(ref mgr) = manager {
+                                if let Ok(session) = mgr.GetCurrentSession() {
+                                    let _ = session.TrySkipPreviousAsync();
+                                }
+                            }
+                        }
+                        SystemCommand::MediaSeek(position_ms) => {
+                            if let Some(ref mgr) = manager {
+                                if let Ok(session) = mgr.GetCurrentSession() {
+                                    let ticks = position_ms * 10_000;
+                                    let _ = session.TryChangePlaybackPositionAsync(ticks);
+                                }
+                            }
+                        }
+                        SystemCommand::ToggleVisibility(visible) => {
+                            let _ = handle_system.emit("visibility-change", visible);
+                            if let Some(w) = handle_system.get_webview_window("bottom-corners") {
+                                if visible {
+                                    let _ = w.show();
+                                } else {
+                                    let _ = w.hide();
+                                }
+                            }
+                        }
+                        SystemCommand::BrightnessUp => {
+                            let new_val =
+                                (CURRENT_BRIGHTNESS.load(Ordering::Relaxed) + 10).min(100);
+                            CURRENT_BRIGHTNESS.store(new_val, Ordering::Relaxed);
+                            LAST_BRIGHTNESS_CHANGE.store(get_now_ms(), Ordering::Relaxed);
+                            let _ = handle_system.emit(
+                                "brightness-change",
+                                BrightnessChangeEvent {
+                                    brightness: new_val,
+                                },
+                            );
+                            if let Some(tx) = BRIGHTNESS_SENDER.get() {
+                                let _ = tx.send(new_val);
+                            }
+                            hide_osd();
+                        }
+                        SystemCommand::BrightnessDown => {
+                            let current = CURRENT_BRIGHTNESS.load(Ordering::Relaxed);
+                            let new_val = current.saturating_sub(10);
+                            CURRENT_BRIGHTNESS.store(new_val, Ordering::Relaxed);
+                            LAST_BRIGHTNESS_CHANGE.store(get_now_ms(), Ordering::Relaxed);
+                            let _ = handle_system.emit(
+                                "brightness-change",
+                                BrightnessChangeEvent {
+                                    brightness: new_val,
+                                },
+                            );
+                            if let Some(tx) = BRIGHTNESS_SENDER.get() {
+                                let _ = tx.send(new_val);
+                            }
+                            hide_osd();
                         }
                     }
                 }
@@ -1806,7 +1815,8 @@ pub fn setup_brightness_worker() {
     std::thread::spawn(move || unsafe {
         // Direct WMI COM + DXVA2 implementation (zero child processes spawned).
         use windows::Win32::System::Com::{
-            CoCreateInstance, CoInitializeEx, CoUninitialize, CLSCTX_ALL, COINIT_MULTITHREADED,
+            CoCreateInstance, CoInitializeEx, CoSetProxyBlanket, CoUninitialize, CLSCTX_ALL,
+            COINIT_MULTITHREADED, EOAC_NONE, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE,
         };
         use windows::Win32::System::Variant::{VariantClear, VARENUM, VARIANT};
         use windows::Win32::System::Wmi::{
@@ -1840,7 +1850,41 @@ pub fn setup_brightness_worker() {
             }
         };
 
-        while let Ok(brightness) = rx.recv() {
+        let _ = CoSetProxyBlanket(
+            &services,
+            10,
+            0,
+            windows::core::PCWSTR::null(),
+            RPC_C_AUTHN_LEVEL_CALL,
+            RPC_C_IMP_LEVEL_IMPERSONATE,
+            None,
+            EOAC_NONE,
+        );
+        let mut class_def: Option<IWbemClassObject> = None;
+        let mut set_brightness_params: Option<IWbemClassObject> = None;
+        if services
+            .GetObject(
+                &windows::core::BSTR::from("WmiMonitorBrightnessMethods"),
+                WBEM_GENERIC_FLAG_TYPE(0),
+                None,
+                Some(&mut class_def),
+                None,
+            )
+            .is_ok()
+        {
+            if let Some(class_def) = class_def {
+                let _ = class_def.GetMethod(
+                    windows::core::w!("WmiSetBrightness"),
+                    0,
+                    &mut set_brightness_params,
+                    std::ptr::null_mut(),
+                );
+            }
+        }
+        while let Ok(mut brightness) = rx.recv() {
+            while let Ok(newer) = rx.try_recv() {
+                brightness = newer;
+            }
             let brightness = brightness.min(100);
             // 1. Laptop internal panel via WMI WmiMonitorBrightnessMethods
             let wql = windows::core::BSTR::from("WQL");
@@ -1861,17 +1905,8 @@ pub fn setup_brightness_worker() {
                                 let obj_path = windows::core::BSTR::from(relpath_str.as_str());
                                 let method_name = windows::core::BSTR::from("WmiSetBrightness");
 
-                                let mut in_cls: Option<IWbemClassObject> = None;
-                                if obj
-                                    .GetMethod(
-                                        windows::core::w!("WmiSetBrightness"),
-                                        0i32,
-                                        &mut in_cls,
-                                        std::ptr::null_mut(),
-                                    )
-                                    .is_ok()
                                 {
-                                    if let Some(in_cls) = in_cls {
+                                    if let Some(ref in_cls) = set_brightness_params {
                                         if let Ok(in_params) = in_cls.SpawnInstance(0i32) {
                                             let mut b_var = VARIANT::default();
                                             let b_anon = &mut b_var.Anonymous.Anonymous;
@@ -2035,8 +2070,73 @@ fn apply_capture_ui_state(app: &AppHandle, active: bool) {
     MH_LAST_OV_IGNORE.store(-1, Ordering::Relaxed);
 }
 
+static TOP_EDGE_ENTERED: AtomicI64 = AtomicI64::new(0);
+
+fn edge_dwell_ready(at_edge: bool, entered: i64, now: i64, delay: i64) -> bool {
+    at_edge && entered > 0 && now.saturating_sub(entered) >= delay
+}
+
+fn top_edge_armed(app: &AppHandle, at_edge: bool, now: i64) -> bool {
+    if get_setting_str(app, "nook-notch-mode")
+        .as_deref()
+        .unwrap_or("fixed")
+        == "fixed"
+        || !at_edge
+    {
+        TOP_EDGE_ENTERED.store(0, Ordering::Relaxed);
+        return false;
+    }
+    let entered = TOP_EDGE_ENTERED.load(Ordering::Relaxed);
+    if entered == 0 {
+        TOP_EDGE_ENTERED.store(now.max(1), Ordering::Relaxed);
+    }
+    let delay = get_setting_str(app, "nook-notch-edge-delay")
+        .and_then(|v| v.parse::<i64>().ok())
+        .unwrap_or(200)
+        .clamp(0, 2000);
+    edge_dwell_ready(
+        at_edge,
+        TOP_EDGE_ENTERED.load(Ordering::Relaxed),
+        now,
+        delay,
+    )
+}
+
 pub fn setup_mouse_hook(app_handle: AppHandle) {
-    let _ = MOUSE_HOOK_APP_HANDLE.set(app_handle);
+    let _ = MOUSE_HOOK_APP_HANDLE.set(app_handle.clone());
+    std::thread::spawn(move || loop {
+        std::thread::sleep(std::time::Duration::from_millis(32));
+        let Some(main) = app_handle.get_webview_window("main") else {
+            break;
+        };
+        if !main.is_visible().unwrap_or(false) {
+            TOP_EDGE_ENTERED.store(0, Ordering::Relaxed);
+            continue;
+        }
+        let mut point = windows::Win32::Foundation::POINT::default();
+        if unsafe { windows::Win32::UI::WindowsAndMessaging::GetCursorPos(&mut point) }.is_err() {
+            continue;
+        }
+        let Ok(Some(monitor)) = main.current_monitor() else {
+            continue;
+        };
+        let pos = monitor.position();
+        let size = monitor.size();
+        let at_edge = point.y >= pos.y
+            && point.y <= pos.y + (8.0 * monitor.scale_factor()) as i32
+            && point.x >= pos.x
+            && point.x < pos.x + size.width as i32;
+        let now = get_now_ms();
+        let armed = top_edge_armed(&app_handle, at_edge, now);
+        let hovered = NOTCH_IS_HOVERED.load(Ordering::Relaxed);
+        if armed || hovered {
+            MH_TOPBAR_EXPIRY_MS.store(now + 500, Ordering::Relaxed);
+        }
+        let active = armed || hovered || now < MH_TOPBAR_EXPIRY_MS.load(Ordering::Relaxed);
+        if MH_LAST_TOP_EDGE_HOVER.swap(i32::from(active), Ordering::Relaxed) != i32::from(active) {
+            let _ = app_handle.emit("notch-edge-hover", active);
+        }
+    });
     unsafe {
         SetWindowsHookExW(WH_MOUSE_LL, Some(mouse_hook_proc), None, 0)
             .expect("Failed to install mouse hook");
@@ -2266,7 +2366,9 @@ unsafe extern "system" fn mouse_hook_proc(
                             && cursor.x >= mon_x
                             && cursor.x <= (mon_x + mon_w);
 
-                        if at_top_edge || in_notch_hover {
+                        let edge_armed = top_edge_armed(app_handle, at_top_edge, now);
+                        let notch_visible = NOTCH_IS_VISIBLE.load(Ordering::Relaxed);
+                        if edge_armed || in_notch_hover {
                             is_notch_hovered = true;
                             MH_TOPBAR_EXPIRY_MS.store(now + 500, Ordering::Relaxed);
                         }
@@ -2297,7 +2399,8 @@ unsafe extern "system" fn mouse_hook_proc(
                                         + pad_y_bottom
                                         + hyst;
 
-                                    if cursor.x >= rx
+                                    if (notch_visible || in_notch_hover || edge_armed)
+                                        && cursor.x >= rx
                                         && cursor.x <= (rx + rw)
                                         && cursor.y >= ry_top
                                         && cursor.y <= ry_bottom
@@ -2311,6 +2414,7 @@ unsafe extern "system" fn mouse_hook_proc(
                                     // boundary. The screen corners stay click-through.
                                     let edge_pad = (60.0 * scale) as i32;
                                     if at_top_edge
+                                        && (notch_visible || in_notch_hover)
                                         && cursor.x >= rx - edge_pad
                                         && cursor.x <= rx + rw + edge_pad
                                     {
@@ -3504,7 +3608,16 @@ unsafe extern "system" fn display_monitor_proc(
 
 #[cfg(test)]
 mod tests {
-    use super::win_number_index;
+    use super::{win_number_index, edge_dwell_ready};
+
+    #[test]
+    fn top_edge_requires_dwell_and_contact() {
+        assert!(!edge_dwell_ready(true, 100, 299, 200));
+        assert!(edge_dwell_ready(true, 100, 300, 200));
+        assert!(!edge_dwell_ready(false, 100, 500, 200));
+        assert!(!edge_dwell_ready(true, 0, 500, 200));
+        assert!(edge_dwell_ready(true, 100, 100, 0));
+    }
 
     #[test]
     fn win_number_maps_top_row_digits_only() {

@@ -112,6 +112,7 @@ fn main() {
             toggle_dock,
             change_dock_mode,
             change_notch_mode,
+            set_notch_visibility,
             sync_appbar,
             set_feature_toggles,
             open_app,

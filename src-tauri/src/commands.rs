@@ -176,6 +176,11 @@ pub async fn change_notch_mode(app: AppHandle, mode: String) {
     }
 }
 
+#[tauri::command]
+pub fn set_notch_visibility(visible: bool) {
+    NOTCH_IS_VISIBLE.store(visible, Ordering::Relaxed);
+}
+
 fn get_uwp_launch_cmd(exe_path: &str) -> Option<String> {
     let path = std::path::Path::new(exe_path);
     let mut is_windows_apps = false;

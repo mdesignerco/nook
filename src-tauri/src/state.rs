@@ -18,6 +18,7 @@ pub static DOCK_RECT: Mutex<Option<IntRect>> = Mutex::new(None);
 pub static NOTCH_RECT: Mutex<Option<IntRect>> = Mutex::new(None);
 pub static DOCK_IS_HOVERED: AtomicBool = AtomicBool::new(false);
 pub static NOTCH_IS_HOVERED: AtomicBool = AtomicBool::new(false);
+pub static NOTCH_IS_VISIBLE: AtomicBool = AtomicBool::new(false);
 pub static MENU_IS_OPEN: AtomicBool = AtomicBool::new(false);
 pub static MENU_RECT: Mutex<Option<IntRect>> = Mutex::new(None);
 pub static ICON_CACHE: OnceLock<Mutex<HashMap<String, String>>> = OnceLock::new();

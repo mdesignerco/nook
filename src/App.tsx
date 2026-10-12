@@ -22,6 +22,7 @@ import { ClickableTime } from "./components/ClickableTime";
 import { QuickSettingsPanel } from "./components/QuickSettingsPanel";
 import { useWeather } from "./hooks/useWeather";
 import { useSettingsSync } from "./hooks/useSettingsSync";
+import { useTrailingThrottle } from "./hooks/useTrailingThrottle";
 import { useCalendarEvents, type CalendarEventItem } from "./hooks/useCalendarEvents";
 import { useMail, type MailSummary } from "./hooks/useMail";
 import { TitleMarquee, type MediaInfo } from "./media";
@@ -1427,7 +1428,7 @@ function App() {
 	// Listen for Volume Changes
 	useEffect(() => {
 		const unlisten = listen<{ volume: number; is_muted: boolean }>("volume-change", (event) => {
-			setVolume(event.payload.volume);
+			setVolume(event.payload.is_muted ? 0 : event.payload.volume);
 		});
 		return () => {
 			unlisten.then((fn) => fn());
@@ -1593,17 +1594,18 @@ function App() {
 		skipNext();
 	}, [skipNext, nextFront, nextBack]);
 
-	const lastVolumeCallRef = useRef(0);
+	const sendVolume = useTrailingThrottle((value: number) => {
+		invoke("set_volume", { volume: value }).catch(() => {});
+	}, 50);
 
-	const handleVolumeChange = useCallback((newVol: number) => {
-		setVolume(newVol);
+	const handleVolumeChange = useCallback(
+		(newVol: number) => {
+			setVolume(newVol);
 
-		const now = Date.now();
-		if (now - lastVolumeCallRef.current < 50) return;
-		lastVolumeCallRef.current = now;
-
-		invoke("set_volume", { volume: newVol }).catch(() => {});
-	}, []);
+			sendVolume(newVol);
+		},
+		[sendVolume]
+	);
 
 	// Open WiFi settings
 	const openWifiSettings = useCallback(async () => {
@@ -1648,17 +1650,18 @@ function App() {
 	}, []);
 
 	// Brightness change with throttling
-	const lastBrightnessCallRef = useRef(0);
+	const sendBrightness = useTrailingThrottle((value: number) => {
+		invoke("set_brightness", { brightness: value }).catch(() => {});
+	}, 50);
 
-	const handleBrightnessChange = useCallback((newVal: number) => {
-		setCurrentBrightness(newVal);
+	const handleBrightnessChange = useCallback(
+		(newVal: number) => {
+			setCurrentBrightness(newVal);
 
-		const now = Date.now();
-		if (now - lastBrightnessCallRef.current < 50) return;
-		lastBrightnessCallRef.current = now;
-
-		invoke("set_brightness", { brightness: newVal }).catch(() => {});
-	}, []);
+			sendBrightness(newVal);
+		},
+		[sendBrightness]
+	);
 
 	// Open system tray (unhide taskbar and invoke Win+B)
 	const openSystemTray = useCallback(async (e: React.MouseEvent) => {
@@ -1830,7 +1833,6 @@ function App() {
 			w = 140;
 			if (isMusicMode) {
 				w = 140;
-				if (settingsMailEnabled && mail && mail.unread > 0) w += 40;
 				if (settingsVisualizerEnabled && isPlaying) w += 30;
 				if (settingsAlbumArtEnabled) w += 30;
 
@@ -1871,6 +1873,9 @@ function App() {
 	};
 
 	const isCalendarMode = nookMode === "calendar";
+	useEffect(() => {
+		invoke("set_notch_visibility", { visible: isVisible && !isHidden }).catch(() => {});
+	}, [isVisible, isHidden]);
 	const isMailView =
 		settingsMailEnabled &&
 		(mailPanelOpen || (!!mailPulse && nookMode !== "calendar" && nookMode !== "command-center"));
@@ -2503,10 +2508,9 @@ function App() {
 																	>
 																		{statusWidgets.right.map(renderStatusWidget)}
 																	</motion.div>
-															) : null}
-														</div>
-														{isMusicMode && renderStatusWidget("mail")}
-													</motion.div>
+																) : null}
+															</div>
+														</motion.div>
 													)}
 												</AnimatePresence>
 											</div>
