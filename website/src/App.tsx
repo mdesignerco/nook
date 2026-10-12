@@ -4,6 +4,7 @@ import Notch from "./components/Notch";
 import Dock from "./components/Dock";
 import Window from "./components/Window";
 import LoadingScreen from "./components/LoadingScreen";
+import NookMascot from "./components/NookMascot";
 
 import AboutApp from "./components/apps/AboutApp";
 import MusicApp from "./components/apps/MusicApp";
@@ -23,7 +24,7 @@ const wallpapersList = [nookBackground];
 export default function App() {
 	const [settings, setSettings] = useState<NookSettings>(loadSettings);
 
-	const [openApps, setOpenApps] = useState<string[]>(["about", "music", "terminal"]);
+	const [openApps, setOpenApps] = useState<string[]>(["about"]);
 	const [minimizedApps, setMinimizedApps] = useState<string[]>([]);
 	const [focusedApp, setFocusedApp] = useState<string>("about");
 	const [loaded, setLoaded] = useState(false);
@@ -154,6 +155,7 @@ export default function App() {
 
 			{loaded && (
 				<>
+					<NookMascot onOpenAbout={() => handleOpenApp("about")} />
 					<div
 						className="absolute inset-0 glow-accent pointer-events-none transition-all duration-500"
 						style={{ opacity: playback.isPlaying ? 1 : 0 }}

@@ -24,3 +24,8 @@
 .calendar-header button, .demo-day-agenda button { background: transparent; border: 0; color: inherit; cursor: pointer; padding: 4px 8px; }
 .calendar-header { justify-content: space-between; }
 .calendar-day:focus-visible, .calendar-header button:focus-visible, .demo-day-agenda button:focus-visible { outline: 2px solid var(--accent-color, #007aff); outline-offset: 2px; }
+.nook-mascot { position: fixed; right: max(20px, env(safe-area-inset-right)); bottom: max(24px, env(safe-area-inset-bottom)); z-index: 120; width: 112px; height: 112px; }
+.nook-mascot-placeholder { display: block; background: transparent; border: 0; padding: 0; cursor: pointer; width: 100%; height: 100%; }
+.nook-mascot-placeholder img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.nook-mascot button:focus-visible { outline: 2px solid #d68b26; outline-offset: 4px; border-radius: 16px; }
+@media (max-width: 640px) { .nook-mascot { right: 12px; bottom: max(90px, env(safe-area-inset-bottom)); width: 80px; height: 80px; } .nook-mascot > button { width: 80px !important; height: 80px !important; } }
